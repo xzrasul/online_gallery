@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:unit": "vitest run",
+    "test:e2e": "dotenv -e .env.local -- playwright test",
+    "db:push": "dotenv -e .env.local -- drizzle-kit push"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.2",
@@ -18,7 +21,9 @@
     "svix": "^2.5.0"
   },
   "devDependencies": {
+    "@clerk/testing": "^2.2.34",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
