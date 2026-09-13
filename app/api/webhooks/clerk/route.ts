@@ -20,7 +20,8 @@ export async function POST(req: Request) {
 
   let event: unknown;
   try {
-    event = new Webhook(secret).verify(payload, svixHeaders);
+    new Webhook(secret).verify(payload, svixHeaders);
+    event = JSON.parse(payload);
   } catch {
     return new Response('Invalid signature', { status: 400 });
   }
