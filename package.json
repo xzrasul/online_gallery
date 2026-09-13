@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test:unit": "vitest run",
+    "test:unit": "dotenv -e .env.local -- vitest run",
     "test:e2e": "dotenv -e .env.local -- playwright test",
     "db:push": "dotenv -e .env.local -- drizzle-kit push"
   },

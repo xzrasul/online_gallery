@@ -12,9 +12,11 @@ test('sign-up redirects to the role-choice screen', async ({ page }) => {
   await page.getByLabel('Password', { exact: true }).fill(testPassword);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
+  // Clerk's OTP field auto-submits once all 6 digits are entered, navigating
+  // away immediately — so we don't click a "Continue" button here (it may
+  // already be gone from the DOM by the time the click lands).
   await page.getByLabel('Enter verification code').fill('424242');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
 
-  await expect(page).toHaveURL(/\/choose-role/);
+  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
   await expect(page.getByRole('heading')).toContainText('Как вы хотите');
 });
