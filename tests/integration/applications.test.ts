@@ -110,4 +110,43 @@ describe('seller applications', () => {
     const [user] = await getDb().select().from(users).where(eq(users.id, applicant.id));
     expect(user.role).toBe('buyer');
   });
+
+  it('resubmitting after rejection upserts the same row instead of throwing', async () => {
+    clerkIds.add('test_applicant_4');
+    clerkIds.add('test_admin_3');
+    const applicant = await insertTestUser('test_applicant_4');
+    const admin = await insertTestUser('test_admin_3');
+    const firstApplicationId = await createSellerApplication(getDb(), {
+      userId: applicant.id,
+      displayName: 'Мастерская Олега',
+      bio: 'Скульптура.',
+    });
+
+    await approveOrRejectApplication(getDb(), {
+      applicationId: firstApplicationId,
+      adminUserId: admin.id,
+      decision: 'reject',
+      reason: 'Недостаточно примеров',
+    });
+
+    const secondApplicationId = await createSellerApplication(getDb(), {
+      userId: applicant.id,
+      displayName: 'Мастерская Олега (обновлено)',
+      bio: 'Скульптура и керамика.',
+    });
+
+    expect(secondApplicationId).toBe(firstApplicationId);
+
+    const applications = await getDb()
+      .select()
+      .from(sellerApplications)
+      .where(eq(sellerApplications.userId, applicant.id));
+    expect(applications).toHaveLength(1);
+
+    const [application] = applications;
+    expect(application.status).toBe('pending');
+    expect(application.rejectionReason).toBeNull();
+    expect(application.displayName).toBe('Мастерская Олега (обновлено)');
+    expect(application.bio).toBe('Скульптура и керамика.');
+  });
 });

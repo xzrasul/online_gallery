@@ -16,6 +16,19 @@ export async function createSellerApplication(
       bio: input.bio,
       telegramContact: input.telegramContact,
     })
+    .onConflictDoUpdate({
+      target: sellerApplications.userId,
+      set: {
+        displayName: input.displayName,
+        bio: input.bio,
+        telegramContact: input.telegramContact,
+        status: 'pending',
+        rejectionReason: null,
+        reviewedByAdminId: null,
+        reviewedAt: null,
+        submittedAt: new Date(),
+      },
+    })
     .returning({ id: sellerApplications.id });
   return row.id;
 }
