@@ -17,9 +17,20 @@ async function main() {
   }
 
   await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, user.id));
-  await syncRoleToClerk(user.clerkUserId, 'admin');
+
+  try {
+    await syncRoleToClerk(user.clerkUserId, 'admin');
+  } catch (err) {
+    console.warn(
+      `WARNING: DB role updated to admin for ${email}, but syncing to Clerk metadata failed:`,
+      err,
+    );
+  }
 
   console.log(`Promoted ${email} to admin.`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

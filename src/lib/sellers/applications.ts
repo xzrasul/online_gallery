@@ -14,14 +14,14 @@ export async function createSellerApplication(
       userId: input.userId,
       displayName: input.displayName,
       bio: input.bio,
-      telegramContact: input.telegramContact,
+      telegramContact: input.telegramContact ?? null,
     })
     .onConflictDoUpdate({
       target: sellerApplications.userId,
       set: {
         displayName: input.displayName,
         bio: input.bio,
-        telegramContact: input.telegramContact,
+        telegramContact: input.telegramContact ?? null,
         status: 'pending',
         rejectionReason: null,
         reviewedByAdminId: null,
@@ -49,7 +49,7 @@ export async function approveOrRejectApplication(
     .from(sellerApplications)
     .where(eq(sellerApplications.id, input.applicationId));
 
-  await db
+  const updateApplication = db
     .update(sellerApplications)
     .set({
       status: outcome.applicationStatus,
@@ -59,8 +59,20 @@ export async function approveOrRejectApplication(
     })
     .where(eq(sellerApplications.id, input.applicationId));
 
-  await db.update(users).set({ role: outcome.role }).where(eq(users.id, application.userId));
+  const updateUserRole = db
+    .update(users)
+    .set({ role: outcome.role })
+    .where(eq(users.id, application.userId));
+
+  await db.batch([updateApplication, updateUserRole]);
 
   const [user] = await db.select().from(users).where(eq(users.id, application.userId));
-  await syncRoleToClerk(user.clerkUserId, outcome.role);
+  try {
+    await syncRoleToClerk(user.clerkUserId, outcome.role);
+  } catch (err) {
+    console.error(
+      'syncRoleToClerk failed (DB role is authoritative, Clerk metadata is a denormalized copy with no current readers):',
+      err,
+    );
+  }
 }

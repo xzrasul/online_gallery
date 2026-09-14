@@ -9,6 +9,8 @@ import { users } from '@/src/db/schema';
 export async function chooseBuyer() {
   const { userId } = await auth();
   if (!userId) redirect('/sign-in');
+  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId!));
+  if (!user) redirect('/sign-in');
   redirect('/dashboard/buyer');
 }
 

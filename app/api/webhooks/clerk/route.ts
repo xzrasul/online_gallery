@@ -22,7 +22,8 @@ export async function POST(req: Request) {
   try {
     new Webhook(secret).verify(payload, svixHeaders);
     event = JSON.parse(payload);
-  } catch {
+  } catch (err) {
+    console.error('Clerk webhook signature verification failed:', err);
     return new Response('Invalid signature', { status: 400 });
   }
 
@@ -32,7 +33,10 @@ export async function POST(req: Request) {
   }
 
   const { clerkUserId, email, fullName } = parseClerkUserCreated(event);
-  await getDb().insert(users).values({ clerkUserId, email, fullName });
+  await getDb()
+    .insert(users)
+    .values({ clerkUserId, email, fullName })
+    .onConflictDoNothing({ target: users.clerkUserId });
 
   return new Response('ok', { status: 200 });
 }

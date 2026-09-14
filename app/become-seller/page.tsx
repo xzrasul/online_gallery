@@ -1,9 +1,15 @@
 import { submitSellerApplication } from './actions';
 
-export default function BecomeSellerPage() {
+export default async function BecomeSellerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   return (
     <main>
       <h1>Анкета продавца</h1>
+      {error === 'invalid' && <p role="alert">Пожалуйста, заполните все поля корректно.</p>}
       <form action={submitSellerApplication}>
         <label>
           Имя художника/студии

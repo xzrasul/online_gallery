@@ -18,8 +18,12 @@ async function requireAdmin() {
 
 export async function approveApplication(formData: FormData) {
   const admin = await requireAdmin();
+  const applicationIdRaw = formData.get('applicationId');
+  if (typeof applicationIdRaw !== 'string' || !applicationIdRaw.trim()) {
+    redirect('/admin/sellers');
+  }
   await approveOrRejectApplication(getDb(), {
-    applicationId: String(formData.get('applicationId')),
+    applicationId: applicationIdRaw,
     adminUserId: admin.id,
     decision: 'approve',
   });
@@ -28,8 +32,12 @@ export async function approveApplication(formData: FormData) {
 
 export async function rejectApplication(formData: FormData) {
   const admin = await requireAdmin();
+  const applicationIdRaw = formData.get('applicationId');
+  if (typeof applicationIdRaw !== 'string' || !applicationIdRaw.trim()) {
+    redirect('/admin/sellers');
+  }
   await approveOrRejectApplication(getDb(), {
-    applicationId: String(formData.get('applicationId')),
+    applicationId: applicationIdRaw,
     adminUserId: admin.id,
     decision: 'reject',
     reason: String(formData.get('reason') || ''),

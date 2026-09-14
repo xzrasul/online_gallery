@@ -120,6 +120,7 @@ describe('seller applications', () => {
       userId: applicant.id,
       displayName: 'Мастерская Олега',
       bio: 'Скульптура.',
+      telegramContact: '@oleg_art',
     });
 
     await approveOrRejectApplication(getDb(), {
@@ -148,5 +149,8 @@ describe('seller applications', () => {
     expect(application.rejectionReason).toBeNull();
     expect(application.displayName).toBe('Мастерская Олега (обновлено)');
     expect(application.bio).toBe('Скульптура и керамика.');
+    // The resubmission omitted telegramContact, so the previously set value
+    // ('@oleg_art') must be cleared to null, not silently left stale.
+    expect(application.telegramContact).toBeNull();
   });
 });
