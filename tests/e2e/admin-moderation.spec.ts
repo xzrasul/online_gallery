@@ -5,6 +5,16 @@ import { getDb } from '../../src/db';
 import { users } from '../../src/db/schema';
 
 test('admin approves a pending seller application', async ({ page }) => {
+  // This spec does two full sign-up+OTP flows plus a live Clerk metadata
+  // sync call on top of them; the default 30s test timeout has been
+  // observed to be too tight for that combined round-trip latency even
+  // though the underlying approve flow completes correctly (verified via
+  // direct DB inspection during Task 14's full verification pass — the
+  // application row was reliably updated to `approved` a few seconds
+  // after the assertion below timed out). Give it real headroom instead
+  // of a hair-trigger timeout.
+  test.setTimeout(60_000);
+
   await setupClerkTestingToken({ page });
 
   // Sign up the future seller and submit an application.
