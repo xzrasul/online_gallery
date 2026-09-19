@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { Show, UserButton } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { buttonVariants } from '@/src/components/ui/button';
 import { MobileNav } from '@/src/components/mobile-nav';
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const { userId } = await auth();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-4 sm:px-6">
@@ -29,7 +31,7 @@ export function SiteHeader() {
             <UserButton />
           </Show>
         </nav>
-        <MobileNav />
+        <MobileNav signedIn={Boolean(userId)} />
       </div>
     </header>
   );

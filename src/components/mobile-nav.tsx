@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Show } from '@clerk/nextjs';
 import { Menu } from 'lucide-react';
 import {
   Sheet,
@@ -15,7 +14,7 @@ import {
 
 const linkClass = 'block rounded-md px-3 py-3 text-base hover:bg-accent';
 
-export function MobileNav() {
+export function MobileNav({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -23,7 +22,7 @@ export function MobileNav() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         aria-label="Меню"
-        className="inline-flex size-10 items-center justify-center rounded-md hover:bg-accent md:hidden"
+        className="inline-flex size-10 items-center justify-center rounded-md hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring md:hidden"
       >
         <Menu className="size-5" aria-hidden="true" />
       </SheetTrigger>
@@ -36,19 +35,20 @@ export function MobileNav() {
           <Link href="/gallery" onClick={close} className={linkClass}>
             Каталог
           </Link>
-          <Show when="signed-out">
-            <Link href="/sign-in" onClick={close} className={linkClass}>
-              Войти
-            </Link>
-            <Link href="/sign-up" onClick={close} className={linkClass}>
-              Регистрация
-            </Link>
-          </Show>
-          <Show when="signed-in">
+          {signedIn ? (
             <Link href="/choose-role" onClick={close} className={linkClass}>
               Личный кабинет
             </Link>
-          </Show>
+          ) : (
+            <>
+              <Link href="/sign-in" onClick={close} className={linkClass}>
+                Войти
+              </Link>
+              <Link href="/sign-up" onClick={close} className={linkClass}>
+                Регистрация
+              </Link>
+            </>
+          )}
         </nav>
       </SheetContent>
     </Sheet>
