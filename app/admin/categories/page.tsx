@@ -4,6 +4,8 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { users } from '@/src/db/schema';
 import { listCategories } from '@/src/lib/catalog/categories';
+import { AdminNav } from '@/src/components/admin/admin-nav';
+import { ReferenceList } from '@/src/components/admin/reference-list';
 import { addCategory, renameCategoryAction } from './actions';
 
 export default async function AdminCategoriesPage() {
@@ -16,22 +18,14 @@ export default async function AdminCategoriesPage() {
 
   return (
     <main>
-      <h1>Категории картин</h1>
-      <ul>
-        {categories.map((category) => (
-          <li key={category.id}>
-            <form action={renameCategoryAction}>
-              <input type="hidden" name="id" value={category.id} />
-              <input type="text" name="name" defaultValue={category.name} />
-              <button type="submit">Переименовать</button>
-            </form>
-          </li>
-        ))}
-      </ul>
-      <form action={addCategory}>
-        <input type="text" name="name" placeholder="Новая категория" required />
-        <button type="submit">Добавить</button>
-      </form>
+      <AdminNav />
+      <ReferenceList
+        title="Категории картин"
+        items={categories}
+        renameAction={renameCategoryAction}
+        addAction={addCategory}
+        addPlaceholder="Новая категория"
+      />
     </main>
   );
 }
