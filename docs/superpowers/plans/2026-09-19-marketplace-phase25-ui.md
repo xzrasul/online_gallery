@@ -749,9 +749,9 @@ import { cn } from '@/src/lib/utils';
 
 const STATUS: Record<string, { label: string; className: string }> = {
   pending: { label: 'На модерации', className: 'bg-[#f3e6c8] text-[#6b4e12] border-transparent' },
-  published: { label: 'Опубликована', className: 'bg-[#dfead6] text-[#2f5a1e] border-transparent' },
-  rejected: { label: 'Отклонена', className: 'bg-[#f3d9d4] text-[#8a2a1e] border-transparent' },
-  sold: { label: 'Продана', className: 'bg-secondary text-foreground border-transparent' },
+  published: { label: 'Опубликовано', className: 'bg-[#dfead6] text-[#2f5a1e] border-transparent' },
+  rejected: { label: 'Отклонено', className: 'bg-[#f3d9d4] text-[#8a2a1e] border-transparent' },
+  sold: { label: 'Продано', className: 'bg-secondary text-foreground border-transparent' },
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -1384,7 +1384,7 @@ export function ArtworkForm({
       {error === 'invalid' && (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           Проверьте, что все поля заполнены корректно.
         </p>
@@ -1801,7 +1801,7 @@ export default async function BecomeSellerPage({
         {error === 'invalid' && (
           <p
             role="alert"
-            className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           >
             Пожалуйста, заполните все поля корректно.
           </p>
