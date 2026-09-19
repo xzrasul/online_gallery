@@ -1,0 +1,58 @@
+import { test, expect } from '@playwright/test';
+import { eq } from 'drizzle-orm';
+import { getDb } from '../../src/db';
+import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
+import { createArtwork } from '../../src/lib/artworks/seller-operations';
+
+test('published artworks appear in the public catalog and respect category filter', async ({ page }) => {
+  const [seller] = await getDb()
+    .insert(users)
+    .values({
+      clerkUserId: `test_catalog_seller_${Date.now()}`,
+      email: `catalog-test-${Date.now()}@example.com`,
+      fullName: 'Catalog Test Seller',
+      role: 'seller',
+    })
+    .returning();
+  await getDb().insert(sellerApplications).values({
+    userId: seller.id,
+    displayName: `Каталог-тест студия ${Date.now()}`,
+    bio: 'Био.',
+    status: 'approved',
+  });
+  const [category] = await getDb().insert(categories).values({ name: `Каталог категория ${Date.now()}` }).returning();
+  const [otherCategory] = await getDb().insert(categories).values({ name: `Другая категория ${Date.now()}` }).returning();
+  const [technique] = await getDb().insert(techniques).values({ name: `Каталог техника ${Date.now()}` }).returning();
+
+  const artworkTitle = `Каталожная картина ${Date.now()}`;
+  const artworkId = await createArtwork(getDb(), {
+    sellerId: seller.id,
+    title: artworkTitle,
+    description: 'Описание.',
+    price: 1500,
+    heightCm: 50,
+    widthCm: 60,
+    categoryId: category.id,
+    techniqueId: technique.id,
+    imageUrl: 'https://example.com/catalog.png',
+  });
+  await getDb().update(artworks).set({ status: 'published' }).where(eq(artworks.id, artworkId));
+
+  try {
+    await page.goto('/gallery');
+    await expect(page.getByText(artworkTitle)).toBeVisible();
+
+    await page.goto(`/gallery?categoryId=${otherCategory.id}`);
+    await expect(page.getByText(artworkTitle)).not.toBeVisible();
+
+    await page.goto(`/gallery?categoryId=${category.id}`);
+    await expect(page.getByText(artworkTitle)).toBeVisible();
+  } finally {
+    await getDb().delete(artworks).where(eq(artworks.id, artworkId));
+    await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, seller.id));
+    await getDb().delete(users).where(eq(users.id, seller.id));
+    await getDb().delete(categories).where(eq(categories.id, category.id));
+    await getDb().delete(categories).where(eq(categories.id, otherCategory.id));
+    await getDb().delete(techniques).where(eq(techniques.id, technique.id));
+  }
+});
