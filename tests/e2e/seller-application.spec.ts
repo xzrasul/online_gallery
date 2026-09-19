@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signUpWithEmail } from './helpers/clerk';
 import { setupClerkTestingToken } from '@clerk/testing/playwright';
 
 test('signing up as a seller lands on the pending status page', async ({ page }) => {
@@ -7,14 +8,7 @@ test('signing up as a seller lands on the pending status page', async ({ page })
   const testEmail = `seller+clerk_test_${Date.now()}@example.com`;
   const testPassword = `Xk9#mQ2vLp${Date.now()}!`;
 
-  await page.goto('/sign-up');
-  await page.getByLabel('Email address').fill(testEmail);
-  await page.getByLabel('Password', { exact: true }).fill(testPassword);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-
-  // Clerk's OTP field auto-submits once all 6 digits are entered, navigating
-  // away immediately — so we don't click a "Continue" button here.
-  await page.getByLabel('Enter verification code').fill('424242');
+  await signUpWithEmail(page, testEmail, testPassword);
 
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
   await page.getByRole('button', { name: 'Хочу продавать картины' }).click();

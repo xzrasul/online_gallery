@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signUpWithEmail } from './helpers/clerk';
 import { setupClerkTestingToken, clerk } from '@clerk/testing/playwright';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
@@ -22,13 +23,7 @@ test('admin approves a pending seller application', async ({ page }) => {
   const sellerPassword = `Xk9#mQ2vLp${Date.now()}!`;
   const displayName = `Админ-тест студия ${Date.now()}`;
 
-  await page.goto('/sign-up');
-  await page.getByLabel('Email address').fill(sellerEmail);
-  await page.getByLabel('Password', { exact: true }).fill(sellerPassword);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-
-  // Clerk's OTP field auto-submits once all 6 digits are entered.
-  await page.getByLabel('Enter verification code').fill('424242');
+  await signUpWithEmail(page, sellerEmail, sellerPassword);
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
 
   await page.getByRole('button', { name: 'Хочу продавать картины' }).click();
@@ -45,12 +40,7 @@ test('admin approves a pending seller application', async ({ page }) => {
   const adminEmail = `admin+clerk_test_${Date.now()}@example.com`;
   const adminPassword = `Zt7#nQ4wRp${Date.now()}!`;
 
-  await page.goto('/sign-up');
-  await page.getByLabel('Email address').fill(adminEmail);
-  await page.getByLabel('Password', { exact: true }).fill(adminPassword);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-
-  await page.getByLabel('Enter verification code').fill('424242');
+  await signUpWithEmail(page, adminEmail, adminPassword);
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
 
   const [adminUser] = await getDb().select().from(users).where(eq(users.email, adminEmail));

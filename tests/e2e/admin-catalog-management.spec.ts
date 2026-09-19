@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signUpWithEmail } from './helpers/clerk';
 import { setupClerkTestingToken } from '@clerk/testing/playwright';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
@@ -10,11 +11,7 @@ test('admin creates and renames a category and a technique', async ({ page }) =>
   const adminEmail = `admin+clerk_test_${Date.now()}@example.com`;
   const adminPassword = `Zt7#nQ4wRp${Date.now()}!`;
 
-  await page.goto('/sign-up');
-  await page.getByLabel('Email address').fill(adminEmail);
-  await page.getByLabel('Password', { exact: true }).fill(adminPassword);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByLabel('Enter verification code').fill('424242');
+  await signUpWithEmail(page, adminEmail, adminPassword);
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
 
   const [adminUser] = await getDb().select().from(users).where(eq(users.email, adminEmail));
