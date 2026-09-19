@@ -52,6 +52,7 @@ export async function getPublishedArtworkById(db: Db, id: string) {
       techniqueName: techniques.name,
       sellerId: artworks.sellerId,
       sellerDisplayName: sellerApplications.displayName,
+      sellerTelegramContact: sellerApplications.telegramContact,
     })
     .from(artworks)
     .innerJoin(categories, eq(artworks.categoryId, categories.id))

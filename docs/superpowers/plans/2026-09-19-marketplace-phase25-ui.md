@@ -736,7 +736,7 @@ export function ArtworkImage({
   className?: string;
 }) {
   return (
-    <div className={cn('relative aspect-[4/5] overflow-hidden rounded-md bg-secondary', className)}>
+    <div className={cn('relative aspect-[4/5] overflow-hidden rounded-sm bg-secondary', className)}>
       <Image src={src} alt={alt} fill sizes={sizes} priority={priority} unoptimized className="object-cover" />
     </div>
   );
@@ -749,9 +749,9 @@ import { cn } from '@/src/lib/utils';
 
 const STATUS: Record<string, { label: string; className: string }> = {
   pending: { label: 'На модерации', className: 'bg-[#f3e6c8] text-[#6b4e12] border-transparent' },
-  published: { label: 'Опубликована', className: 'bg-[#dfead6] text-[#2f5a1e] border-transparent' },
-  rejected: { label: 'Отклонена', className: 'bg-[#f3d9d4] text-[#8a2a1e] border-transparent' },
-  sold: { label: 'Продана', className: 'bg-secondary text-foreground border-transparent' },
+  published: { label: 'Опубликовано', className: 'bg-[#dfead6] text-[#2f5a1e] border-transparent' },
+  rejected: { label: 'Отклонено', className: 'bg-[#f3d9d4] text-[#8a2a1e] border-transparent' },
+  sold: { label: 'Продано', className: 'bg-secondary text-foreground border-transparent' },
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -1059,7 +1059,7 @@ Replace the `return (...)` with:
       <h1>Каталог картин</h1>
       <form
         method="get"
-        className="mt-6 grid gap-4 rounded-lg border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_9rem_9rem_auto] lg:items-end"
+        className="mt-6 grid gap-4 rounded-sm border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_9rem_9rem_auto] lg:items-end"
       >
         <Field label="Категория">
           <NativeSelect name="categoryId" defaultValue={params.categoryId ?? ''}>
@@ -1384,12 +1384,12 @@ export function ArtworkForm({
       {error === 'invalid' && (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           Проверьте, что все поля заполнены корректно.
         </p>
       )}
-      <form action={action} className="mt-6 grid max-w-xl gap-5 rounded-lg border border-border bg-card p-5 sm:p-6">
+      <form action={action} className="mt-6 grid max-w-xl gap-5 rounded-sm border border-border bg-card p-5 sm:p-6">
         <Field label="Название">
           <Input type="text" name="title" defaultValue={defaults?.title} required />
         </Field>
@@ -1511,7 +1511,7 @@ and return:
       {myArtworks.length === 0 && <p className="mt-4 text-muted-foreground">У вас пока нет картин.</p>}
       <div className="mt-4 grid gap-4">
         {myArtworks.map((artwork) => (
-          <section key={artwork.id} className="flex gap-4 rounded-lg border border-border bg-card p-4">
+          <section key={artwork.id} className="flex gap-4 rounded-sm border border-border bg-card p-4">
             <ArtworkImage src={artwork.imageUrl} alt="" className="w-20 shrink-0 sm:w-28" sizes="112px" />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -1683,7 +1683,7 @@ and return:
       {pending.length === 0 && <p className="mt-4 text-muted-foreground">Нет заявок на рассмотрении.</p>}
       <div className="mt-6 grid max-w-2xl gap-4">
         {pending.map((application) => (
-          <section key={application.id} className="rounded-lg border border-border bg-card p-5">
+          <section key={application.id} className="rounded-sm border border-border bg-card p-5">
             <h2>{application.displayName}</h2>
             <p className="mt-2 whitespace-pre-line text-muted-foreground">{application.bio}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -1717,7 +1717,7 @@ and return:
       {pending.length === 0 && <p className="mt-4 text-muted-foreground">Нет картин на модерации.</p>}
       <div className="mt-6 grid gap-4">
         {pending.map((artwork) => (
-          <section key={artwork.id} className="flex flex-col gap-4 rounded-lg border border-border bg-card p-5 sm:flex-row">
+          <section key={artwork.id} className="flex flex-col gap-4 rounded-sm border border-border bg-card p-5 sm:flex-row">
             <ArtworkImage src={artwork.imageUrl} alt={artwork.title} className="w-full sm:w-40 sm:shrink-0" sizes="160px" />
             <div className="min-w-0 flex-1">
               <h2>{artwork.title}</h2>
@@ -1761,7 +1761,7 @@ import { chooseBuyer, chooseSeller } from './actions';
 export default function ChooseRolePage() {
   return (
     <main className="mx-auto max-w-md pt-4 sm:pt-10">
-      <div className="rounded-lg border border-border bg-card p-6 sm:p-8">
+      <div className="rounded-sm border border-border bg-card p-6 sm:p-8">
         <h1 className="text-2xl">Как вы хотите использовать галерею?</h1>
         <div className="mt-6 grid gap-3">
           <form action={chooseBuyer}>
@@ -1796,12 +1796,12 @@ export default async function BecomeSellerPage({
   const { error } = await searchParams;
   return (
     <main className="mx-auto max-w-lg pt-4 sm:pt-10">
-      <div className="rounded-lg border border-border bg-card p-6 sm:p-8">
+      <div className="rounded-sm border border-border bg-card p-6 sm:p-8">
         <h1 className="text-2xl">Анкета продавца</h1>
         {error === 'invalid' && (
           <p
             role="alert"
-            className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
           >
             Пожалуйста, заполните все поля корректно.
           </p>
@@ -1829,7 +1829,7 @@ export default async function BecomeSellerPage({
 ```tsx
   return (
     <main className="mx-auto max-w-lg pt-4 sm:pt-10">
-      <div className="rounded-lg border border-border bg-card p-6 sm:p-8">
+      <div className="rounded-sm border border-border bg-card p-6 sm:p-8">
         <h1 className="text-2xl">Статус заявки продавца</h1>
         {application.status === 'pending' && <p className="mt-4">Ваша заявка на рассмотрении.</p>}
         {application.status === 'approved' && (
@@ -1853,7 +1853,7 @@ export default function BuyerDashboardPage() {
   return (
     <main className="mx-auto max-w-2xl pt-4 sm:pt-10">
       <h1>Личный кабинет покупателя</h1>
-      <div className="mt-8 rounded-lg border border-border bg-card p-6">
+      <div className="mt-8 rounded-sm border border-border bg-card p-6">
         <h2>Мои заказы</h2>
         <p className="mt-2 text-muted-foreground">У вас пока нет заказов.</p>
       </div>
