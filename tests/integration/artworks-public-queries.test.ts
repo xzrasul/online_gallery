@@ -94,6 +94,7 @@ describe('public gallery queries', () => {
     const detail = await getPublishedArtworkById(getDb(), publishedId);
     expect(detail?.title).toBe('Опубликованная картина');
     expect(detail?.categoryName).toBe('Публичная категория теста');
+    expect(detail?.sellerTelegramContact).toBe('@public_test');
 
     const pendingDetail = await getPublishedArtworkById(getDb(), pendingId);
     expect(pendingDetail).toBeUndefined();
