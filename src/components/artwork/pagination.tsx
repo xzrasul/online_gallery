@@ -13,26 +13,31 @@ export function Pagination({
   totalPages: number;
 }) {
   if (totalPages <= 1) return null;
-  const disabled = 'pointer-events-none opacity-50';
+  const buttonClass = buttonVariants({ variant: 'outline', size: 'sm' });
+  const disabledClass = cn(buttonClass, 'pointer-events-none opacity-50');
   return (
     <nav className="mt-10 flex items-center justify-center gap-4" aria-label="Страницы каталога">
-      <Link
-        href={catalogHref(params, page - 1)}
-        aria-disabled={page <= 1}
-        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page <= 1 && disabled)}
-      >
-        Назад
-      </Link>
+      {page <= 1 ? (
+        <span aria-disabled="true" className={disabledClass}>
+          Назад
+        </span>
+      ) : (
+        <Link href={catalogHref(params, page - 1)} className={buttonClass}>
+          Назад
+        </Link>
+      )}
       <span className="text-sm text-muted-foreground">
         Страница {page} из {totalPages}
       </span>
-      <Link
-        href={catalogHref(params, page + 1)}
-        aria-disabled={page >= totalPages}
-        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), page >= totalPages && disabled)}
-      >
-        Вперёд
-      </Link>
+      {page >= totalPages ? (
+        <span aria-disabled="true" className={disabledClass}>
+          Вперёд
+        </span>
+      ) : (
+        <Link href={catalogHref(params, page + 1)} className={buttonClass}>
+          Вперёд
+        </Link>
+      )}
     </nav>
   );
 }

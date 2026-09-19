@@ -6,7 +6,14 @@ import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { buttonVariants } from '@/src/components/ui/button';
 
 export default async function HomePage() {
-  const { items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 8 });
+  let items: Awaited<ReturnType<typeof listPublishedArtworks>>['items'] = [];
+  let loadFailed = false;
+  try {
+    ({ items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 8 }));
+  } catch (error) {
+    console.error('home: failed to load latest artworks', error);
+    loadFailed = true;
+  }
 
   return (
     <main>
@@ -39,7 +46,9 @@ export default async function HomePage() {
             Смотреть все →
           </Link>
         </div>
-        {items.length === 0 ? (
+        {loadFailed ? (
+          <p className="text-muted-foreground">Не удалось загрузить свежие картины. Попробуйте позже.</p>
+        ) : items.length === 0 ? (
           <p className="text-muted-foreground">Пока нет опубликованных картин.</p>
         ) : (
           <ArtworkGrid artworks={items} />

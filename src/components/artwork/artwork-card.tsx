@@ -20,9 +20,9 @@ export function ArtworkCard({ artwork }: { artwork: ArtworkCardData }) {
         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
         className="transition-opacity group-hover:opacity-90"
       />
-      <h3 className="mt-3 text-sm font-medium leading-snug">{artwork.title}</h3>
+      <h3 className="mt-3 break-words text-sm font-medium leading-snug">{artwork.title}</h3>
       {artwork.sellerDisplayName && (
-        <p className="text-sm text-muted-foreground">{artwork.sellerDisplayName}</p>
+        <p className="break-words text-sm text-muted-foreground">{artwork.sellerDisplayName}</p>
       )}
       <p className="mt-1 text-sm font-semibold text-brand">{artwork.price} TJS</p>
       {artwork.status === 'sold' && (
