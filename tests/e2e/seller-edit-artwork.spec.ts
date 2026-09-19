@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signUpWithEmail } from './helpers/clerk';
 import { setupClerkTestingToken } from '@clerk/testing/playwright';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
@@ -11,11 +12,7 @@ test('a seller edits a published artwork and it goes back to pending', async ({ 
   const sellerEmail = `seller+clerk_test_${Date.now()}@example.com`;
   const sellerPassword = `Xk9#mQ2vLp${Date.now()}!`;
 
-  await page.goto('/sign-up');
-  await page.getByLabel('Email address').fill(sellerEmail);
-  await page.getByLabel('Password', { exact: true }).fill(sellerPassword);
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page.getByLabel('Enter verification code').fill('424242');
+  await signUpWithEmail(page, sellerEmail, sellerPassword);
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
 
   const [seller] = await getDb().select().from(users).where(eq(users.email, sellerEmail));
