@@ -1,42 +1,103 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Light theme only: generated shadcn classes use `dark:`; Tailwind's default
+   would map it to prefers-color-scheme, so bind it to a class we never set. */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --radius: 0.5rem;
+  --background: #f6f2ec;
+  --foreground: #2b2622;
+  --card: #fffdf9;
+  --card-foreground: #2b2622;
+  --popover: #fffdf9;
+  --popover-foreground: #2b2622;
+  --primary: #2b2622;
+  --primary-foreground: #f6f2ec;
+  --secondary: #ece4d8;
+  --secondary-foreground: #2b2622;
+  --muted: #ece4d8;
+  --muted-foreground: #6f655a;
+  --accent: #ece4d8;
+  --accent-foreground: #2b2622;
+  --destructive: #b3261e;
+  --border: #d9cdbd;
+  --input: #d9cdbd;
+  --ring: #b4562f;
+  --brand: #b4562f;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  h1 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  h2 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+  h3 {
+    @apply text-base font-semibold;
+  }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+  /* LEGACY FALLBACK — keeps pages that are not restyled yet readable and
+     usable (Tailwind's preflight strips native control styling). Every rule
+     only matches class-less elements, so restyled pages are unaffected.
+     Deleted in Task 8. */
+  main :is(input, select, textarea):not([class]) {
+    @apply w-full rounded-md border border-input bg-card px-3 py-2 text-sm;
+  }
+  main input[type='hidden'] {
+    display: none;
+  }
+  main button:not([class]) {
+    @apply cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground;
+  }
+  main a:not([class]) {
+    @apply underline underline-offset-4 hover:text-brand;
+  }
+  main label:not([class]) {
+    @apply mb-3 grid gap-1.5 text-sm font-medium;
+  }
+  main section:not([class]),
+  main form:not([class]) {
+    @apply mt-4 grid gap-3;
   }
 }
