@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['buyer', 'seller', 'admin']);
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -30,4 +30,47 @@ export const sellerApplications = pgTable('seller_applications', {
   reviewedByAdminId: uuid('reviewed_by_admin_id').references(() => users.id),
   submittedAt: timestamp('submitted_at').notNull().defaultNow(),
   reviewedAt: timestamp('reviewed_at'),
+});
+
+export const artworkStatusEnum = pgEnum('artwork_status', [
+  'pending',
+  'published',
+  'rejected',
+  'sold',
+]);
+
+export const categories = pgTable('categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const techniques = pgTable('techniques', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull().unique(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const artworks = pgTable('artworks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sellerId: uuid('seller_id')
+    .notNull()
+    .references(() => users.id),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  price: integer('price').notNull(),
+  heightCm: integer('height_cm').notNull(),
+  widthCm: integer('width_cm').notNull(),
+  categoryId: uuid('category_id')
+    .notNull()
+    .references(() => categories.id),
+  techniqueId: uuid('technique_id')
+    .notNull()
+    .references(() => techniques.id),
+  imageUrl: text('image_url').notNull(),
+  status: artworkStatusEnum('status').notNull().default('pending'),
+  rejectionReason: text('rejection_reason'),
+  submittedAt: timestamp('submitted_at').notNull().defaultNow(),
+  reviewedAt: timestamp('reviewed_at'),
+  reviewedByAdminId: uuid('reviewed_by_admin_id').references(() => users.id),
 });
