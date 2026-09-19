@@ -2,6 +2,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { ruRU } from '@clerk/localizations';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { SiteFooter } from '@/src/components/site-footer';
+import { SiteHeader } from '@/src/components/site-header';
 import './globals.css';
 
 const inter = Inter({
@@ -28,8 +30,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       }}
     >
       <html lang="ru" className={inter.variable}>
-        <body>
-          <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 sm:py-10">{children}</div>
+        <body className="flex min-h-screen flex-col">
+          <SiteHeader />
+          <div className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</div>
+          <SiteFooter />
         </body>
       </html>
     </ClerkProvider>
