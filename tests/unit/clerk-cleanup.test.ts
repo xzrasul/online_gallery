@@ -28,4 +28,17 @@ describe('shouldDeleteClerkUser', () => {
   it('never matches an owner-like address', () => {
     expect(shouldDeleteClerkUser(['someone@gmail.com'], 'someone@gmail.com')).toBe(false);
   });
+
+  it('keeps a partial-match neighbour returned by the Clerk lookup', () => {
+    expect(shouldDeleteClerkUser(['x' + recorded], recorded)).toBe(false);
+  });
+
+  it('keeps a user for an empty or whitespace recorded email', () => {
+    expect(shouldDeleteClerkUser([''], '')).toBe(false);
+    expect(shouldDeleteClerkUser(['  '], '  ')).toBe(false);
+  });
+
+  it('requires the test mark in the local part, not in the domain', () => {
+    expect(shouldDeleteClerkUser(['a@b+clerk_test.com'], 'a@b+clerk_test.com')).toBe(false);
+  });
 });
