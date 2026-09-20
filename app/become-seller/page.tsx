@@ -1,3 +1,7 @@
+import { Field } from '@/src/components/form/field';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
+import { Textarea } from '@/src/components/ui/textarea';
 import { submitSellerApplication } from './actions';
 
 export default async function BecomeSellerPage({
@@ -7,24 +11,32 @@ export default async function BecomeSellerPage({
 }) {
   const { error } = await searchParams;
   return (
-    <main>
-      <h1>Анкета продавца</h1>
-      {error === 'invalid' && <p role="alert">Пожалуйста, заполните все поля корректно.</p>}
-      <form action={submitSellerApplication}>
-        <label>
-          Имя художника/студии
-          <input type="text" name="displayName" required />
-        </label>
-        <label>
-          О себе
-          <textarea name="bio" required />
-        </label>
-        <label>
-          Telegram (необязательно)
-          <input type="text" name="telegramContact" />
-        </label>
-        <button type="submit">Отправить на рассмотрение</button>
-      </form>
+    <main className="mx-auto max-w-lg pt-4 sm:pt-10">
+      <div className="rounded-sm border border-border bg-card p-6 sm:p-8">
+        <h1 className="text-2xl">Анкета продавца</h1>
+        {error === 'invalid' && (
+          <p
+            role="alert"
+            className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            Пожалуйста, заполните все поля корректно.
+          </p>
+        )}
+        <form action={submitSellerApplication} className="mt-6 grid gap-5">
+          <Field label="Имя художника/студии">
+            <Input type="text" name="displayName" required />
+          </Field>
+          <Field label="О себе">
+            <Textarea name="bio" rows={5} required />
+          </Field>
+          <Field label="Telegram (необязательно)">
+            <Input type="text" name="telegramContact" placeholder="@username" />
+          </Field>
+          <Button type="submit" size="lg">
+            Отправить на рассмотрение
+          </Button>
+        </form>
+      </div>
     </main>
   );
 }

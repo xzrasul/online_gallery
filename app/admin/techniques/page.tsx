@@ -4,6 +4,8 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { users } from '@/src/db/schema';
 import { listTechniques } from '@/src/lib/catalog/techniques';
+import { AdminNav } from '@/src/components/admin/admin-nav';
+import { ReferenceList } from '@/src/components/admin/reference-list';
 import { addTechnique, renameTechniqueAction } from './actions';
 
 export default async function AdminTechniquesPage() {
@@ -16,22 +18,14 @@ export default async function AdminTechniquesPage() {
 
   return (
     <main>
-      <h1>Техники</h1>
-      <ul>
-        {techniques.map((technique) => (
-          <li key={technique.id}>
-            <form action={renameTechniqueAction}>
-              <input type="hidden" name="id" value={technique.id} />
-              <input type="text" name="name" defaultValue={technique.name} />
-              <button type="submit">Переименовать</button>
-            </form>
-          </li>
-        ))}
-      </ul>
-      <form action={addTechnique}>
-        <input type="text" name="name" placeholder="Новая техника" required />
-        <button type="submit">Добавить</button>
-      </form>
+      <AdminNav />
+      <ReferenceList
+        title="Техники"
+        items={techniques}
+        renameAction={renameTechniqueAction}
+        addAction={addTechnique}
+        addPlaceholder="Новая техника"
+      />
     </main>
   );
 }

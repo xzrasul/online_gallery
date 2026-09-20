@@ -77,28 +77,4 @@
   h3 {
     @apply text-base font-semibold;
   }
-
-  /* LEGACY FALLBACK — keeps pages that are not restyled yet readable and
-     usable (Tailwind's preflight strips native control styling). Every rule
-     only matches class-less elements, so restyled pages are unaffected.
-     Deleted in Task 8. */
-  main :is(input, select, textarea):not([class]) {
-    @apply w-full rounded-md border border-input bg-card px-3 py-2 text-sm;
-  }
-  main input[type='hidden'] {
-    display: none;
-  }
-  main button:not([class]) {
-    @apply cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground;
-  }
-  main a:not([class]) {
-    @apply underline underline-offset-4 hover:text-brand;
-  }
-  main label:not([class]) {
-    @apply mb-3 grid gap-1.5 text-sm font-medium;
-  }
-  main section:not([class]),
-  main form:not([class]) {
-    @apply mt-4 grid gap-3;
-  }
 }
