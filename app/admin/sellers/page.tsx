@@ -36,7 +36,7 @@ export default async function AdminSellersPage() {
               </form>
               <form action={rejectApplication} className="flex flex-1 gap-2">
                 <input type="hidden" name="applicationId" value={application.id} />
-                <Input type="text" name="reason" placeholder="Причина отказа" />
+                <Input type="text" name="reason" placeholder="Причина отказа" aria-label="Причина отказа" />
                 <Button type="submit" variant="outline">
                   Отклонить
                 </Button>

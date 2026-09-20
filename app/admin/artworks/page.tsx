@@ -26,7 +26,7 @@ export default async function AdminArtworksPage() {
       <div className="mt-6 grid gap-4">
         {pending.map((artwork) => (
           <section key={artwork.id} className="flex flex-col gap-4 rounded-sm border border-border bg-card p-5 sm:flex-row">
-            <ArtworkImage src={artwork.imageUrl} alt={artwork.title} className="w-full sm:w-40 sm:shrink-0" sizes="160px" />
+            <ArtworkImage src={artwork.imageUrl} alt="" className="w-full sm:w-40 sm:shrink-0" sizes="160px" />
             <div className="min-w-0 flex-1">
               <h2>{artwork.title}</h2>
               <p className="mt-2 whitespace-pre-line text-muted-foreground">{artwork.description}</p>
@@ -44,7 +44,7 @@ export default async function AdminArtworksPage() {
                 </form>
                 <form action={rejectArtwork} className="flex flex-1 gap-2">
                   <input type="hidden" name="artworkId" value={artwork.id} />
-                  <Input type="text" name="reason" placeholder="Причина отказа" />
+                  <Input type="text" name="reason" placeholder="Причина отказа" aria-label="Причина отказа" />
                   <Button type="submit" variant="outline">
                     Отклонить
                   </Button>

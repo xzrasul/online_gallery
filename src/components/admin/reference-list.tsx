@@ -25,7 +25,7 @@ export function ReferenceList({
           <li key={item.id}>
             <form action={renameAction} className="flex gap-2">
               <input type="hidden" name="id" value={item.id} />
-              <Input type="text" name="name" defaultValue={item.name} />
+              <Input type="text" name="name" defaultValue={item.name} aria-label={`Название: ${item.name}`} />
               <Button type="submit" variant="outline">
                 Переименовать
               </Button>
