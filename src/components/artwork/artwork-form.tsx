@@ -46,7 +46,7 @@ export function ArtworkForm({
           Проверьте, что все поля заполнены корректно.
         </p>
       )}
-      <form action={action} className="mt-6 grid max-w-xl gap-5 rounded-sm border border-border bg-card p-5 sm:p-6">
+      <form action={action} className="mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)] gap-5 rounded-sm border border-border bg-card p-5 sm:p-6">
         <Field label="Название">
           <Input type="text" name="title" defaultValue={defaults?.title} required />
         </Field>

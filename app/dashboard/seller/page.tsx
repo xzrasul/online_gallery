@@ -31,7 +31,7 @@ export default async function SellerDashboardPage() {
       <div className="mt-4 grid gap-4">
         {myArtworks.map((artwork) => (
           <section key={artwork.id} className="flex gap-4 rounded-sm border border-border bg-card p-4">
-            <ArtworkImage src={artwork.imageUrl} alt="" className="w-20 shrink-0 sm:w-28" sizes="112px" />
+            <ArtworkImage src={artwork.imageUrl} alt="" className="w-20 shrink-0 self-start sm:w-28" sizes="112px" />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h3>{artwork.title}</h3>

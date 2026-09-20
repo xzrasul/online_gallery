@@ -42,7 +42,7 @@ export default async function AdminArtworksPage() {
                   <input type="hidden" name="artworkId" value={artwork.id} />
                   <Button type="submit">Одобрить</Button>
                 </form>
-                <form action={rejectArtwork} className="flex flex-1 gap-2">
+                <form action={rejectArtwork} className="flex w-full gap-2 sm:w-auto sm:flex-1">
                   <input type="hidden" name="artworkId" value={artwork.id} />
                   <Input type="text" name="reason" placeholder="Причина отказа" aria-label="Причина отказа" />
                   <Button type="submit" variant="outline">
