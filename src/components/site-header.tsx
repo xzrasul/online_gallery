@@ -25,7 +25,7 @@ export async function SiteHeader() {
             </Link>
           </Show>
           <Show when="signed-in">
-            <Link href="/choose-role" className="text-sm hover:text-brand">
+            <Link href="/cabinet" className="text-sm hover:text-brand">
               Личный кабинет
             </Link>
             <UserButton />
