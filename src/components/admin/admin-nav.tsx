@@ -9,7 +9,7 @@ const LINKS = [
 
 export function AdminNav() {
   return (
-    <nav aria-label="Разделы админки" className="mb-8 flex flex-nowrap gap-2 overflow-x-auto sm:flex-wrap">
+    <nav aria-label="Разделы админки" className="-m-1 mb-7 p-1 flex flex-nowrap gap-2 overflow-x-auto sm:flex-wrap">
       {LINKS.map((link) => (
         <Link
           key={link.href}
