@@ -17,11 +17,15 @@ describe('public gallery queries', () => {
   let pendingId: string;
 
   afterEach(async () => {
-    await getDb().delete(artworks).where(eq(artworks.sellerId, sellerId));
-    await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, sellerId));
-    await getDb().delete(users).where(eq(users.id, sellerId));
-    await getDb().delete(categories).where(eq(categories.id, categoryId));
-    await getDb().delete(techniques).where(eq(techniques.id, techniqueId));
+    // Guarded: if a test fails before assigning these ids, eq(col, undefined)
+    // would throw here and hide the real failure.
+    if (sellerId) {
+      await getDb().delete(artworks).where(eq(artworks.sellerId, sellerId));
+      await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, sellerId));
+      await getDb().delete(users).where(eq(users.id, sellerId));
+    }
+    if (categoryId) await getDb().delete(categories).where(eq(categories.id, categoryId));
+    if (techniqueId) await getDb().delete(techniques).where(eq(techniques.id, techniqueId));
   });
 
   it('lists only published artworks, filters by category/price, and returns total', async () => {

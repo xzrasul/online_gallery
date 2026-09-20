@@ -24,7 +24,8 @@ export default async function GalleryPage({
   }>;
 }) {
   const params = await searchParams;
-  const page = Math.max(1, Math.floor(Number(params.page)) || 1);
+  const parsedPage = Number(params.page);
+  const page = Number.isFinite(parsedPage) ? Math.max(1, Math.floor(parsedPage)) : 1;
   const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : undefined;
 

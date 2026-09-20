@@ -22,6 +22,8 @@
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# e2e: emails of Clerk test users awaiting cleanup
+/.e2e/
 
 # next.js
 /.next/
