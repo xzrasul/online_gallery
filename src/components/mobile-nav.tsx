@@ -36,7 +36,7 @@ export function MobileNav({ signedIn }: { signedIn: boolean }) {
             Каталог
           </Link>
           {signedIn ? (
-            <Link href="/choose-role" onClick={close} className={linkClass}>
+            <Link href="/cabinet" onClick={close} className={linkClass}>
               Личный кабинет
             </Link>
           ) : (
