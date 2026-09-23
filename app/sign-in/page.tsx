@@ -5,9 +5,10 @@ import { BotLogin } from '@/src/components/auth/bot-login';
 import { Field } from '@/src/components/form/field';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
+import { BRAND_NAME } from '@/src/lib/brand';
 
 export const metadata = {
-  title: 'Вход — Галерея художников',
+  title: 'Вход',
 };
 
 export default async function SignInPage() {
@@ -22,7 +23,7 @@ export default async function SignInPage() {
         <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#229ED9] text-white">
           <Send className="size-6 -translate-x-px translate-y-px" aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-2xl">Вход в галерею</h1>
+        <h1 className="mt-5 text-2xl">Вход в {BRAND_NAME}</h1>
         <p className="mt-2 text-muted-foreground">
           Вход подтверждается в нашем Telegram-боте — без паролей, номера телефона и СМС. При первом входе аккаунт создастся автоматически.
         </p>

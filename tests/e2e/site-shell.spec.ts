@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('guests see the shell with catalog and auth links', async ({ page }) => {
   await page.goto('/');
   const header = page.getByRole('banner');
-  await expect(header.getByRole('link', { name: 'Галерея' })).toBeVisible();
+  await expect(header.getByRole('link', { name: 'SanatPlace' })).toBeVisible();
   await expect(header.getByRole('link', { name: 'Каталог' })).toBeVisible();
   await expect(header.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/gallery');
   await expect(header.getByRole('link', { name: 'Войти через Telegram' })).toHaveAttribute('href', '/sign-in');

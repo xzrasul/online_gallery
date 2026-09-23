@@ -3,7 +3,7 @@ import { testTelegramId } from '../helpers/test-telegram-id';
 
 test('first sign-in from the sign-in page leads to the role-choice screen', async ({ page }) => {
   await page.goto('/sign-in');
-  await expect(page.getByRole('heading', { name: 'Вход в галерею' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Вход в SanatPlace' })).toBeVisible();
 
   const devLogin = page.getByRole('form', { name: 'Вход для разработки' });
   await devLogin.getByLabel('Telegram ID').fill(String(testTelegramId(`buyer_signup_${Date.now()}`)));

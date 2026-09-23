@@ -9,9 +9,8 @@ import {
 } from '@/src/lib/auth/bot-login';
 import { safeEqual } from '@/src/lib/auth/crypto';
 import { getSessionSecret } from '@/src/lib/auth/session-token';
+import { BRAND_NAME as SITE_NAME } from '@/src/lib/brand';
 import { callTelegram, type TelegramUpdate, type TelegramUser } from '@/src/lib/telegram-bot/api';
-
-const SITE_NAME = 'Галерея художников';
 
 // Replies are best effort: a failed sendMessage must never break the login.
 async function reply(method: string, body: Record<string, unknown>) {

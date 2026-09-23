@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { buttonVariants } from '@/src/components/ui/button';
+import { BrandWordmark } from '@/src/components/brand-wordmark';
+import { BRAND_TAGLINE } from '@/src/lib/brand';
 
 export default async function HomePage() {
   let items: Awaited<ReturnType<typeof listPublishedArtworks>>['items'] = [];
@@ -19,9 +21,12 @@ export default async function HomePage() {
   return (
     <main>
       <section className="max-w-2xl py-6 sm:py-14">
-        <h1 className="text-4xl sm:text-5xl">Галерея художников</h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Маркетплейс уникальных картин: оригиналы прямо от художников.
+        <h1 className="text-4xl sm:text-5xl">
+          <BrandWordmark />
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground">{BRAND_TAGLINE}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          «Санъат» по-таджикски — искусство. SanatPlace — место, где его находят.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/gallery" className={buttonVariants({ size: 'lg' })}>
