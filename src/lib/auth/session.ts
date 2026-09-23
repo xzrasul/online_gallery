@@ -10,9 +10,9 @@ import {
   getSessionSecret,
   readSessionToken,
 } from './session-token';
-import type { TelegramProfile } from './telegram-login';
+import type { User } from './users';
 
-export type CurrentUser = typeof users.$inferSelect;
+export type CurrentUser = User;
 
 // The signed-in user from the session cookie, or null for anonymous visitors.
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -23,35 +23,13 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   return user ?? null;
 }
 
-// Creates the user on first login and refreshes their Telegram profile after.
-// Returns whether the account is new so the caller can route to onboarding.
-export async function upsertTelegramUser(profile: TelegramProfile): Promise<{ user: CurrentUser; isNew: boolean }> {
-  const db = getDb();
-  const [existing] = await db.select().from(users).where(eq(users.telegramId, profile.telegramId));
-  if (existing) {
-    const [user] = await db
-      .update(users)
-      .set({ fullName: profile.fullName, username: profile.username, photoUrl: profile.photoUrl })
-      .where(eq(users.id, existing.id))
-      .returning();
-    return { user, isNew: false };
-  }
-  const [user] = await db
-    .insert(users)
-    .values(profile)
-    .onConflictDoUpdate({
-      target: users.telegramId,
-      set: { fullName: profile.fullName, username: profile.username, photoUrl: profile.photoUrl },
-    })
-    .returning();
-  return { user, isNew: true };
+// New accounts pick a role first, returning users go to their cabinet.
+export function afterSignInPath(isNewUser: boolean): string {
+  return isNewUser ? '/choose-role' : '/cabinet';
 }
 
-// Redirects a freshly signed-in user with the session cookie attached:
-// new accounts pick a role first, returning users go to their cabinet.
-export async function signInResponse(req: Request, user: CurrentUser, isNew: boolean): Promise<NextResponse> {
-  const res = NextResponse.redirect(new URL(isNew ? '/choose-role' : '/cabinet', req.url), 303);
-  res.cookies.set(SESSION_COOKIE, await createSessionToken(user.id, getSessionSecret()), {
+export async function setSessionCookie(res: NextResponse, userId: string): Promise<NextResponse> {
+  res.cookies.set(SESSION_COOKIE, await createSessionToken(userId, getSessionSecret()), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
