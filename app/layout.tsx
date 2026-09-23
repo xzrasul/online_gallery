@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/src/components/site-footer';
 import { SiteHeader } from '@/src/components/site-header';
+import { BRAND_NAME, BRAND_TAGLINE } from '@/src/lib/brand';
 import './globals.css';
 
 const inter = Inter({
@@ -11,7 +12,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'Галерея художников',
+  title: { default: `${BRAND_NAME} — место для искусства`, template: `%s — ${BRAND_NAME}` },
+  description: BRAND_TAGLINE,
+  applicationName: BRAND_NAME,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
