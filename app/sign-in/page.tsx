@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Send } from 'lucide-react';
 import { getCurrentUser } from '@/src/lib/auth/session';
-import { TelegramLoginButton } from '@/src/components/auth/telegram-login-button';
+import { BotLogin } from '@/src/components/auth/bot-login';
 import { Field } from '@/src/components/form/field';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
@@ -10,10 +10,9 @@ export const metadata = {
   title: 'Вход — Галерея художников',
 };
 
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function SignInPage() {
   if (await getCurrentUser()) redirect('/cabinet');
 
-  const { error } = await searchParams;
   const botUsername = process.env.TELEGRAM_BOT_USERNAME;
   const devLoginEnabled = process.env.NODE_ENV !== 'production';
 
@@ -25,21 +24,12 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         </div>
         <h1 className="mt-5 text-2xl">Вход в галерею</h1>
         <p className="mt-2 text-muted-foreground">
-          Войдите через Telegram — без паролей и писем с кодами. При первом входе аккаунт создастся автоматически.
+          Вход подтверждается в нашем Telegram-боте — без паролей, номера телефона и СМС. При первом входе аккаунт создастся автоматически.
         </p>
-
-        {error === 'telegram' && (
-          <p
-            role="alert"
-            className="mt-5 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-left text-sm text-destructive"
-          >
-            Не удалось подтвердить вход через Telegram. Попробуйте ещё раз.
-          </p>
-        )}
 
         <div className="mt-6">
           {botUsername ? (
-            <TelegramLoginButton botUsername={botUsername} />
+            <BotLogin botUsername={botUsername} />
           ) : (
             <p className="rounded-sm bg-muted px-3 py-2 text-sm text-muted-foreground">
               Вход через Telegram не настроен: задайте TELEGRAM_BOT_USERNAME.
@@ -48,7 +38,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Мы получим только ваше имя, username и фото профиля из Telegram. Номер телефона не передаётся.
+          Бот получит только ваше имя и username в Telegram. Номер телефона не передаётся.
         </p>
       </div>
 
@@ -62,7 +52,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
           <div>
             <h2 className="text-base">Вход для разработки</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Виджет Telegram не работает на localhost. Эта форма есть только в режиме разработки.
+              Бот не может достучаться до localhost. Эта форма есть только в режиме разработки.
             </p>
           </div>
           <Field label="Telegram ID">

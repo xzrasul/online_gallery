@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, bigint, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, bigint, boolean, pgEnum } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['buyer', 'seller', 'admin']);
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -74,4 +74,18 @@ export const artworks = pgTable('artworks', {
   submittedAt: timestamp('submitted_at').notNull().defaultNow(),
   reviewedAt: timestamp('reviewed_at'),
   reviewedByAdminId: uuid('reviewed_by_admin_id').references(() => users.id),
+});
+
+// One-time "sign in via the bot" requests. The browser keeps the raw token in
+// an httpOnly cookie and the bot receives it as the /start payload; only its
+// SHA-256 hash is stored.
+export const loginRequests = pgTable('login_requests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tokenHash: text('token_hash').notNull().unique(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  isNewUser: boolean('is_new_user').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+  confirmedAt: timestamp('confirmed_at'),
+  consumedAt: timestamp('consumed_at'),
 });
