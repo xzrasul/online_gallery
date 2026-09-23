@@ -33,5 +33,7 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // The postgres driver needs Node.js TCP sockets, which the edge runtime lacks.
+  runtime: 'nodejs',
   matcher: ['/dashboard/:path*', '/become-seller/:path*', '/choose-role/:path*', '/admin/:path*'],
 };

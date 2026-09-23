@@ -1,10 +1,11 @@
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 function createDb() {
-  const sql = neon(process.env.DATABASE_URL!);
-  return drizzle(sql, { schema });
+  // Supabase's transaction pooler (port 6543) does not support prepared statements.
+  const client = postgres(process.env.DATABASE_URL!, { prepare: false });
+  return drizzle(client, { schema });
 }
 
 let _db: ReturnType<typeof createDb> | null = null;
