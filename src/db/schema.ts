@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, bigint, pgEnum } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['buyer', 'seller', 'admin']);
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -9,9 +9,10 @@ export const applicationStatusEnum = pgEnum('application_status', [
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
-  clerkUserId: text('clerk_user_id').notNull().unique(),
-  email: text('email').notNull(),
+  telegramId: bigint('telegram_id', { mode: 'number' }).notNull().unique(),
+  username: text('username'),
   fullName: text('full_name').notNull(),
+  photoUrl: text('photo_url'),
   role: roleEnum('role').notNull().default('buyer'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });

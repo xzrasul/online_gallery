@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { Show, UserButton } from '@clerk/nextjs';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { buttonVariants } from '@/src/components/ui/button';
 import { MobileNav } from '@/src/components/mobile-nav';
+import { UserAvatar } from '@/src/components/user-avatar';
 
 export async function SiteHeader() {
-  const { userId } = await auth();
+  const user = await getCurrentUser();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-4 sm:px-6">
@@ -16,22 +16,25 @@ export async function SiteHeader() {
           <Link href="/gallery" className="text-sm hover:text-brand">
             Каталог
           </Link>
-          <Show when="signed-out">
-            <Link href="/sign-in" className="text-sm hover:text-brand">
-              Войти
+          {user ? (
+            <>
+              <Link href="/cabinet" className="flex items-center gap-2 text-sm hover:text-brand">
+                <UserAvatar fullName={user.fullName} photoUrl={user.photoUrl} />
+                Личный кабинет
+              </Link>
+              <form action="/auth/sign-out" method="post">
+                <button type="submit" className="text-sm text-muted-foreground hover:text-brand">
+                  Выйти
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/sign-in" className={buttonVariants({ size: 'sm' })}>
+              Войти через Telegram
             </Link>
-            <Link href="/sign-up" className={buttonVariants({ size: 'sm' })}>
-              Регистрация
-            </Link>
-          </Show>
-          <Show when="signed-in">
-            <Link href="/cabinet" className="text-sm hover:text-brand">
-              Личный кабинет
-            </Link>
-            <UserButton />
-          </Show>
+          )}
         </nav>
-        <MobileNav signedIn={Boolean(userId)} />
+        <MobileNav user={user && { fullName: user.fullName, photoUrl: user.photoUrl }} />
       </div>
     </header>
   );

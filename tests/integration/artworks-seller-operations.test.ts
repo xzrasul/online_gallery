@@ -9,37 +9,38 @@ import {
   listArtworksForSeller,
   getArtworkForOwner,
 } from '../../src/lib/artworks/seller-operations';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
 async function setupSellerAndRefs(
-  clerkUserId: string,
+  userKey: string,
   createdCategoryIds: string[],
   createdTechniqueIds: string[],
 ) {
   const [seller] = await getDb()
     .insert(users)
-    .values({ clerkUserId, email: `${clerkUserId}@example.com`, fullName: 'Seller Ops Test', role: 'seller' })
+    .values({ telegramId: testTelegramId(userKey), fullName: 'Seller Ops Test', role: 'seller' })
     .returning();
-  const [category] = await getDb().insert(categories).values({ name: `Категория ${clerkUserId}` }).returning();
-  const [technique] = await getDb().insert(techniques).values({ name: `Техника ${clerkUserId}` }).returning();
+  const [category] = await getDb().insert(categories).values({ name: `Категория ${userKey}` }).returning();
+  const [technique] = await getDb().insert(techniques).values({ name: `Техника ${userKey}` }).returning();
   createdCategoryIds.push(category.id);
   createdTechniqueIds.push(technique.id);
   return { seller, category, technique };
 }
 
 describe('seller artwork operations', () => {
-  const clerkIds = new Set<string>();
+  const userKeys = new Set<string>();
   const createdCategoryIds: string[] = [];
   const createdTechniqueIds: string[] = [];
 
   afterEach(async () => {
-    for (const id of clerkIds) {
-      const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, id));
+    for (const id of userKeys) {
+      const [user] = await getDb().select().from(users).where(eq(users.telegramId, testTelegramId(id)));
       if (user) {
         await getDb().delete(artworks).where(eq(artworks.sellerId, user.id));
         await getDb().delete(users).where(eq(users.id, user.id));
       }
     }
-    clerkIds.clear();
+    userKeys.clear();
     for (const id of createdCategoryIds) {
       await getDb().delete(categories).where(eq(categories.id, id));
     }
@@ -51,9 +52,9 @@ describe('seller artwork operations', () => {
   });
 
   it('creates an artwork with status pending', async () => {
-    const clerkId = 'test_seller_ops_create';
-    clerkIds.add(clerkId);
-    const { seller, category, technique } = await setupSellerAndRefs(clerkId, createdCategoryIds, createdTechniqueIds);
+    const userKey = 'test_seller_ops_create';
+    userKeys.add(userKey);
+    const { seller, category, technique } = await setupSellerAndRefs(userKey, createdCategoryIds, createdTechniqueIds);
 
     const id = await createArtwork(getDb(), {
       sellerId: seller.id,
@@ -72,9 +73,9 @@ describe('seller artwork operations', () => {
   });
 
   it('updating an already-published artwork resets it to pending', async () => {
-    const clerkId = 'test_seller_ops_update';
-    clerkIds.add(clerkId);
-    const { seller, category, technique } = await setupSellerAndRefs(clerkId, createdCategoryIds, createdTechniqueIds);
+    const userKey = 'test_seller_ops_update';
+    userKeys.add(userKey);
+    const { seller, category, technique } = await setupSellerAndRefs(userKey, createdCategoryIds, createdTechniqueIds);
 
     const id = await createArtwork(getDb(), {
       sellerId: seller.id,
@@ -113,9 +114,9 @@ describe('seller artwork operations', () => {
   });
 
   it('marks a published artwork as sold, and rejects a non-published one', async () => {
-    const clerkId = 'test_seller_ops_sold';
-    clerkIds.add(clerkId);
-    const { seller, category, technique } = await setupSellerAndRefs(clerkId, createdCategoryIds, createdTechniqueIds);
+    const userKey = 'test_seller_ops_sold';
+    userKeys.add(userKey);
+    const { seller, category, technique } = await setupSellerAndRefs(userKey, createdCategoryIds, createdTechniqueIds);
 
     const id = await createArtwork(getDb(), {
       sellerId: seller.id,
@@ -139,9 +140,9 @@ describe('seller artwork operations', () => {
   });
 
   it('lists all artworks for a seller and fetches one by owner', async () => {
-    const clerkId = 'test_seller_ops_list';
-    clerkIds.add(clerkId);
-    const { seller, category, technique } = await setupSellerAndRefs(clerkId, createdCategoryIds, createdTechniqueIds);
+    const userKey = 'test_seller_ops_list';
+    userKeys.add(userKey);
+    const { seller, category, technique } = await setupSellerAndRefs(userKey, createdCategoryIds, createdTechniqueIds);
 
     const id = await createArtwork(getDb(), {
       sellerId: seller.id,

@@ -1,8 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { listPendingArtworks } from '@/src/lib/artworks/admin-operations';
 import { AdminNav } from '@/src/components/admin/admin-nav';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
@@ -11,10 +9,9 @@ import { Input } from '@/src/components/ui/input';
 import { approveArtwork, rejectArtwork } from './actions';
 
 export default async function AdminArtworksPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [admin] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
-  if (!admin || admin.role !== 'admin') redirect('/');
+  const admin = await getCurrentUser();
+  if (!admin) redirect('/sign-in');
+  if (admin.role !== 'admin') redirect('/');
 
   const pending = await listPendingArtworks(getDb());
 

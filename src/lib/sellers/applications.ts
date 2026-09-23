@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm';
 import type { Db } from '../../db';
 import { users, sellerApplications } from '../../db/schema';
 import { decideApplicationOutcome } from './decision';
-import { syncRoleToClerk } from '../auth/sync-role';
 
 export async function createSellerApplication(
   db: Db,
@@ -65,14 +64,4 @@ export async function approveOrRejectApplication(
     .where(eq(users.id, application.userId));
 
   await db.batch([updateApplication, updateUserRole]);
-
-  const [user] = await db.select().from(users).where(eq(users.id, application.userId));
-  try {
-    await syncRoleToClerk(user.clerkUserId, outcome.role);
-  } catch (err) {
-    console.error(
-      'syncRoleToClerk failed (DB role is authoritative, Clerk metadata is a denormalized copy with no current readers):',
-      err,
-    );
-  }
 }

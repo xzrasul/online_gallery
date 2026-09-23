@@ -2,6 +2,7 @@ import { Field } from '@/src/components/form/field';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Textarea } from '@/src/components/ui/textarea';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { submitSellerApplication } from './actions';
 
 export default async function BecomeSellerPage({
@@ -10,6 +11,7 @@ export default async function BecomeSellerPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const user = await getCurrentUser();
   return (
     <main className="mx-auto max-w-lg pt-4 sm:pt-10">
       <div className="rounded-sm border border-border bg-card p-6 sm:p-8">
@@ -30,7 +32,12 @@ export default async function BecomeSellerPage({
             <Textarea name="bio" rows={5} required />
           </Field>
           <Field label="Telegram (необязательно)">
-            <Input type="text" name="telegramContact" placeholder="@username" />
+            <Input
+              type="text"
+              name="telegramContact"
+              placeholder="@username"
+              defaultValue={user?.username ? `@${user.username}` : undefined}
+            />
           </Field>
           <Button type="submit" size="lg">
             Отправить на рассмотрение

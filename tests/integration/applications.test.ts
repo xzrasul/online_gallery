@@ -1,8 +1,3 @@
-import { vi } from 'vitest';
-vi.mock('../../src/lib/auth/sync-role', () => ({
-  syncRoleToClerk: vi.fn().mockResolvedValue(undefined),
-}));
-
 import { describe, it, expect, afterEach } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
@@ -11,31 +6,32 @@ import {
   createSellerApplication,
   approveOrRejectApplication,
 } from '../../src/lib/sellers/applications';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
-async function insertTestUser(clerkUserId: string) {
+async function insertTestUser(userKey: string) {
   const [row] = await getDb()
     .insert(users)
-    .values({ clerkUserId, email: `${clerkUserId}@example.com`, fullName: 'Test User' })
+    .values({ telegramId: testTelegramId(userKey), fullName: 'Test User' })
     .returning();
   return row;
 }
 
 describe('seller applications', () => {
-  const clerkIds = new Set<string>();
+  const userKeys = new Set<string>();
 
   afterEach(async () => {
-    for (const id of clerkIds) {
-      const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, id));
+    for (const id of userKeys) {
+      const [user] = await getDb().select().from(users).where(eq(users.telegramId, testTelegramId(id)));
       if (user) {
         await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, user.id));
         await getDb().delete(users).where(eq(users.id, user.id));
       }
     }
-    clerkIds.clear();
+    userKeys.clear();
   });
 
   it('creates a pending application and leaves the user role as buyer', async () => {
-    clerkIds.add('test_applicant_1');
+    userKeys.add('test_applicant_1');
     const applicant = await insertTestUser('test_applicant_1');
 
     const applicationId = await createSellerApplication(getDb(), {
@@ -55,8 +51,8 @@ describe('seller applications', () => {
   });
 
   it('approving grants the seller role and marks the application approved', async () => {
-    clerkIds.add('test_applicant_2');
-    clerkIds.add('test_admin_1');
+    userKeys.add('test_applicant_2');
+    userKeys.add('test_admin_1');
     const applicant = await insertTestUser('test_applicant_2');
     const admin = await insertTestUser('test_admin_1');
     const applicationId = await createSellerApplication(getDb(), {
@@ -83,8 +79,8 @@ describe('seller applications', () => {
   });
 
   it('rejecting keeps the buyer role and stores the reason', async () => {
-    clerkIds.add('test_applicant_3');
-    clerkIds.add('test_admin_2');
+    userKeys.add('test_applicant_3');
+    userKeys.add('test_admin_2');
     const applicant = await insertTestUser('test_applicant_3');
     const admin = await insertTestUser('test_admin_2');
     const applicationId = await createSellerApplication(getDb(), {
@@ -112,8 +108,8 @@ describe('seller applications', () => {
   });
 
   it('resubmitting after rejection upserts the same row instead of throwing', async () => {
-    clerkIds.add('test_applicant_4');
-    clerkIds.add('test_admin_3');
+    userKeys.add('test_applicant_4');
+    userKeys.add('test_admin_3');
     const applicant = await insertTestUser('test_applicant_4');
     const admin = await insertTestUser('test_admin_3');
     const firstApplicationId = await createSellerApplication(getDb(), {

@@ -3,13 +3,13 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
 import { createArtwork } from '../../src/lib/artworks/seller-operations';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
 test('published artworks appear in the public catalog and respect category filter', async ({ page }) => {
   const [seller] = await getDb()
     .insert(users)
     .values({
-      clerkUserId: `test_catalog_seller_${Date.now()}`,
-      email: `catalog-test-${Date.now()}@example.com`,
+      telegramId: testTelegramId(`test_catalog_seller_${Date.now()}`),
       fullName: 'Catalog Test Seller',
       role: 'seller',
     })

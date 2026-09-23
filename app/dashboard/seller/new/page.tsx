@@ -1,8 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { listCategories } from '@/src/lib/catalog/categories';
 import { listTechniques } from '@/src/lib/catalog/techniques';
 import { ArtworkForm } from '@/src/components/artwork/artwork-form';
@@ -13,9 +11,8 @@ export default async function NewArtworkPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
+  const user = await getCurrentUser();
+  if (!user) redirect('/sign-in');
   if (!user || user.role !== 'seller') redirect('/');
 
   const { error } = await searchParams;

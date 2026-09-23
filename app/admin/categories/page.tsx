@@ -1,18 +1,15 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { listCategories } from '@/src/lib/catalog/categories';
 import { AdminNav } from '@/src/components/admin/admin-nav';
 import { ReferenceList } from '@/src/components/admin/reference-list';
 import { addCategory, renameCategoryAction } from './actions';
 
 export default async function AdminCategoriesPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [admin] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
-  if (!admin || admin.role !== 'admin') redirect('/');
+  const admin = await getCurrentUser();
+  if (!admin) redirect('/sign-in');
+  if (admin.role !== 'admin') redirect('/');
 
   const categories = await listCategories(getDb());
 

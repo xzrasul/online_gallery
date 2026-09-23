@@ -1,16 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { signUpWithEmail } from './helpers/clerk';
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
+import { signInAsNewUser } from './helpers/auth';
 
-test('signing up as a seller lands on the pending status page', async ({ page }) => {
-  await setupClerkTestingToken({ page });
-
-  const testEmail = `seller+clerk_test_${Date.now()}@example.com`;
-  const testPassword = `Xk9#mQ2vLp${Date.now()}!`;
-
-  await signUpWithEmail(page, testEmail, testPassword);
-
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
+test('a new user applying as a seller lands on the pending status page', async ({ page }) => {
+  await signInAsNewUser(page, 'seller_application');
   await page.getByRole('button', { name: 'Хочу продавать картины' }).click();
 
   await expect(page).toHaveURL(/\/become-seller$/, { timeout: 15000 });

@@ -3,39 +3,40 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, categories, techniques, artworks, sellerApplications } from '../../src/db/schema';
 import { approveOrRejectArtwork, listPendingArtworks } from '../../src/lib/artworks/admin-operations';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
 describe('admin artwork operations', () => {
-  const clerkIds = new Set<string>();
+  const userKeys = new Set<string>();
   let categoryId: string;
   let techniqueId: string;
 
   afterEach(async () => {
-    for (const id of clerkIds) {
-      const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, id));
+    for (const id of userKeys) {
+      const [user] = await getDb().select().from(users).where(eq(users.telegramId, testTelegramId(id)));
       if (user) {
         await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, user.id));
         await getDb().delete(artworks).where(eq(artworks.sellerId, user.id));
         await getDb().delete(users).where(eq(users.id, user.id));
       }
     }
-    clerkIds.clear();
+    userKeys.clear();
     if (categoryId) await getDb().delete(categories).where(eq(categories.id, categoryId));
     if (techniqueId) await getDb().delete(techniques).where(eq(techniques.id, techniqueId));
   });
 
   async function setup() {
-    const sellerClerkId = 'test_admin_ops_seller';
-    const adminClerkId = 'test_admin_ops_admin';
-    clerkIds.add(sellerClerkId);
-    clerkIds.add(adminClerkId);
+    const sellerUserKey = 'test_admin_ops_seller';
+    const adminUserKey = 'test_admin_ops_admin';
+    userKeys.add(sellerUserKey);
+    userKeys.add(adminUserKey);
 
     const [seller] = await getDb()
       .insert(users)
-      .values({ clerkUserId: sellerClerkId, email: `${sellerClerkId}@example.com`, fullName: 'Seller', role: 'seller' })
+      .values({ telegramId: testTelegramId(sellerUserKey), fullName: 'Seller', role: 'seller' })
       .returning();
     const [admin] = await getDb()
       .insert(users)
-      .values({ clerkUserId: adminClerkId, email: `${adminClerkId}@example.com`, fullName: 'Admin', role: 'admin' })
+      .values({ telegramId: testTelegramId(adminUserKey), fullName: 'Admin', role: 'admin' })
       .returning();
     await getDb().insert(sellerApplications).values({
       userId: seller.id,

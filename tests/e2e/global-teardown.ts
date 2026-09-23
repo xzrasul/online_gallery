@@ -1,5 +1,5 @@
-import { deleteRecordedClerkUsers } from './helpers/clerk-cleanup';
+import { deleteTestUsers } from './helpers/test-users-cleanup';
 
 export default async function globalTeardown() {
-  await deleteRecordedClerkUsers();
+  await deleteTestUsers();
 }
