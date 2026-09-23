@@ -40,7 +40,7 @@ test('the home page greets visitors and shows the newest published artwork', asy
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: 'Галерея художников' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'В каталог' })).toHaveAttribute('href', '/gallery');
-    await expect(page.getByRole('link', { name: 'Хочу продавать картины' })).toHaveAttribute('href', '/sign-up');
+    await expect(page.getByRole('link', { name: 'Хочу продавать картины' })).toHaveAttribute('href', '/sign-in');
     await expect(page.getByText(artworkTitle)).toBeVisible();
   } finally {
     await getDb().delete(artworks).where(eq(artworks.id, artworkId));
