@@ -12,7 +12,7 @@ async function main() {
   if (sourceUrl === targetUrl) throw new Error('Source and target are the same database');
 
   const source = postgres(sourceUrl, { max: 1 });
-  const target = postgres(targetUrl, { max: 1, prepare: false });
+  const target = postgres(targetUrl, { max: 1, prepare: false, ssl: 'require' });
   try {
     for (const table of TABLES) {
       const rows = await source`select * from ${source(table)}`;

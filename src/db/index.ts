@@ -3,8 +3,9 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 function createDb() {
-  // Supabase's transaction pooler (port 6543) does not support prepared statements.
-  const client = postgres(process.env.DATABASE_URL!, { prepare: false });
+  // Supabase's transaction pooler (port 6543) does not support prepared statements,
+  // and the project enforces SSL.
+  const client = postgres(process.env.DATABASE_URL!, { prepare: false, ssl: 'require' });
   return drizzle(client, { schema });
 }
 
