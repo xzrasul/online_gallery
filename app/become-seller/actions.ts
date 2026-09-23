@@ -1,17 +1,12 @@
 'use server';
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { createSellerApplication } from '@/src/lib/sellers/applications';
 
 export async function submitSellerApplication(formData: FormData) {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
-  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId!));
+  const user = await getCurrentUser();
   if (!user) redirect('/sign-in');
 
   const displayName = String(formData.get('displayName') ?? '').trim();

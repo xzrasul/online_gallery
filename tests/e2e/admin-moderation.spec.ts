@@ -1,30 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { signUpWithEmail } from './helpers/clerk';
-import { setupClerkTestingToken, clerk } from '@clerk/testing/playwright';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users } from '../../src/db/schema';
+import { signInAsNewUser, signOut } from './helpers/auth';
 
 test('admin approves a pending seller application', async ({ page }) => {
-  // This spec does two full sign-up+OTP flows plus a live Clerk metadata
-  // sync call on top of them; the default 30s test timeout has been
-  // observed to be too tight for that combined round-trip latency even
-  // though the underlying approve flow completes correctly (verified via
-  // direct DB inspection during Task 14's full verification pass — the
-  // application row was reliably updated to `approved` a few seconds
-  // after the assertion below timed out). Give it real headroom instead
-  // of a hair-trigger timeout.
-  test.setTimeout(60_000);
-
-  await setupClerkTestingToken({ page });
-
-  // Sign up the future seller and submit an application.
-  const sellerEmail = `seller+clerk_test_${Date.now()}@example.com`;
-  const sellerPassword = `Xk9#mQ2vLp${Date.now()}!`;
+  // Sign in the future seller and submit an application.
   const displayName = `Админ-тест студия ${Date.now()}`;
-
-  await signUpWithEmail(page, sellerEmail, sellerPassword);
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
+  await signInAsNewUser(page, 'moderation_seller');
 
   await page.getByRole('button', { name: 'Хочу продавать картины' }).click();
   await expect(page).toHaveURL(/\/become-seller$/, { timeout: 15000 });
@@ -34,16 +17,10 @@ test('admin approves a pending seller application', async ({ page }) => {
   await page.getByRole('button', { name: 'Отправить на рассмотрение' }).click();
   await expect(page).toHaveURL(/\/become-seller\/status/, { timeout: 15000 });
 
-  await clerk.signOut({ page });
+  await signOut(page);
 
-  // Sign up a second account and promote it to admin directly in the DB.
-  const adminEmail = `admin+clerk_test_${Date.now()}@example.com`;
-  const adminPassword = `Zt7#nQ4wRp${Date.now()}!`;
-
-  await signUpWithEmail(page, adminEmail, adminPassword);
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-
-  const [adminUser] = await getDb().select().from(users).where(eq(users.email, adminEmail));
+  // Sign in a second account and promote it to admin directly in the DB.
+  const adminUser = await signInAsNewUser(page, 'moderation_admin');
   await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
 
   await page.goto('/admin/sellers');

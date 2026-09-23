@@ -3,13 +3,13 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
 import { createArtwork } from '../../src/lib/artworks/seller-operations';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
 test('artist page and artwork page render for a published artwork, and a pending one 404s', async ({ page }) => {
   const [seller] = await getDb()
     .insert(users)
     .values({
-      clerkUserId: `test_detail_seller_${Date.now()}`,
-      email: `detail-test-${Date.now()}@example.com`,
+      telegramId: testTelegramId(`test_detail_seller_${Date.now()}`),
       fullName: 'Detail Test Seller',
       role: 'seller',
     })

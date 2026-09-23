@@ -1,17 +1,14 @@
 'use server';
 
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { markArtworkAsSold } from '@/src/lib/artworks/seller-operations';
 
 export async function markAsSold(formData: FormData) {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
+  const user = await getCurrentUser();
+  if (!user) redirect('/sign-in');
   if (!user || user.role !== 'seller') redirect('/');
 
   const artworkId = String(formData.get('artworkId') ?? '').trim();

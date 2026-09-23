@@ -6,8 +6,7 @@ test('guests see the shell with catalog and auth links', async ({ page }) => {
   await expect(header.getByRole('link', { name: 'Галерея' })).toBeVisible();
   await expect(header.getByRole('link', { name: 'Каталог' })).toBeVisible();
   await expect(header.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/gallery');
-  await expect(header.getByRole('link', { name: 'Войти' })).toHaveAttribute('href', '/sign-in');
-  await expect(header.getByRole('link', { name: 'Регистрация' })).toHaveAttribute('href', '/sign-up');
+  await expect(header.getByRole('link', { name: 'Войти через Telegram' })).toHaveAttribute('href', '/sign-in');
 });
 
 test('the header stays pinned to the top while scrolling', async ({ page }) => {
@@ -32,10 +31,8 @@ test.describe('on a phone', () => {
     await page.getByRole('button', { name: 'Меню' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByRole('link', { name: 'Каталог' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Войти' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Войти' })).toHaveAttribute('href', '/sign-in');
-    await expect(dialog.getByRole('link', { name: 'Регистрация' })).toBeVisible();
-    await expect(dialog.getByRole('link', { name: 'Регистрация' })).toHaveAttribute('href', '/sign-up');
+    await expect(dialog.getByRole('link', { name: 'Войти через Telegram' })).toBeVisible();
+    await expect(dialog.getByRole('link', { name: 'Войти через Telegram' })).toHaveAttribute('href', '/sign-in');
     await dialog.getByRole('link', { name: 'Каталог' }).click();
     await expect(page).toHaveURL(/\/gallery$/);
   });

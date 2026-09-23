@@ -11,10 +11,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/src/components/ui/sheet';
+import { UserAvatar } from '@/src/components/user-avatar';
 
 const linkClass = 'block rounded-md px-3 py-3 text-base hover:bg-accent';
 
-export function MobileNav({ signedIn }: { signedIn: boolean }) {
+export function MobileNav({ user }: { user: { fullName: string; photoUrl: string | null } | null }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -35,19 +36,22 @@ export function MobileNav({ signedIn }: { signedIn: boolean }) {
           <Link href="/gallery" onClick={close} className={linkClass}>
             Каталог
           </Link>
-          {signedIn ? (
-            <Link href="/cabinet" onClick={close} className={linkClass}>
-              Личный кабинет
-            </Link>
-          ) : (
+          {user ? (
             <>
-              <Link href="/sign-in" onClick={close} className={linkClass}>
-                Войти
+              <Link href="/cabinet" onClick={close} className={`${linkClass} flex items-center gap-3`}>
+                <UserAvatar fullName={user.fullName} photoUrl={user.photoUrl} />
+                Личный кабинет
               </Link>
-              <Link href="/sign-up" onClick={close} className={linkClass}>
-                Регистрация
-              </Link>
+              <form action="/auth/sign-out" method="post">
+                <button type="submit" className={`${linkClass} w-full text-left text-muted-foreground`}>
+                  Выйти
+                </button>
+              </form>
             </>
+          ) : (
+            <Link href="/sign-in" onClick={close} className={linkClass}>
+              Войти через Telegram
+            </Link>
           )}
         </nav>
       </SheetContent>

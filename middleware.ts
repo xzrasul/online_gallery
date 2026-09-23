@@ -1,48 +1,37 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { users } from '@/src/db/schema';
+import { SESSION_COOKIE, getSessionSecret, readSessionToken } from '@/src/lib/auth/session-token';
 
-const isSellerRoute = createRouteMatcher(['/dashboard/seller(.*)']);
-const isAdminRoute = createRouteMatcher(['/admin(.*)']);
-const isAuthenticatedRoute = createRouteMatcher(['/dashboard(.*)', '/become-seller(.*)', '/choose-role(.*)']);
+const isSellerRoute = (path: string) => path.startsWith('/dashboard/seller');
+const isAdminRoute = (path: string) => path.startsWith('/admin');
+const isAuthenticatedRoute = (path: string) =>
+  ['/dashboard', '/become-seller', '/choose-role'].some((prefix) => path.startsWith(prefix));
 
-// NOTE: this deliberately reads `role` from our own `users` table (the
-// authorization source of truth everywhere else in this project — Tasks 8
-// and 12 both read role from the DB, never from Clerk metadata) instead of
-// `sessionClaims.publicMetadata.role`. The original plan's session-claims
-// fast path depends on a custom session token claim configured in Clerk's
-// dashboard; that dashboard editor is currently broken (Monaco
-// initialization error + a React hydration error on every reload,
-// confirmed by both the controller and the human directly in the browser,
-// not an automation artifact), so publicMetadata never reaches the session
-// token. Falling back to a DB read here costs one extra round-trip per
-// protected route via the same HTTP-based Neon driver already used
-// everywhere else in this project — acceptable for Phase 1.
-export default clerkMiddleware(async (auth, req) => {
-  if (isAuthenticatedRoute(req) || isSellerRoute(req) || isAdminRoute(req)) {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.redirect(new URL('/sign-in', req.url));
-    }
+// Role is read from our own `users` table, the authorization source of truth
+// everywhere else in this project; the session cookie only carries the user id.
+export default async function middleware(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  if (!isAuthenticatedRoute(path) && !isSellerRoute(path) && !isAdminRoute(path)) {
+    return NextResponse.next();
+  }
 
-    const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
-    const role = user?.role;
+  const userId = await readSessionToken(req.cookies.get(SESSION_COOKIE)?.value, getSessionSecret());
+  const [user] = userId ? await getDb().select().from(users).where(eq(users.id, userId)) : [];
+  if (!user) {
+    return NextResponse.redirect(new URL('/sign-in', req.url));
+  }
 
-    if (isSellerRoute(req) && role !== 'seller') {
-      return NextResponse.redirect(new URL('/become-seller/status', req.url));
-    }
-    if (isAdminRoute(req) && role !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
+  if (isSellerRoute(path) && user.role !== 'seller') {
+    return NextResponse.redirect(new URL('/become-seller/status', req.url));
+  }
+  if (isAdminRoute(path) && user.role !== 'admin') {
+    return NextResponse.redirect(new URL('/', req.url));
   }
   return NextResponse.next();
-});
+}
 
 export const config = {
-  matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico)).*)',
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ['/dashboard/:path*', '/become-seller/:path*', '/choose-role/:path*', '/admin/:path*'],
 };

@@ -1,21 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { signUpWithEmail } from './helpers/clerk';
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
+import { signInAsNewUser } from './helpers/auth';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
 import { createArtwork } from '../../src/lib/artworks/seller-operations';
 
 test('a seller edits a published artwork and it goes back to pending', async ({ page }) => {
-  await setupClerkTestingToken({ page });
-
-  const sellerEmail = `seller+clerk_test_${Date.now()}@example.com`;
-  const sellerPassword = `Xk9#mQ2vLp${Date.now()}!`;
-
-  await signUpWithEmail(page, sellerEmail, sellerPassword);
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-
-  const [seller] = await getDb().select().from(users).where(eq(users.email, sellerEmail));
+  const seller = await signInAsNewUser(page, 'edit_artwork_seller');
   await getDb().update(users).set({ role: 'seller' }).where(eq(users.id, seller.id));
   await getDb().insert(sellerApplications).values({
     userId: seller.id,

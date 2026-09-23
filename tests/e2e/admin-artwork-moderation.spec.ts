@@ -1,20 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { signUpWithEmail } from './helpers/clerk';
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
+import { signInAsNewUser } from './helpers/auth';
+import { testTelegramId } from '../helpers/test-telegram-id';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
 import { createArtwork } from '../../src/lib/artworks/seller-operations';
 
 test('admin approves a pending artwork', async ({ page }) => {
-  await setupClerkTestingToken({ page });
-
-  const sellerClerkEmail = `seller+clerk_test_${Date.now()}@example.com`;
   const [seller] = await getDb()
     .insert(users)
     .values({
-      clerkUserId: `test_artwork_mod_seller_${Date.now()}`,
-      email: sellerClerkEmail,
+      telegramId: testTelegramId(`test_artwork_mod_seller_${Date.now()}`),
       fullName: 'Seller',
       role: 'seller',
     })
@@ -41,15 +37,9 @@ test('admin approves a pending artwork', async ({ page }) => {
     imageUrl: 'https://example.com/pending-e2e.png',
   });
 
-  const adminEmail = `admin+clerk_test_${Date.now()}@example.com`;
-  const adminPassword = `Zt7#nQ4wRp${Date.now()}!`;
-
   let adminUserId: string | undefined;
   try {
-    await signUpWithEmail(page, adminEmail, adminPassword);
-    await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-
-    const [adminUser] = await getDb().select().from(users).where(eq(users.email, adminEmail));
+    const adminUser = await signInAsNewUser(page, 'artwork_mod_admin');
     adminUserId = adminUser.id;
     await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
 

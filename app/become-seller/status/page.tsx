@@ -1,16 +1,13 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users, sellerApplications } from '@/src/db/schema';
+import { sellerApplications } from '@/src/db/schema';
 import { buttonVariants } from '@/src/components/ui/button';
 
 export default async function SellerApplicationStatusPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-
-  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
+  const user = await getCurrentUser();
   if (!user) redirect('/sign-in');
 
   const [application] = await getDb()

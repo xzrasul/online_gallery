@@ -1,20 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { signUpWithEmail } from './helpers/clerk';
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
+import { signInAsNewUser } from './helpers/auth';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, categories, techniques } from '../../src/db/schema';
 
 test('admin creates and renames a category and a technique', async ({ page }) => {
-  await setupClerkTestingToken({ page });
-
-  const adminEmail = `admin+clerk_test_${Date.now()}@example.com`;
-  const adminPassword = `Zt7#nQ4wRp${Date.now()}!`;
-
-  await signUpWithEmail(page, adminEmail, adminPassword);
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-
-  const [adminUser] = await getDb().select().from(users).where(eq(users.email, adminEmail));
+  const adminUser = await signInAsNewUser(page, 'catalog_admin');
   await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
 
   const categoryName = `E2E категория ${Date.now()}`;

@@ -7,9 +7,10 @@ import {
   getPublishedArtworkById,
   getArtistPublicProfile,
 } from '../../src/lib/artworks/public-queries';
+import { testTelegramId } from '../helpers/test-telegram-id';
 
 describe('public gallery queries', () => {
-  const clerkId = 'test_public_queries_seller';
+  const userKey = 'test_public_queries_seller';
   let categoryId: string;
   let techniqueId: string;
   let sellerId: string;
@@ -31,7 +32,7 @@ describe('public gallery queries', () => {
   it('lists only published artworks, filters by category/price, and returns total', async () => {
     const [seller] = await getDb()
       .insert(users)
-      .values({ clerkUserId: clerkId, email: `${clerkId}@example.com`, fullName: 'Public Test Seller', role: 'seller' })
+      .values({ telegramId: testTelegramId(userKey), fullName: 'Public Test Seller', role: 'seller' })
       .returning();
     sellerId = seller.id;
     await getDb().insert(sellerApplications).values({

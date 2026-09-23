@@ -1,21 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { setupClerkTestingToken } from '@clerk/testing/playwright';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications } from '../../src/db/schema';
-import { signUpWithEmail } from './helpers/clerk';
+import { signInAsNewUser } from './helpers/auth';
 
 test('/cabinet sends each user to the cabinet of their role', async ({ page }) => {
   await page.goto('/cabinet');
   await expect(page).toHaveURL(/\/sign-in/);
 
-  await setupClerkTestingToken({ page });
-  const email = `cabinet+clerk_test_${Date.now()}@example.com`;
-  const password = `Xk9#mQ2vLp${Date.now()}!`;
-  await signUpWithEmail(page, email, password);
-  await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-
-  const [user] = await getDb().select().from(users).where(eq(users.email, email));
+  const user = await signInAsNewUser(page, 'cabinet_redirect');
   try {
     // the header link points at /cabinet
     await expect(page.getByRole('banner').getByRole('link', { name: 'Личный кабинет' })).toHaveAttribute('href', '/cabinet');

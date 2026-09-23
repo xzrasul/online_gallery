@@ -1,9 +1,7 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users } from '@/src/db/schema';
 import { listArtworksForSeller } from '@/src/lib/artworks/seller-operations';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
 import { StatusBadge } from '@/src/components/artwork/status-badge';
@@ -11,9 +9,8 @@ import { Button, buttonVariants } from '@/src/components/ui/button';
 import { markAsSold } from './actions';
 
 export default async function SellerDashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [user] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
+  const user = await getCurrentUser();
+  if (!user) redirect('/sign-in');
   if (!user || user.role !== 'seller') redirect('/');
 
   const myArtworks = await listArtworksForSeller(getDb(), user.id);

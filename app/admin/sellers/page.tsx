@@ -1,18 +1,17 @@
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
-import { users, sellerApplications } from '@/src/db/schema';
+import { sellerApplications } from '@/src/db/schema';
 import { AdminNav } from '@/src/components/admin/admin-nav';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { approveApplication, rejectApplication } from './actions';
 
 export default async function AdminSellersPage() {
-  const { userId } = await auth();
-  if (!userId) redirect('/sign-in');
-  const [admin] = await getDb().select().from(users).where(eq(users.clerkUserId, userId));
-  if (!admin || admin.role !== 'admin') redirect('/');
+  const admin = await getCurrentUser();
+  if (!admin) redirect('/sign-in');
+  if (admin.role !== 'admin') redirect('/');
 
   const pending = await getDb()
     .select()

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Show } from '@clerk/nextjs';
 import { getDb } from '@/src/db';
+import { getCurrentUser } from '@/src/lib/auth/session';
 import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { buttonVariants } from '@/src/components/ui/button';
@@ -8,6 +8,7 @@ import { buttonVariants } from '@/src/components/ui/button';
 export default async function HomePage() {
   let items: Awaited<ReturnType<typeof listPublishedArtworks>>['items'] = [];
   let loadFailed = false;
+  const signedIn = Boolean(await getCurrentUser());
   try {
     ({ items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 8 }));
   } catch (error) {
@@ -26,16 +27,12 @@ export default async function HomePage() {
           <Link href="/gallery" className={buttonVariants({ size: 'lg' })}>
             В каталог
           </Link>
-          <Show when="signed-out">
-            <Link href="/sign-up" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
-              Хочу продавать картины
-            </Link>
-          </Show>
-          <Show when="signed-in">
-            <Link href="/choose-role" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
-              Хочу продавать картины
-            </Link>
-          </Show>
+          <Link
+            href={signedIn ? '/choose-role' : '/sign-in'}
+            className={buttonVariants({ size: 'lg', variant: 'outline' })}
+          >
+            Хочу продавать картины
+          </Link>
         </div>
       </section>
 
