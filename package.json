@@ -12,14 +12,14 @@
     "db:push": "dotenv -e .env.local -- drizzle-kit push"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0",
+    "@supabase/supabase-js": "^2.117.1",
     "@tailwindcss/postcss": "^4.3.3",
-    "@vercel/blob": "^2.8.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.47.0",
     "next": "15.5.25",
+    "postgres": "^3.4.9",
     "radix-ui": "^1.6.7",
     "react": "^19.1.4",
     "react-dom": "^19.1.4",

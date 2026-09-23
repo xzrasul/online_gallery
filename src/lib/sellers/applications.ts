@@ -48,20 +48,17 @@ export async function approveOrRejectApplication(
     .from(sellerApplications)
     .where(eq(sellerApplications.id, input.applicationId));
 
-  const updateApplication = db
-    .update(sellerApplications)
-    .set({
-      status: outcome.applicationStatus,
-      rejectionReason: outcome.rejectionReason,
-      reviewedByAdminId: input.adminUserId,
-      reviewedAt: new Date(),
-    })
-    .where(eq(sellerApplications.id, input.applicationId));
+  await db.transaction(async (tx) => {
+    await tx
+      .update(sellerApplications)
+      .set({
+        status: outcome.applicationStatus,
+        rejectionReason: outcome.rejectionReason,
+        reviewedByAdminId: input.adminUserId,
+        reviewedAt: new Date(),
+      })
+      .where(eq(sellerApplications.id, input.applicationId));
 
-  const updateUserRole = db
-    .update(users)
-    .set({ role: outcome.role })
-    .where(eq(users.id, application.userId));
-
-  await db.batch([updateApplication, updateUserRole]);
+    await tx.update(users).set({ role: outcome.role }).where(eq(users.id, application.userId));
+  });
 }

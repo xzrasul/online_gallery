@@ -3,6 +3,7 @@ import { signInAsNewUser } from './helpers/auth';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, sellerApplications, categories, techniques, artworks } from '../../src/db/schema';
+import { deleteArtworkImages } from '../../src/lib/uploads/upload-image';
 
 test('an approved seller creates an artwork', async ({ page }) => {
   const seller = await signInAsNewUser(page, 'create_artwork_seller');
@@ -44,6 +45,8 @@ test('an approved seller creates an artwork', async ({ page }) => {
     const [artwork] = await getDb().select().from(artworks).where(eq(artworks.title, artworkTitle));
     expect(artwork.status).toBe('pending');
   } finally {
+    const uploaded = await getDb().select({ url: artworks.imageUrl }).from(artworks).where(eq(artworks.sellerId, seller.id));
+    await deleteArtworkImages(uploaded.map((a) => a.url));
     await getDb().delete(artworks).where(eq(artworks.sellerId, seller.id));
     await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, seller.id));
     await getDb().delete(categories).where(eq(categories.id, category.id));
