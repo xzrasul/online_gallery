@@ -1,6 +1,7 @@
 import { gte, inArray } from 'drizzle-orm';
 import { getDb } from '../../../src/db';
 import { artworks, sellerApplications, users } from '../../../src/db/schema';
+import { deleteArtworkImages } from '../../../src/lib/uploads/upload-image';
 import { TEST_TELEGRAM_ID_MIN } from '../../helpers/test-telegram-id';
 
 // Removes every user created by tests (fake Telegram ids >= TEST_TELEGRAM_ID_MIN)
@@ -13,6 +14,8 @@ export async function deleteTestUsers(): Promise<void> {
 
   await db.update(sellerApplications).set({ reviewedByAdminId: null }).where(inArray(sellerApplications.reviewedByAdminId, ids));
   await db.update(artworks).set({ reviewedByAdminId: null }).where(inArray(artworks.reviewedByAdminId, ids));
+  const images = await db.select({ url: artworks.imageUrl }).from(artworks).where(inArray(artworks.sellerId, ids));
+  await deleteArtworkImages(images.map((i) => i.url));
   await db.delete(artworks).where(inArray(artworks.sellerId, ids));
   await db.delete(sellerApplications).where(inArray(sellerApplications.userId, ids));
   await db.delete(users).where(inArray(users.id, ids));

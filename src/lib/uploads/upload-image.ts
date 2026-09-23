@@ -15,6 +15,15 @@ function objectPath(fileName: string): string {
   return ext ? `${crypto.randomUUID()}.${ext}` : crypto.randomUUID();
 }
 
+// Deletes images this bucket served; URLs from anywhere else are ignored.
+export async function deleteArtworkImages(publicUrls: string[]): Promise<void> {
+  const marker = `/storage/v1/object/public/${ARTWORK_IMAGES_BUCKET}/`;
+  const paths = publicUrls.filter((url) => url.includes(marker)).map((url) => url.split(marker)[1]);
+  if (paths.length === 0) return;
+  const { error } = await getStorageClient().storage.from(ARTWORK_IMAGES_BUCKET).remove(paths);
+  if (error) throw new Error(`Image delete failed: ${error.message}`);
+}
+
 export async function uploadArtworkImage(file: File): Promise<string> {
   const storage = getStorageClient().storage.from(ARTWORK_IMAGES_BUCKET);
   const path = objectPath(file.name);
