@@ -1,9 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Loader2, Send } from 'lucide-react';
-import { Button, buttonVariants } from '@/src/components/ui/button';
-import { cn } from '@/src/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 type State =
   | { step: 'idle' }
@@ -66,21 +64,15 @@ export function BotLogin({ botUsername }: { botUsername: string }) {
   if (state.step === 'waiting') {
     return (
       <div className="grid gap-4">
-        <a
-          href={state.botUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(buttonVariants({ size: 'lg' }), 'w-full bg-[#229ED9] text-white hover:bg-[#1c8cc2]')}
-        >
-          <Send aria-hidden="true" />
+        <a href={state.botUrl} target="_blank" rel="noopener noreferrer" className="btn wide">
           Открыть @{botUsername}
         </a>
-        <ol className="grid gap-1 text-left text-sm text-muted-foreground">
+        <ol className="steps">
           <li>1. В Telegram нажмите «Запустить» (Start).</li>
           <li>2. Нажмите «✅ Подтвердить вход».</li>
           <li>3. Вернитесь сюда — вход выполнится автоматически.</li>
         </ol>
-        <p role="status" className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <p role="status" className="flex items-center justify-center gap-2 text-sm text-ink-2">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           Ждём подтверждения в Telegram…
         </p>
@@ -89,30 +81,21 @@ export function BotLogin({ botUsername }: { botUsername: string }) {
   }
 
   return (
-    <div className="grid gap-3">
+    <div>
       {state.step === 'expired' && (
-        <p role="alert" className="rounded-sm bg-muted px-3 py-2 text-sm text-muted-foreground">
+        <p role="alert" className="notice">
           Время на подтверждение истекло. Попробуйте ещё раз.
         </p>
       )}
       {state.step === 'error' && (
-        <p
-          role="alert"
-          className="rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-        >
+        <p role="alert" className="notice err">
           Не удалось начать вход. Попробуйте ещё раз.
         </p>
       )}
-      <Button
-        type="button"
-        size="lg"
-        onClick={start}
-        disabled={state.step === 'starting'}
-        className="w-full bg-[#229ED9] text-white hover:bg-[#1c8cc2]"
-      >
-        {state.step === 'starting' ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Send aria-hidden="true" />}
+      <button type="button" onClick={start} disabled={state.step === 'starting'} className="btn wide">
+        {state.step === 'starting' && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
         Войти через Telegram
-      </Button>
+      </button>
     </div>
   );
 }

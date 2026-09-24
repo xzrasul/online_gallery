@@ -1,15 +1,22 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import '../src/styles/sanat-shell.css';
+@import '../src/styles/sanat-pages.css';
+@import '../src/styles/sanat-motion.css';
 
-/* Light theme only: generated shadcn classes use `dark:`; Tailwind's default
-   would map it to prefers-color-scheme, so bind it to a class we never set. */
+/* One dark theme only: bind shadcn's `dark:` variant to a class we never set. */
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-body);
+  /* Kelly Slab has a single 400 face: no synthetic bold anywhere. */
+  --font-weight-medium: 400;
+  --font-weight-semibold: 400;
+  --font-weight-bold: 400;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  --color-card: var(--card-bg);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
@@ -26,55 +33,113 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-brand: var(--brand);
+  --color-gold: var(--gold);
+  --color-gold-2: var(--gold-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-night: var(--night);
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
 }
 
 :root {
-  color-scheme: light;
-  --radius: 0.5rem;
-  --background: #f6f2ec;
-  --foreground: #2b2622;
-  --card: #fffdf9;
-  --card-foreground: #2b2622;
-  --popover: #fffdf9;
-  --popover-foreground: #2b2622;
-  --primary: #2b2622;
-  --primary-foreground: #f6f2ec;
-  --secondary: #ece4d8;
-  --secondary-foreground: #2b2622;
-  --muted: #ece4d8;
-  --muted-foreground: #6f655a;
-  --accent: #ece4d8;
-  --accent-foreground: #2b2622;
-  --destructive: #b3261e;
-  --border: #d9cdbd;
-  --input: #d9cdbd;
-  --ring: #b4562f;
-  --brand: #b4562f;
+  color-scheme: dark;
+  /* sanatplace palette */
+  --night: #08141f;
+  --night-2: #0d1f30;
+  --card: #0f2436;
+  --ink: #f4efe0;
+  --ink-2: #b9c6c4;
+  --gold: #e3b02b;
+  --gold-2: #f0c64f;
+  --rose: #e45a86;
+  --crim: #b7264b;
+  --teal: #2e7e80;
+  --line: rgba(227, 176, 43, 0.38);
+  --panel: rgba(7, 17, 28, 0.8);
+  --font-body: var(--font-kelly), var(--font-roboto-slab), Georgia, serif;
+
+  /* shadcn tokens, mapped onto the palette (cabinets, admin, dialogs) */
+  --radius: 10px;
+  --background: var(--night);
+  --foreground: var(--ink);
+  --card-bg: var(--card);
+  --card-foreground: var(--ink);
+  --popover: var(--night-2);
+  --popover-foreground: var(--ink);
+  --primary: var(--gold);
+  --primary-foreground: #1a1405;
+  --secondary: #173542;
+  --secondary-foreground: var(--ink);
+  --muted: #10283a;
+  --muted-foreground: var(--ink-2);
+  --accent: rgba(227, 176, 43, 0.15);
+  --accent-foreground: var(--ink);
+  --destructive: #f07a8f;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--gold-2);
+  --brand: var(--gold-2);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   /* html only: overflow-x on both html and body turns body into a scroll
-     container and breaks the sticky header. */
+     container. */
   html {
     max-width: 100vw;
     overflow-x: hidden;
   }
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font: 400 17px/1.6 var(--font-body);
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  b,
+  strong,
+  th {
+    font-weight: 400;
   }
   h1 {
-    @apply text-3xl font-semibold tracking-tight;
+    font-size: clamp(2.1rem, 4.8vw, 3.3rem);
+    line-height: 1.15;
   }
   h2 {
-    @apply text-xl font-semibold tracking-tight;
+    font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+    line-height: 1.2;
   }
   h3 {
-    @apply text-base font-semibold;
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+  a {
+    color: inherit;
+  }
+  :focus-visible {
+    outline: 3px solid var(--gold-2);
+    outline-offset: 3px;
+  }
+  select,
+  input,
+  textarea {
+    font-family: var(--font-body);
+    font-weight: 400;
+  }
+  select option {
+    background: var(--night-2);
+    color: var(--ink);
+  }
+  [hidden] {
+    display: none !important;
   }
 }
