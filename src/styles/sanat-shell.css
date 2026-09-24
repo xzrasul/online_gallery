@@ -102,6 +102,94 @@
     color: var(--ink-2);
   }
 
+  /* phones and tablets: the links move into a burger menu */
+  .mobile-nav {
+    display: none;
+  }
+  @media (max-width: 800px) {
+    .links.desk {
+      display: none;
+    }
+    .mobile-nav {
+      display: block;
+    }
+  }
+  .burger {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 5px;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(8, 20, 31, 0.4);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+  .burger:hover,
+  .burger.open {
+    border-color: var(--gold);
+  }
+  .burger span {
+    display: block;
+    width: 20px;
+    height: 1.5px;
+    background: currentColor;
+    transition:
+      transform 0.3s,
+      opacity 0.3s;
+  }
+  .burger.open span:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .burger.open span:nth-child(2) {
+    opacity: 0;
+  }
+  .burger.open span:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+  .mobile-menu {
+    position: absolute;
+    top: calc(100% - 8px);
+    left: 20px;
+    right: 20px;
+    z-index: 50;
+    display: grid;
+    padding: 6px 16px 16px;
+    background: rgba(7, 17, 28, 0.97);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.8);
+  }
+  .mobile-menu .link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 4px;
+    border: 0;
+    border-bottom: 1px dashed var(--line);
+    background: none;
+    color: var(--ink);
+    font: 400 1.15rem/1.2 var(--font-body);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .mobile-menu .link[aria-current='page'] {
+    color: var(--gold-2);
+  }
+  .mobile-menu .link.quiet {
+    color: var(--ink-2);
+    border-bottom: 0;
+  }
+  .mobile-menu .btn {
+    width: 100%;
+    margin-top: 14px;
+  }
+
   /* ---------- buttons ---------- */
   .btn {
     display: inline-flex;

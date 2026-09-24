@@ -12,13 +12,27 @@ test('guests see the shell with catalog and auth links', async ({ page }) => {
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 800 } });
 
-  test('the header links stay visible and lead to the catalog', async ({ page }) => {
+  test('the header links live in a burger menu', async ({ page }) => {
     await page.goto('/');
     const header = page.getByRole('banner');
-    await expect(header.getByRole('link', { name: 'Войти через Telegram' })).toHaveAttribute('href', '/sign-in');
-    await header.getByRole('link', { name: 'Каталог' }).click();
+    await expect(header.getByRole('link', { name: 'Каталог' })).toBeHidden();
+
+    const burger = header.getByRole('button', { name: 'Меню' });
+    await expect(burger).toHaveAttribute('aria-expanded', 'false');
+    await burger.click();
+    const menu = header.getByRole('navigation', { name: 'Меню' });
+    await expect(menu.getByRole('link', { name: 'Войти через Telegram' })).toHaveAttribute('href', '/sign-in');
+
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    await expect(burger).toBeFocused();
+
+    await burger.click();
+    await menu.getByRole('link', { name: 'Каталог' }).click();
     await expect(page).toHaveURL(/\/gallery$/);
-    await expect(header.getByRole('link', { name: 'Каталог' })).toHaveAttribute('aria-current', 'page');
+    await expect(menu).toBeHidden();
+    await header.getByRole('button', { name: 'Меню' }).click();
+    await expect(menu.getByRole('link', { name: 'Каталог' })).toHaveAttribute('aria-current', 'page');
   });
 
   test('the page has no horizontal scroll', async ({ page }) => {
