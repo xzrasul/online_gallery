@@ -165,10 +165,19 @@
     border-block: 2px solid var(--gold);
     background: #0a1b2c;
   }
+  /* the pattern layer starts two tiles to the left and slides right by one */
   .dband svg {
+    position: absolute;
+    left: -96px;
+    top: 0;
     display: block;
-    width: 100%;
+    width: calc(100% + 96px);
     height: 100%;
+    will-change: transform;
+  }
+  .dband.s svg {
+    left: -64px;
+    width: calc(100% + 64px);
   }
   .dband.s {
     height: 34px;
@@ -221,17 +230,38 @@
   }
 
   /* ---------- mandala ---------- */
+  /* the mandala is a stack of ring-sized <svg> layers (see mandala.tsx) */
   .mandala {
-    display: block;
+    position: relative;
     width: 100%;
     height: 100%;
+  }
+  .mandala .bl {
+    position: absolute;
+    inset: 0;
+  }
+  .mandala .ml {
+    position: absolute;
+    left: calc((1 - var(--s)) * 50%);
+    top: calc((1 - var(--s)) * 50%);
+    width: calc(var(--s) * 100%);
+    height: calc(var(--s) * 100%);
     overflow: visible;
-    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+  }
+  /* a static shadow instead of drop-shadow(), which re-rasterised the turning rings every frame */
+  .mandala .mshadow {
+    position: absolute;
+    inset: 0.5%;
+    border-radius: 50%;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
   }
   .sa,
-  .sb {
-    transform-box: fill-box;
-    transform-origin: center;
+  .sb,
+  .sc,
+  .sd,
+  .pulse {
+    transform-origin: 50% 50%;
+    will-change: transform;
   }
 
   /* ---------- cards ---------- */

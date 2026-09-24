@@ -143,7 +143,7 @@ function strokes(W: number, PH: number, { x: cx, y: cy, r: R0 }: Centre): Stroke
 }
 
 // A leaf: two quadratic curves, a light crest (alpha .55) and a dark shadow edge (alpha .4).
-function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke) {
+function drawStroke(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, s: Stroke) {
   ctx.beginPath();
   ctx.moveTo(s.x0, s.y0);
   ctx.quadraticCurveTo(s.tx, s.ty, s.x1, s.y1);
@@ -171,26 +171,40 @@ function drawStroke(ctx: CanvasRenderingContext2D, s: Stroke) {
 // closing never force a repaint.
 export const OVERSCAN = 600;
 
-export type PaintOptions = {
-  canvas: HTMLCanvasElement;
+type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
+type Ctx2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+
+export type RenderOptions = {
   width: number;
   height: number;
   centre: Centre;
   animate: boolean;
   small: boolean;
+  dpr: number;
 };
 
-// Paints the vortex; with `animate`, strokes appear from the centre outwards
-// (1.8s, 1.3s on phones) while the canvas settles in. Returns a cancel function.
-export function paintSwirl({ canvas, width: W, height: H, centre, animate, small }: PaintOptions): () => void {
-  const ctx = canvas.getContext('2d');
+// Device pixel ratio for a W×PH canvas: never above 2, and the whole canvas
+// stays under ~6 megapixels however tall the page is.
+export function swirlDpr(W: number, H: number, deviceDpr: number) {
+  return Math.max(Math.min(deviceDpr || 1, 2, Math.sqrt(6e6 / (W * (H + OVERSCAN)))), 0.75);
+}
+
+// Frame scheduling that works on the main thread and in a worker (where
+// requestAnimationFrame may be missing).
+const raf = (cb: (t: number) => void): number =>
+  typeof requestAnimationFrame === 'function'
+    ? requestAnimationFrame(cb)
+    : (setTimeout(() => cb(performance.now()), 16) as unknown as number);
+const caf = (id: number) => (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame(id) : clearTimeout(id));
+
+// Paints the vortex into a DOM or offscreen canvas; with `animate`, strokes
+// appear from the centre outwards (1.8s, 1.3s on phones). Returns a cancel function.
+export function renderSwirl(canvas: AnyCanvas, { width: W, height: H, centre, animate, small, dpr }: RenderOptions) {
+  const ctx = canvas.getContext('2d') as Ctx2D | null;
   if (!ctx) return () => {};
   const PH = H + OVERSCAN;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(6e6 / (W * PH)));
-  dpr = Math.max(dpr, 0.75);
   canvas.width = Math.round(W * dpr);
   canvas.height = Math.round(PH * dpr);
-  canvas.style.height = PH + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.lineCap = 'round';
   ctx.fillStyle = '#08141F';
@@ -204,15 +218,6 @@ export function paintSwirl({ canvas, width: W, height: H, centre, animate, small
     many(0, S.length);
     return () => {};
   }
-
-  canvas.style.transformOrigin = `${centre.x}px ${centre.y}px`;
-  const settle = canvas.animate?.(
-    [
-      { transform: 'scale(1.07)', opacity: 0.35 },
-      { transform: 'scale(1)', opacity: 1 },
-    ],
-    { duration: 2000, easing: 'cubic-bezier(.2,.8,.2,1)' },
-  );
   const t0 = performance.now(),
     D = small ? 1300 : 1800;
   let done = 0,
@@ -224,12 +229,60 @@ export function paintSwirl({ canvas, width: W, height: H, centre, animate, small
       many(done, to);
       done = to;
     }
-    if (p < 1) job = requestAnimationFrame(step);
+    if (p < 1) job = raf(step);
     else if (done < S.length) many(done, S.length);
   };
   step(t0);
-  return () => {
-    cancelAnimationFrame(job);
-    settle?.cancel();
+  return () => caf(job);
+}
+
+export type PaintRequest = Omit<RenderOptions, 'dpr'>;
+
+// The on-page painter. Where the browser allows it, the canvas is handed to a
+// worker, so generating and drawing ~42k strokes never blocks scrolling, input
+// or navigation; otherwise it paints on the main thread.
+export function createSwirlPainter(canvas: HTMLCanvasElement, makeWorker: () => Worker) {
+  let worker: Worker | null = null;
+  if (typeof canvas.transferControlToOffscreen === 'function' && typeof Worker !== 'undefined') {
+    try {
+      worker = makeWorker();
+      const offscreen = canvas.transferControlToOffscreen();
+      worker.postMessage({ type: 'init', canvas: offscreen }, [offscreen]);
+    } catch {
+      worker?.terminate();
+      worker = null;
+    }
+  }
+  let cancel = () => {};
+  let settle: Animation | undefined;
+
+  return {
+    paint(req: PaintRequest) {
+      const dpr = swirlDpr(req.width, req.height, window.devicePixelRatio);
+      canvas.style.height = req.height + OVERSCAN + 'px';
+      settle?.cancel();
+      settle = undefined;
+      if (req.animate) {
+        // the canvas settles in (scale 1.07 → 1, opacity .35 → 1) while strokes appear
+        canvas.style.transformOrigin = `${req.centre.x}px ${req.centre.y}px`;
+        settle = canvas.animate?.(
+          [
+            { transform: 'scale(1.07)', opacity: 0.35 },
+            { transform: 'scale(1)', opacity: 1 },
+          ],
+          { duration: 2000, easing: 'cubic-bezier(.2,.8,.2,1)' },
+        );
+      }
+      if (worker) worker.postMessage({ type: 'paint', options: { ...req, dpr } });
+      else {
+        cancel();
+        cancel = renderSwirl(canvas, { ...req, dpr });
+      }
+    },
+    dispose() {
+      cancel();
+      settle?.cancel();
+      worker?.terminate();
+    },
   };
 }

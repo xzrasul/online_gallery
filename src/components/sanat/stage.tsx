@@ -4,7 +4,34 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { createMotes } from '@/src/lib/sanat/motes';
 import { arm, prefersReducedMotion, REVEAL_SELECTOR } from '@/src/lib/sanat/reveal';
-import { paintSwirl, type Centre } from '@/src/lib/sanat/swirl';
+import { createSwirlPainter, type Centre } from '@/src/lib/sanat/swirl';
+
+// transferControlToOffscreen works once per canvas; React's dev-mode double
+// effect must reuse the painter and the lights instead of creating them twice.
+const painters = new WeakMap<HTMLCanvasElement, ReturnType<typeof createSwirlPainter>>();
+function painterFor(canvas: HTMLCanvasElement) {
+  let painter = painters.get(canvas);
+  if (!painter) {
+    painter = createSwirlPainter(
+      canvas,
+      () => new Worker(new URL('../../lib/sanat/swirl.worker.ts', import.meta.url), { type: 'module' }),
+    );
+    painters.set(canvas, painter);
+  }
+  return painter;
+}
+const lights = new WeakMap<HTMLCanvasElement, ReturnType<typeof createMotes>>();
+function motesFor(canvas: HTMLCanvasElement) {
+  let motes = lights.get(canvas);
+  if (!motes) {
+    motes = createMotes(
+      canvas,
+      () => new Worker(new URL('../../lib/sanat/motes.worker.ts', import.meta.url), { type: 'module' }),
+    );
+    lights.set(canvas, motes);
+  }
+  return motes;
+}
 
 export type PageName = 'home' | 'catalog' | 'artwork' | 'signin' | 'other';
 
@@ -54,9 +81,9 @@ export function Stage({ children }: { children: ReactNode }) {
       mc = motesRef.current!;
     const RM = prefersReducedMotion();
     const FINE = !!window.matchMedia?.('(hover:hover) and (pointer:fine)').matches;
-    const motes = RM ? null : createMotes(mc);
+    const motes = RM ? null : motesFor(mc);
+    const painter = painterFor(cv);
     let last: Last | null = null,
-      cancel = () => {},
       timer = 0;
 
     const paint = (force: boolean, animate: boolean) => {
@@ -79,8 +106,7 @@ export function Stage({ children }: { children: ReactNode }) {
       )
         return;
       last = { page: pageName, W, H, PH: H + 600, cx: c.x, cy: c.y };
-      cancel();
-      cancel = paintSwirl({ canvas: cv, width: W, height: H, centre: c, animate: animate && !RM, small: window.innerWidth < 700 });
+      painter.paint({ width: W, height: H, centre: c, animate: animate && !RM, small: window.innerWidth < 700 });
     };
     const schedule = () => {
       window.clearTimeout(timer);
@@ -91,7 +117,15 @@ export function Stage({ children }: { children: ReactNode }) {
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
     if (ro) ro.observe(stage);
     else window.addEventListener('resize', schedule);
-    motes?.start();
+    // Lights only run while their canvas is on screen and the tab is visible.
+    const motesIo =
+      motes && 'IntersectionObserver' in window
+        ? new IntersectionObserver(([e]) => motes.setOnScreen(e.isIntersecting))
+        : null;
+    if (motesIo) motesIo.observe(mc);
+    else motes?.setOnScreen(true);
+    const onVisibility = () => motes?.sync();
+    document.addEventListener('visibilitychange', onVisibility);
 
     // First paint waits for the fonts (at most 900ms) so the centre is where it will stay.
     let alive = true;
@@ -105,43 +139,52 @@ export function Stage({ children }: { children: ReactNode }) {
       document.fonts.ready.then(() => alive && schedule());
     } else boot();
 
-    // Pointer: card tilt + glare, mandala parallax, warm light.
+    // Pointer: card tilt + glare, mandala parallax, warm light. Batched into one
+    // frame, and the custom properties go on the elements that use them (never
+    // the stage: an inherited property there restyles the whole page).
+    const spot = stage.querySelector<HTMLElement>(':scope > .spot');
     let pr = 0,
       pxv = 0,
       pyv = 0,
+      target: Element | null = null,
       tilt: HTMLElement | null = null;
     const untilt = (c: HTMLElement | null) => {
       c?.style.removeProperty('--rx');
       c?.style.removeProperty('--ry');
     };
-    const onMove = (e: PointerEvent) => {
-      pxv = e.clientX;
-      pyv = e.clientY;
-      const c = (e.target as Element | null)?.closest?.<HTMLElement>('.card') ?? null;
+    const onFrame = () => {
+      pr = 0;
+      const c = target?.closest?.<HTMLElement>('.card') ?? null;
       if (c !== tilt) {
         untilt(tilt);
         tilt = c;
       }
       if (c) {
         const r = c.getBoundingClientRect(),
-          px = (e.clientX - r.left) / r.width,
-          py = (e.clientY - r.top) / r.height;
+          px = (pxv - r.left) / r.width,
+          py = (pyv - r.top) / r.height;
         c.style.setProperty('--ry', ((px - 0.5) * 11).toFixed(2) + 'deg');
         c.style.setProperty('--rx', ((0.5 - py) * 9).toFixed(2) + 'deg');
         c.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
         c.style.setProperty('--gy', (py * 100).toFixed(1) + '%');
       }
-      if (pr) return;
-      pr = requestAnimationFrame(() => {
-        pr = 0;
-        const w = window.innerWidth,
-          h = window.innerHeight;
-        stage.style.setProperty('--mx', ((pxv / w - 0.5) * 2).toFixed(3));
-        stage.style.setProperty('--my', ((pyv / h - 0.5) * 2).toFixed(3));
-        stage.style.setProperty('--px', pxv + 'px');
-        stage.style.setProperty('--py', pyv + 'px');
-        stage.classList.add('moved');
+      const mx = ((pxv / window.innerWidth - 0.5) * 2).toFixed(3),
+        my = ((pyv / window.innerHeight - 0.5) * 2).toFixed(3);
+      stage.querySelectorAll<HTMLElement>('.mandala').forEach((m) => {
+        m.style.setProperty('--mx', mx);
+        m.style.setProperty('--my', my);
       });
+      if (spot) {
+        spot.style.setProperty('--px', pxv + 'px');
+        spot.style.setProperty('--py', pyv + 'px');
+      }
+      stage.classList.add('moved');
+    };
+    const onMove = (e: PointerEvent) => {
+      pxv = e.clientX;
+      pyv = e.clientY;
+      target = e.target as Element | null;
+      if (!pr) pr = requestAnimationFrame(onFrame);
     };
     const onLeave = () => {
       untilt(tilt);
@@ -168,10 +211,11 @@ export function Stage({ children }: { children: ReactNode }) {
 
     return () => {
       alive = false;
-      cancel();
       window.clearTimeout(timer);
       ro?.disconnect();
       window.removeEventListener('resize', schedule);
+      motesIo?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       motes?.stop();
       cancelAnimationFrame(pr);
       window.removeEventListener('pointermove', onMove);
