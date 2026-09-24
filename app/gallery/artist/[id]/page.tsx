@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import type { Metadata } from 'next';
+import { pagePreview, snippet } from '@/src/lib/seo';
 import { getDb } from '@/src/db';
 import { getArtistPublicProfile } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
@@ -16,11 +18,18 @@ const WORKS: [string, string, string] = ['работа', 'работы', 'раб
 // One query per request, shared by the page and its metadata.
 const loadProfile = cache((id: string) => getArtistPublicProfile(getDb(), id));
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+// Link preview: the artist's name, bio, and their newest work on sale (or sold).
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const profile = await loadProfile((await params).id);
   if (!profile) return {};
-  const description = profile.bio.length > 160 ? `${profile.bio.slice(0, 157)}…` : profile.bio;
-  return { title: `${profile.displayName} — художник`, description };
+  const title = `${profile.displayName} — художник`;
+  const description = snippet(profile.bio);
+  const cover = profile.artworks.find((a) => a.status === 'published') ?? profile.artworks[0];
+  return {
+    title,
+    description,
+    ...pagePreview({ title, description, image: cover && { url: cover.imageUrl, alt: cover.title } }),
+  };
 }
 
 export default async function ArtistPublicPage({ params }: { params: Promise<{ id: string }> }) {
