@@ -11,31 +11,50 @@ const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 // One ring group; `d` is its bloom order from the centre outwards.
 function Ring({ d, children }: { d: number; children: ReactNode }) {
   return (
-    <g className="bl" style={{ '--bd': d } as CSSProperties}>
+    <div className="bl" style={{ '--bd': d } as CSSProperties}>
       {children}
-    </g>
+    </div>
   );
 }
 
-// Suzani mandala (viewBox -200 -200 400 400). Rings are grouped so they can
-// bloom from the centre out; inner groups turn slowly in opposite directions.
+// One layer of the mandala: its own <svg>, just big enough for a ring of radius
+// `r` (in the 400-unit mandala space) and centred. Turning a whole <svg> element
+// is a GPU transform; turning groups inside one repaints every path each frame.
+function Layer({ r, spin, children }: { r: number; spin?: string; children: ReactNode }) {
+  return (
+    <svg
+      className={spin ? `ml ${spin}` : 'ml'}
+      viewBox={`${-r} ${-r} ${2 * r} ${2 * r}`}
+      style={{ '--s': r / 200 } as CSSProperties}
+      aria-hidden="true"
+      focusable="false"
+    >
+      {children}
+    </svg>
+  );
+}
+
+// Suzani mandala. Rings bloom from the centre out and turn slowly in opposite
+// directions. The discs and gold rules are circles, so they turn with their
+// ring without any visible change.
 export function SuzaniMandala() {
   return (
-    <svg className="mandala" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false">
+    <div className="mandala" aria-hidden="true">
       <Ring d={5}>
-        <circle r="198" fill="#0A1B2C" />
-        <circle r="190" fill="#0F2A3A" />
-        <circle r="191" fill="none" stroke={GOLD} strokeWidth="1.6" />
-        <g className="sa">
+        <div className="mshadow" />
+        <Layer r={200} spin="sa">
+          <circle r="198" fill="#0A1B2C" />
+          <circle r="190" fill="#0F2A3A" />
+          <circle r="191" fill="none" stroke={GOLD} strokeWidth="1.6" />
           {range(34).map((i) => (
             <use key={i} href="#curl" x="-16" y="-188" width="32" height="32" transform={`rotate(${(i * 360) / 34})`} />
           ))}
-        </g>
+        </Layer>
       </Ring>
       <Ring d={4}>
-        <circle r="153" fill="none" stroke={GOLD} strokeWidth="1.4" />
-        <circle r="150" fill="#173542" />
-        <g className="sb">
+        <Layer r={155} spin="sb">
+          <circle r="153" fill="none" stroke={GOLD} strokeWidth="1.4" />
+          <circle r="150" fill="#173542" />
           {range(30).map((i) => {
             const t = `rotate(${i * 12}) translate(0,-131) rotate(-16)`;
             return (
@@ -45,11 +64,11 @@ export function SuzaniMandala() {
               </g>
             );
           })}
-        </g>
+        </Layer>
       </Ring>
       <Ring d={3}>
-        <circle r="112" fill="#5E1230" />
-        <g className="sc">
+        <Layer r={113} spin="sc">
+          <circle r="112" fill="#5E1230" />
           {range(22).map((i) => (
             <g key={i}>
               <path
@@ -62,11 +81,11 @@ export function SuzaniMandala() {
               <circle cx="0" cy="-106" r="1.9" fill="#F4EFE0" transform={`rotate(${(i * 360) / 22 + 180 / 22})`} />
             </g>
           ))}
-        </g>
+        </Layer>
       </Ring>
       <Ring d={2}>
-        <circle r="80" fill="#1D5A3A" />
-        <g className="sd">
+        <Layer r={81} spin="sd">
+          <circle r="80" fill="#1D5A3A" />
           {range(16).map((i) => (
             <path
               key={i}
@@ -80,19 +99,21 @@ export function SuzaniMandala() {
           {range(40).map((i) => (
             <circle key={i} cx="0" cy="-71" r="2" fill={GOLD} transform={`rotate(${i * 9})`} />
           ))}
-        </g>
+        </Layer>
       </Ring>
       <Ring d={1}>
-        <circle r="46" fill="#0F3A2C" />
-        <circle
-          r="41"
-          fill="none"
-          stroke={GOLD}
-          strokeWidth="2.6"
-          strokeDasharray="0.1 5.3"
-          strokeLinecap="round"
-        />
-        <g className="sa">
+        <Layer r={47}>
+          <circle r="46" fill="#0F3A2C" />
+          <circle
+            r="41"
+            fill="none"
+            stroke={GOLD}
+            strokeWidth="2.6"
+            strokeDasharray="0.1 5.3"
+            strokeLinecap="round"
+          />
+        </Layer>
+        <Layer r={33} spin="sa">
           {range(8).map((i) => (
             <path key={i} d={PETAL} fill="#E45A86" stroke="#F7A6C0" strokeWidth="1" transform={`rotate(${i * 45})`} />
           ))}
@@ -106,12 +127,14 @@ export function SuzaniMandala() {
               transform={`rotate(${i * 45 + 22.5}) scale(.62)`}
             />
           ))}
-        </g>
+        </Layer>
       </Ring>
       <Ring d={0}>
-        <circle r="6.5" fill={GOLD} stroke="#B7264B" strokeWidth="1.6" className="pulse" />
+        <Layer r={8} spin="pulse">
+          <circle r="6.5" fill={GOLD} stroke="#B7264B" strokeWidth="1.6" />
+        </Layer>
       </Ring>
-    </svg>
+    </div>
   );
 }
 

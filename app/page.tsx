@@ -35,9 +35,11 @@ export default async function HomePage() {
               {BRAND_TAGLINE}
             </p>
             <div className="actions in" style={delay(950)}>
-              <Link className="btn" href="/gallery">
-                В каталог
-              </Link>
+              <span className="halo">
+                <Link className="btn" href="/gallery">
+                  В каталог
+                </Link>
+              </span>
               <Link className="btn alt" href={signedIn ? '/choose-role' : '/sign-in'}>
                 Хочу продавать картины
               </Link>

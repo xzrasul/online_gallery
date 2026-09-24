@@ -10,13 +10,28 @@ export function prefersReducedMotion() {
   return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 }
 
-function cardDelay(el: Element) {
-  const grid = el.closest('.cards');
-  if (!grid) return 0;
-  const cards = Array.from(grid.querySelectorAll(CARD_SELECTOR));
-  const i = cards.indexOf(el);
-  const cols = Math.max(1, getComputedStyle(grid).gridTemplateColumns.split(' ').length);
-  return (i % cols) * 130 + Math.floor(i / cols) * 60;
+// Stagger for every card: 130ms along a row, 60ms per row. All reads happen
+// here, before any attribute is written, so the page's styles are computed once
+// (reading layout between writes would recompute them for every card).
+function cardDelays(elements: Element[]) {
+  const delays = new Map<Element, number>();
+  const grids = new Map<Element, { cards: Element[]; cols: number }>();
+  for (const el of elements) {
+    if (!el.matches(CARD_SELECTOR)) continue;
+    const grid = el.closest('.cards');
+    if (!grid) continue;
+    let g = grids.get(grid);
+    if (!g) {
+      g = {
+        cards: Array.from(grid.querySelectorAll(CARD_SELECTOR)),
+        cols: Math.max(1, getComputedStyle(grid).gridTemplateColumns.split(' ').length),
+      };
+      grids.set(grid, g);
+    }
+    const i = g.cards.indexOf(el);
+    delays.set(el, (i % g.cols) * 130 + Math.floor(i / g.cols) * 60);
+  }
+  return delays;
 }
 
 // Arms the given elements; `base` delays the first batch that comes into view.
@@ -45,8 +60,9 @@ export function arm(elements: Element[], base: number): () => void {
     }
     first = false;
   });
+  const delays = cardDelays(elements);
   for (const el of elements) {
-    el.setAttribute('data-rd', String(el.matches(CARD_SELECTOR) ? cardDelay(el) : 0));
+    el.setAttribute('data-rd', String(delays.get(el) ?? 0));
     el.setAttribute('data-reveal', '');
     io.observe(el);
   }

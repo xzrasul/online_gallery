@@ -64,9 +64,11 @@ export function BotLogin({ botUsername }: { botUsername: string }) {
   if (state.step === 'waiting') {
     return (
       <div className="grid gap-4">
-        <a href={state.botUrl} target="_blank" rel="noopener noreferrer" className="btn wide">
-          Открыть @{botUsername}
-        </a>
+        <span className="halo wide">
+          <a href={state.botUrl} target="_blank" rel="noopener noreferrer" className="btn wide">
+            Открыть @{botUsername}
+          </a>
+        </span>
         <ol className="steps">
           <li>1. В Telegram нажмите «Запустить» (Start).</li>
           <li>2. Нажмите «✅ Подтвердить вход».</li>
@@ -92,10 +94,12 @@ export function BotLogin({ botUsername }: { botUsername: string }) {
           Не удалось начать вход. Попробуйте ещё раз.
         </p>
       )}
-      <button type="button" onClick={start} disabled={state.step === 'starting'} className="btn wide">
-        {state.step === 'starting' && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-        Войти через Telegram
-      </button>
+      <span className="halo wide">
+        <button type="button" onClick={start} disabled={state.step === 'starting'} className="btn wide">
+          {state.step === 'starting' && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+          Войти через Telegram
+        </button>
+      </span>
     </div>
   );
 }
