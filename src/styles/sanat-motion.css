@@ -140,6 +140,16 @@
 .heart-wrap[data-pop] {
   animation: heartpop 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
 }
+@keyframes menuin {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @keyframes navin {
   from {
     opacity: 0;
@@ -216,18 +226,20 @@
   }
 
   /* header / nav */
+  /* the burger button, not its wrapper: a transformed wrapper would become the
+     containing block of the absolutely placed menu panel */
   .logo,
-  .links {
+  .links,
+  .burger {
     animation: navin 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both 0.1s;
   }
-  .links {
+  .links,
+  .burger {
     animation-delay: 0.25s;
   }
-  .logo svg {
-    transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .logo:hover svg {
-    transform: rotate(200deg) scale(1.14);
+  /* (the vortex logo mark itself stays still: no hover spin) */
+  .mobile-menu:not([hidden]) {
+    animation: menuin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .links .link {
     background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0% 1.5px no-repeat;
