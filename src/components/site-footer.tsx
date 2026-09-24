@@ -1,9 +1,11 @@
+import { KoshinBand } from '@/src/components/sanat/koshin-band';
 import { BRAND_NAME } from '@/src/lib/brand';
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-6 text-sm text-muted-foreground sm:px-6">
+    <footer className="site-footer">
+      <KoshinBand />
+      <div className="wrap">
         © {new Date().getFullYear()} {BRAND_NAME} — место для искусства
       </div>
     </footer>

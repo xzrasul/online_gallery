@@ -1,0 +1,477 @@
+/* sanatplace motion. Timings are the reference's (sanatplace-reference.html).
+   Only transform, opacity, clip-path and translate are animated. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes chIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) rotate(8deg) scale(0.84);
+    filter: blur(12px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes shimmer {
+  0%,
+  55% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-80deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.45);
+  }
+}
+@keyframes glow {
+  from {
+    opacity: 0.5;
+    transform: scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.07);
+  }
+}
+@keyframes march {
+  to {
+    transform: translateX(48px);
+  }
+}
+@keyframes marchs {
+  to {
+    transform: translateX(32px);
+  }
+}
+@keyframes glint {
+  0%,
+  60% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(227, 176, 43, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 20px rgba(227, 176, 43, 0);
+  }
+}
+@keyframes navin {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer components {
+  /* living background layers */
+  .stage > .beams {
+    position: absolute;
+    left: var(--cx, 75%);
+    top: var(--cy, 320px);
+    width: 2200px;
+    height: 2200px;
+    margin: -1100px 0 0 -1100px;
+    z-index: -1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    will-change: transform;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0 6deg,
+      rgba(255, 214, 120, 0.2) 26deg,
+      transparent 58deg 116deg,
+      rgba(110, 225, 205, 0.17) 146deg,
+      transparent 182deg 234deg,
+      rgba(240, 110, 150, 0.16) 272deg,
+      transparent 314deg 360deg
+    );
+    -webkit-mask-image: radial-gradient(circle closest-side, #000 0, #000 34%, transparent 100%);
+    mask-image: radial-gradient(circle closest-side, #000 0, #000 34%, transparent 100%);
+    animation: spin 80s linear infinite;
+  }
+  .stage > .motes {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .stage > .spot {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.8s;
+    background: radial-gradient(
+      560px circle at var(--px, 50%) var(--py, -40%),
+      rgba(240, 198, 79, 0.13),
+      rgba(90, 220, 200, 0.05) 46%,
+      transparent 70%
+    );
+  }
+  .stage.moved > .spot {
+    opacity: 1;
+  }
+
+  /* header / nav */
+  .logo,
+  .links {
+    animation: navin 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both 0.1s;
+  }
+  .links {
+    animation-delay: 0.25s;
+  }
+  .logo svg {
+    transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .logo:hover svg {
+    transform: rotate(200deg) scale(1.14);
+  }
+  .links .link {
+    background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0% 1.5px no-repeat;
+    transition: background-size 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .links .link:hover,
+  .links .link[aria-current='page'] {
+    background-size: 100% 1.5px;
+  }
+  .back {
+    transition:
+      transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+      background 0.3s,
+      border-color 0.3s;
+  }
+  .back:hover {
+    transform: translateX(-5px);
+  }
+
+  /* buttons: a glint runs across on hover, press shrinks */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.5) 50%, transparent 66%);
+    transform: translateX(-130%);
+  }
+  .btn:hover::after {
+    transition: transform 0.85s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transform: translateX(130%);
+  }
+  .btn:active {
+    transform: scale(0.965);
+  }
+  .actions .btn:not(.alt),
+  .login .btn.wide {
+    animation: ring 3s ease-out infinite 2.2s;
+  }
+
+  /* entrance for the hero */
+  .in {
+    animation: rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--d, 0) * 1ms + 320ms);
+  }
+  .eyebrow::before {
+    transform-origin: left center;
+    animation: draw 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both 0.35s;
+  }
+  .ch {
+    display: inline-block;
+    animation: chIn 1.05s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+    animation-delay: calc(var(--i) * 70ms + 380ms);
+  }
+  h1.brand em {
+    display: inline-block;
+    filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.55));
+  }
+  h1.brand em .ch {
+    text-shadow: none;
+  }
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    h1.brand em .ch {
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      background-image: linear-gradient(105deg, #f0c64f 0 34%, #fff6cf 50%, #f0c64f 66% 100%);
+      background-size: 300% 100%;
+      background-position: 100% 0;
+      animation:
+        chIn 1.05s cubic-bezier(0.2, 0.9, 0.25, 1) both,
+        shimmer 5.5s ease-in-out infinite;
+      animation-delay:
+        calc(var(--i) * 70ms + 380ms),
+        calc(2.6s + var(--i) * 0.14s);
+    }
+  }
+
+  /* mandala: blooms from the centre out, then keeps breathing */
+  .mandala {
+    translate: calc(var(--mx, 0) * 14px) calc(var(--my, 0) * 14px);
+    transition: translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .medal-lg .bl,
+  .medal-sm .bl,
+  .medal-md .bl {
+    animation: bloom 1.15s cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
+    animation-delay: calc(var(--bd) * 0.13s + 0.5s);
+  }
+  .sa {
+    animation: turn 120s linear infinite;
+  }
+  .sb {
+    animation: turn 95s linear infinite reverse;
+  }
+  .sc {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: turn 150s linear infinite reverse;
+  }
+  .sd {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: turn 110s linear infinite;
+  }
+  .pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulse 3.2s ease-in-out infinite;
+  }
+  .medal-lg,
+  .medal-sm,
+  .medal-md {
+    position: relative;
+    isolation: isolate;
+  }
+  .medal-lg::before,
+  .medal-sm::before,
+  .medal-md::before {
+    content: '';
+    position: absolute;
+    inset: -24%;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(228, 90, 134, 0.36) 0, rgba(227, 176, 43, 0.15) 40%, transparent 68%);
+    animation: glow 4.5s ease-in-out infinite alternate;
+  }
+
+  /* moving koshin bands */
+  .march {
+    animation: march 5.5s linear infinite;
+  }
+  .dband.s .march {
+    animation-name: marchs;
+  }
+  .site-footer .march {
+    animation-direction: reverse;
+  }
+  .dband {
+    position: relative;
+    overflow: hidden;
+  }
+  .dband::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 42%, rgba(255, 240, 190, 0.4) 50%, transparent 58%);
+    mix-blend-mode: overlay;
+    animation: glint 8s ease-in-out infinite;
+  }
+  .site-footer .dband::after {
+    animation-delay: 3.5s;
+  }
+
+  /* pictures: diagonal sheen + slow zoom on hover (no filters on real photos) */
+  .art::after {
+    content: '';
+    position: absolute;
+    inset: -10% -70%;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 43%, rgba(255, 255, 255, 0.2) 50%, transparent 57%);
+    transform: translateX(-75%);
+  }
+  .card:hover .art::after,
+  .frame:hover .art::after {
+    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transform: translateX(75%);
+  }
+  .art .tag {
+    z-index: 2;
+  }
+  .art img.pic {
+    transition: transform 1.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .card:hover .art img.pic {
+    transform: scale(1.11);
+  }
+  .frame:hover .art img.pic {
+    transform: scale(1.07);
+  }
+
+  /* scroll reveal (attributes are set by script only) */
+  [data-reveal] {
+    opacity: 0;
+    translate: 0 36px;
+    transition:
+      opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition-delay: var(--rd, 0ms);
+  }
+  [data-reveal='in'] {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .dband[data-reveal] {
+    opacity: 1;
+    translate: 0 0;
+    clip-path: inset(0 50%);
+    transition: clip-path 1.2s cubic-bezier(0.7, 0, 0.2, 1) var(--rd, 0ms);
+  }
+  .dband[data-reveal='in'] {
+    clip-path: inset(0 0);
+  }
+  .card[data-reveal] {
+    transition:
+      opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+      translate 1s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.25s,
+      border-color 0.4s,
+      box-shadow 0.4s;
+    transition-delay: var(--rd, 0ms), var(--rd, 0ms), 0s, 0s, 0s;
+  }
+  .card[data-reveal] .art img.pic {
+    clip-path: circle(0% at 68% 32%);
+    transition:
+      clip-path 1.6s cubic-bezier(0.3, 0.7, 0.2, 1) calc(var(--rd, 0ms) + 200ms),
+      transform 1.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .card[data-reveal='in'] .art img.pic {
+    clip-path: circle(150% at 68% 32%);
+  }
+
+  /* cards: tilt + glare (fine pointers only) */
+  @media (hover: hover) and (pointer: fine) {
+    .card {
+      position: relative;
+      transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition:
+        transform 0.28s ease-out,
+        border-color 0.4s,
+        box-shadow 0.4s;
+    }
+    a.card:hover {
+      transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-5px);
+      border-color: var(--gold);
+      box-shadow:
+        0 26px 50px -22px rgba(0, 0, 0, 0.85),
+        0 0 32px -6px rgba(227, 176, 43, 0.28);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      background: radial-gradient(360px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 236, 178, 0.2), transparent 62%);
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .card:hover::after {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .stage > .beams {
+      width: 1500px;
+      height: 1500px;
+      margin: -750px 0 0 -750px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .stage > .beams,
+  .stage > .motes,
+  .stage > .spot {
+    display: none !important;
+  }
+}

@@ -1,0 +1,351 @@
+/* sanatplace shell: one painted canvas under the whole site, a single dark world.
+   Ported from sanatplace-reference.html. */
+@layer components {
+  .wrap {
+    width: min(1200px, 100%);
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+
+  /* ---------- the canvas ---------- */
+  .stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: radial-gradient(circle at 70% 20%, #173b3a 0, #0c2431 40%, #08141f 80%);
+  }
+  .stage > main,
+  .stage > .page {
+    flex: 1 0 auto;
+  }
+  .stage > .swirl {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+  }
+  .stage > .dim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: rgba(6, 15, 25, 0.3);
+    transition: background 0.4s;
+  }
+  .stage[data-page='home'] > .dim {
+    background: rgba(6, 15, 25, 0.12);
+  }
+  .stage > .topfade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 170px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(rgba(6, 15, 25, 0.75), rgba(6, 15, 25, 0));
+  }
+
+  /* ---------- header ---------- */
+  .nav {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    flex-wrap: wrap;
+    padding-block: 22px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font: 400 2rem/1.2 var(--font-body);
+    letter-spacing: 0.01em;
+  }
+  .logo em {
+    font-style: normal;
+    color: var(--gold-2);
+  }
+  .logo svg {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 12px 24px;
+    flex-wrap: wrap;
+  }
+  .links .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding-block: 4px 5px;
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  .links .link.quiet {
+    color: var(--ink-2);
+  }
+
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    font: 400 0.98rem/1.2 var(--font-body);
+    background: var(--gold);
+    color: #1a1405;
+    border: 1.5px solid var(--gold);
+    transition:
+      background 0.3s,
+      border-color 0.3s,
+      transform 0.3s;
+  }
+  .btn:hover {
+    background: var(--gold-2);
+    border-color: var(--gold-2);
+    transform: translateY(-1px);
+  }
+  .btn:disabled {
+    cursor: progress;
+    opacity: 0.75;
+  }
+  .btn.alt {
+    background: rgba(8, 20, 31, 0.4);
+    color: var(--ink);
+    border-color: rgba(244, 239, 224, 0.55);
+  }
+  .btn.alt:hover {
+    background: rgba(244, 239, 224, 0.12);
+    border-color: var(--ink);
+  }
+  .btn.sm {
+    padding: 9px 20px;
+    font-size: 0.98rem;
+    background: rgba(8, 20, 31, 0.4);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn.sm:hover {
+    background: rgba(227, 176, 43, 0.15);
+    border-color: var(--gold);
+  }
+  .btn.wide {
+    width: 100%;
+  }
+  .btn[aria-disabled='true'] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* ---------- koshin bands ---------- */
+  .dband {
+    display: block;
+    height: 52px;
+    border-block: 2px solid var(--gold);
+    background: #0a1b2c;
+  }
+  .dband svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .dband.s {
+    height: 34px;
+  }
+
+  /* ---------- panels & type ---------- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: clamp(20px, 3vw, 34px);
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-block: clamp(28px, 4vw, 48px) clamp(56px, 7vw, 96px);
+  }
+  h1.t {
+    font: 400 clamp(2.1rem, 4.8vw, 3.3rem) / 1.15 var(--font-body);
+    letter-spacing: 0;
+    margin: 0;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+    overflow-wrap: anywhere;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font: 400 clamp(1.6rem, 3.6vw, 2.2rem) / 1.2 var(--font-body);
+    letter-spacing: 0;
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font: 400 0.92rem/1 var(--font-body);
+    color: var(--gold-2);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 36px;
+    height: 1.5px;
+    background: var(--gold);
+  }
+  .muted {
+    color: var(--ink-2);
+  }
+
+  /* ---------- mandala ---------- */
+  .mandala {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+  }
+  .sa,
+  .sb {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* ---------- cards ---------- */
+  .cards {
+    display: grid;
+    /* auto-fill (not auto-fit): one or two real works must not stretch to the full row */
+    grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    padding: 12px 12px 18px;
+    background: linear-gradient(180deg, var(--card), var(--night-2));
+    border: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 0.4s,
+      border-color 0.4s,
+      box-shadow 0.4s;
+  }
+  a.card:hover {
+    transform: translateY(-3px);
+    border-color: var(--gold);
+    box-shadow: 0 20px 44px -22px rgba(0, 0, 0, 0.8);
+  }
+  .art {
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    background: #0a1b2c;
+  }
+  .art img.pic {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+  }
+  .tag {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: rgba(8, 20, 31, 0.82);
+    color: var(--gold-2);
+    font: 400 0.7rem/1 var(--font-body);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+  }
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding-inline: 6px;
+  }
+  .meta > div {
+    min-width: 0;
+  }
+  .card h3 {
+    margin: 0;
+    font: 400 1.25rem/1.25 var(--font-body);
+    overflow-wrap: anywhere;
+  }
+  .by {
+    margin: 2px 0 0;
+    color: var(--ink-2);
+    font-size: 0.98rem;
+    overflow-wrap: anywhere;
+  }
+  .price {
+    color: var(--gold-2);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .sec-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+  .more {
+    text-decoration: none;
+    color: var(--gold-2);
+    border-bottom: 1.5px solid var(--gold);
+  }
+  .more:hover {
+    color: var(--ink);
+  }
+
+  /* ---------- footer ---------- */
+  .site-footer .wrap {
+    padding-block: 22px 40px;
+    text-align: center;
+    color: var(--ink-2);
+    font-size: 0.98rem;
+  }
+
+  @media (max-width: 700px) {
+    .panel,
+    .work .frame {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(7, 17, 28, 0.88);
+    }
+  }
+}

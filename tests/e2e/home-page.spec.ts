@@ -38,7 +38,7 @@ test('the home page greets visitors and shows the newest published artwork', asy
 
   try {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: 'SanatPlace' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'sanatplace' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'В каталог' })).toHaveAttribute('href', '/gallery');
     await expect(page.getByRole('link', { name: 'Хочу продавать картины' })).toHaveAttribute('href', '/sign-in');
     await expect(page.getByText(artworkTitle)).toBeVisible();

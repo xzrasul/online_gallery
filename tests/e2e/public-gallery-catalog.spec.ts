@@ -56,3 +56,20 @@ test('published artworks appear in the public catalog and respect category filte
     await getDb().delete(techniques).where(eq(techniques.id, technique.id));
   }
 });
+
+test('catalog filters stay folded until opened and fold again after applying', async ({ page }) => {
+  await page.goto('/gallery');
+  const toggle = page.getByRole('button', { name: /Фильтры/ });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByLabel('Цена до')).toBeHidden();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await page.getByLabel('Цена от').fill('1');
+  await page.getByLabel('Цена до').fill('999999');
+  await page.getByRole('button', { name: 'Применить фильтры' }).click();
+
+  await expect(page).toHaveURL(/minPrice=1&maxPrice=999999/);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toContainText('2');
+});

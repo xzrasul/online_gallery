@@ -1,16 +1,19 @@
-import Link from 'next/link';
 import { getDb } from '@/src/db';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { Pagination } from '@/src/components/artwork/pagination';
-import { Field } from '@/src/components/form/field';
-import { NativeSelect } from '@/src/components/form/native-select';
-import { Button, buttonVariants } from '@/src/components/ui/button';
-import { Input } from '@/src/components/ui/input';
+import { CatalogFilters } from '@/src/components/sanat/catalog-filters';
+import { KoshinBand } from '@/src/components/sanat/koshin-band';
+import { Medal } from '@/src/components/sanat/mandala';
 import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
+import { catalogHref } from '@/src/lib/catalog-href';
 import { listCategories } from '@/src/lib/catalog/categories';
 import { listTechniques } from '@/src/lib/catalog/techniques';
 
 const PAGE_SIZE = 24;
+
+export const metadata = {
+  title: 'Каталог картин',
+};
 
 export default async function GalleryPage({
   searchParams,
@@ -45,64 +48,37 @@ export default async function GalleryPage({
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  const hasFilters = Boolean(params.categoryId || params.techniqueId || params.minPrice || params.maxPrice);
+  const activeCount = [params.categoryId, params.techniqueId, params.minPrice, params.maxPrice].filter(Boolean).length;
+  // A new query remounts the filters (fresh field values, folded) and replays the cards' reveal.
+  const query = catalogHref(params, page);
 
   return (
     <main>
-      <h1>Каталог картин</h1>
-      <form
-        method="get"
-        className="mt-6 grid gap-4 rounded-sm border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_9rem_9rem_auto] lg:items-end"
-      >
-        <Field label="Категория">
-          <NativeSelect name="categoryId" defaultValue={params.categoryId ?? ''}>
-            <option value="">Все категории</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field label="Техника">
-          <NativeSelect name="techniqueId" defaultValue={params.techniqueId ?? ''}>
-            <option value="">Все техники</option>
-            {techniques.map((technique) => (
-              <option key={technique.id} value={technique.id}>
-                {technique.name}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field label="Цена от">
-          <Input type="number" name="minPrice" min="0" defaultValue={params.minPrice ?? ''} />
-        </Field>
-        <Field label="Цена до">
-          <Input type="number" name="maxPrice" min="0" defaultValue={params.maxPrice ?? ''} />
-        </Field>
-        <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
-          <Button type="submit">Применить фильтры</Button>
-          {hasFilters && (
-            <Link href="/gallery" className={buttonVariants({ variant: 'outline' })}>
-              Сбросить
-            </Link>
+      <KoshinBand />
+      <div className="wrap stack">
+        <div className="head-row">
+          <h1 className="t">Каталог картин</h1>
+          <Medal size="sm" />
+        </div>
+        <CatalogFilters
+          key={query}
+          categories={categories}
+          techniques={techniques}
+          values={params}
+          activeCount={activeCount}
+        />
+        <section className="panel" aria-labelledby="list-title">
+          <div className="sec-head">
+            <h2 id="list-title">Список картин</h2>
+          </div>
+          {items.length === 0 ? (
+            <p className="empty">Ничего не найдено.{activeCount > 0 && ' Попробуйте изменить или сбросить фильтры.'}</p>
+          ) : (
+            <ArtworkGrid key={query} artworks={items} revealBase={150} priorityCount={3} />
           )}
-        </div>
-      </form>
-
-      <h2 className="sr-only">Список картин</h2>
-      {items.length === 0 ? (
-        <p className="mt-12 text-center text-muted-foreground">
-          Ничего не найдено.{hasFilters && ' Попробуйте изменить или сбросить фильтры.'}
-        </p>
-      ) : (
-        <div className="mt-8">
-          <ArtworkGrid artworks={items} />
-        </div>
-      )}
-
-      <Pagination params={params} page={Math.min(page, totalPages)} totalPages={totalPages} />
+          <Pagination params={params} page={Math.min(page, totalPages)} totalPages={totalPages} />
+        </section>
+      </div>
     </main>
   );
 }

@@ -1,18 +1,22 @@
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { getDb } from '@/src/db';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
-import { buttonVariants } from '@/src/components/ui/button';
-import { BrandWordmark } from '@/src/components/brand-wordmark';
-import { BRAND_TAGLINE } from '@/src/lib/brand';
+import { BrandTitle } from '@/src/components/sanat/brand-title';
+import { KoshinBand } from '@/src/components/sanat/koshin-band';
+import { Medal } from '@/src/components/sanat/mandala';
+import { BRAND_NAME, BRAND_TAGLINE } from '@/src/lib/brand';
+
+const delay = (ms: number) => ({ '--d': ms }) as CSSProperties;
 
 export default async function HomePage() {
   let items: Awaited<ReturnType<typeof listPublishedArtworks>>['items'] = [];
   let loadFailed = false;
   const signedIn = Boolean(await getCurrentUser());
   try {
-    ({ items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 8 }));
+    ({ items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 6 }));
   } catch (error) {
     console.error('home: failed to load latest artworks', error);
     loadFailed = true;
@@ -20,42 +24,55 @@ export default async function HomePage() {
 
   return (
     <main>
-      <section className="max-w-2xl py-6 sm:py-14">
-        <h1 className="text-4xl sm:text-5xl">
-          <BrandWordmark />
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">{BRAND_TAGLINE}</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          «Санъат» по-таджикски — искусство. SanatPlace — место, где его находят.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/gallery" className={buttonVariants({ size: 'lg' })}>
-            В каталог
-          </Link>
-          <Link
-            href={signedIn ? '/choose-role' : '/sign-in'}
-            className={buttonVariants({ size: 'lg', variant: 'outline' })}
-          >
-            Хочу продавать картины
-          </Link>
+      <div className="hero">
+        <div className="wrap hero-in">
+          <div>
+            <p className="eyebrow in" style={delay(0)}>
+              Хуш омадед
+            </p>
+            <BrandTitle />
+            <p className="lead in" style={delay(800)}>
+              {BRAND_TAGLINE}
+            </p>
+            <div className="actions in" style={delay(950)}>
+              <Link className="btn" href="/gallery">
+                В каталог
+              </Link>
+              <Link className="btn alt" href={signedIn ? '/choose-role' : '/sign-in'}>
+                Хочу продавать картины
+              </Link>
+            </div>
+            <div className="note in" style={delay(1100)}>
+              <div className="word">
+                <span className="cyr">санъат</span>
+                <span className="fa" lang="fa" dir="rtl">
+                  صنعت
+                </span>
+              </div>
+              <p>«Санъат» по-таджикски — искусство. {BRAND_NAME} — место, где его находят.</p>
+            </div>
+          </div>
+          <Medal size="lg" />
         </div>
-      </section>
-
-      <section className="mt-6">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2>Свежие картины</h2>
-          <Link href="/gallery" className="text-sm text-muted-foreground hover:text-brand">
-            Смотреть все →
-          </Link>
-        </div>
-        {loadFailed ? (
-          <p className="text-muted-foreground">Не удалось загрузить свежие картины. Попробуйте позже.</p>
-        ) : items.length === 0 ? (
-          <p className="text-muted-foreground">Пока нет опубликованных картин.</p>
-        ) : (
-          <ArtworkGrid artworks={items} />
-        )}
-      </section>
+      </div>
+      <KoshinBand />
+      <div className="wrap stack">
+        <section className="panel" aria-labelledby="fresh-title">
+          <div className="sec-head">
+            <h2 id="fresh-title">Свежие картины</h2>
+            <Link className="more" href="/gallery">
+              Смотреть все →
+            </Link>
+          </div>
+          {loadFailed ? (
+            <p className="empty">Не удалось загрузить свежие картины. Попробуйте позже.</p>
+          ) : items.length === 0 ? (
+            <p className="empty">Пока нет опубликованных картин.</p>
+          ) : (
+            <ArtworkGrid artworks={items} />
+          )}
+        </section>
+      </div>
     </main>
   );
 }
