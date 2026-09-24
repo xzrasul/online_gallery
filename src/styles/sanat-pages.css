@@ -425,62 +425,26 @@
     margin-inline: 12px;
     color: var(--gold);
   }
-  .artist-info {
-    display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-    gap: 28px;
-    align-items: start;
-  }
   .panel-title {
     margin: 0 0 14px;
     font: 400 1.45rem/1.25 var(--font-body);
   }
-  .artist-info .bio {
+  .panel .bio {
     margin: 0;
     max-width: 62ch;
     white-space: pre-line;
     overflow-wrap: anywhere;
-  }
-  .how {
-    display: grid;
-    gap: 14px;
-    margin: 0 0 24px;
-    padding: 0;
-    list-style: none;
-  }
-  .how li {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-  .how-n {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    margin-top: 1px;
-    border: 1px solid var(--gold);
-    border-radius: 50%;
-    color: var(--gold-2);
-    font-size: 0.95rem;
-    line-height: 1;
   }
   .contact {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px 16px;
+    margin: 22px 0 0;
   }
   .handle {
     color: var(--ink-2);
     overflow-wrap: anywhere;
-  }
-  .contact-note {
-    margin: 0;
-    padding: 10px 14px;
-    border: 1px dashed var(--line);
-    color: var(--ink-2);
   }
   .count {
     color: var(--ink-2);
@@ -529,8 +493,7 @@
       width: min(52vw, 170px);
       align-self: center;
     }
-    .work,
-    .artist-info {
+    .work {
       grid-template-columns: minmax(0, 1fr);
     }
   }
