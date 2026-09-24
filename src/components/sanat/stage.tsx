@@ -33,12 +33,13 @@ function motesFor(canvas: HTMLCanvasElement) {
   return motes;
 }
 
-export type PageName = 'home' | 'catalog' | 'artwork' | 'signin' | 'other';
+export type PageName = 'home' | 'catalog' | 'artwork' | 'artist' | 'signin' | 'other';
 
 export function pageNameOf(pathname: string): PageName {
   if (pathname === '/') return 'home';
   if (pathname === '/gallery') return 'catalog';
   if (pathname.startsWith('/gallery/artwork/')) return 'artwork';
+  if (pathname.startsWith('/gallery/artist/')) return 'artist';
   if (pathname === '/sign-in') return 'signin';
   return 'other';
 }

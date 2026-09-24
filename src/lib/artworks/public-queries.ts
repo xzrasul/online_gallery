@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import type { Db } from '../../db';
 import { artworks, categories, techniques, sellerApplications } from '../../db/schema';
 
@@ -62,12 +62,15 @@ export async function getPublishedArtworkById(db: Db, id: string) {
   return row;
 }
 
+// An artist's public page: profile, when they joined (application approval),
+// and their published and sold works, newest first.
 export async function getArtistPublicProfile(db: Db, sellerId: string) {
   const [profile] = await db
     .select({
       displayName: sellerApplications.displayName,
       bio: sellerApplications.bio,
       telegramContact: sellerApplications.telegramContact,
+      joinedAt: sellerApplications.reviewedAt,
     })
     .from(sellerApplications)
     .where(eq(sellerApplications.userId, sellerId));
@@ -82,7 +85,8 @@ export async function getArtistPublicProfile(db: Db, sellerId: string) {
       status: artworks.status,
     })
     .from(artworks)
-    .where(and(eq(artworks.sellerId, sellerId), inArray(artworks.status, ['published', 'sold'])));
+    .where(and(eq(artworks.sellerId, sellerId), inArray(artworks.status, ['published', 'sold'])))
+    .orderBy(desc(artworks.submittedAt));
 
   return { ...profile, artworks: artworkRows };
 }
