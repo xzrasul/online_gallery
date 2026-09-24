@@ -122,6 +122,24 @@
     transform: scale(var(--hx, 1.1), var(--hy, 1.8));
   }
 }
+@keyframes heartpop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.38);
+  }
+  65% {
+    transform: scale(0.92);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* the heart pulses once when liked (the element is remounted per like) */
+.heart-wrap[data-pop] {
+  animation: heartpop 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
 @keyframes navin {
   from {
     opacity: 0;
@@ -493,7 +511,7 @@
         border-color 0.4s,
         box-shadow 0.4s;
     }
-    a.card:hover {
+    .card:hover {
       transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-5px);
       border-color: var(--gold);
       box-shadow:

@@ -18,6 +18,7 @@ export async function SiteHeader() {
         <NavLink href="/gallery">Каталог</NavLink>
         {user ? (
           <>
+            <NavLink href="/favorites">Избранное</NavLink>
             <NavLink href="/cabinet" match="/dashboard">
               <UserAvatar fullName={user.fullName} photoUrl={user.photoUrl} />
               Личный кабинет

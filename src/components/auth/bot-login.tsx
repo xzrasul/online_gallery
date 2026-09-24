@@ -13,21 +13,26 @@ type State =
 const POLL_INTERVAL_MS = 2000;
 
 // Sign in via the bot: open t.me/<bot>?start=<token>, press "Confirm" in the
-// bot, and this page picks the confirmation up by polling.
-export function BotLogin({ botUsername }: { botUsername: string }) {
+// bot, and this page picks the confirmation up by polling. `next` is where to
+// return afterwards (validated again on the server).
+export function BotLogin({ botUsername, next }: { botUsername: string; next?: string | null }) {
   const [state, setState] = useState<State>({ step: 'idle' });
 
   const start = useCallback(async () => {
     setState({ step: 'starting' });
     try {
-      const res = await fetch('/auth/bot/start', { method: 'POST' });
+      const res = await fetch('/auth/bot/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ next: next ?? null }),
+      });
       if (!res.ok) throw new Error(String(res.status));
       const { botUrl } = (await res.json()) as { botUrl: string };
       setState({ step: 'waiting', botUrl });
     } catch {
       setState({ step: 'error' });
     }
-  }, []);
+  }, [next]);
 
   useEffect(() => {
     if (state.step !== 'waiting') return;

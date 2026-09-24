@@ -5,6 +5,9 @@ import { getDb } from '@/src/db';
 import { getPublishedArtworkById } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
 import { CountUp } from '@/src/components/sanat/count-up';
+import { LikeButton } from '@/src/components/likes/like-button';
+import { getCurrentUser } from '@/src/lib/auth/session';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { KoshinBand } from '@/src/components/sanat/koshin-band';
 
 export default async function ArtworkDetailPage({
@@ -13,9 +16,10 @@ export default async function ArtworkDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const artwork = await getPublishedArtworkById(getDb(), id);
+  const [artwork, viewer] = await Promise.all([getPublishedArtworkById(getDb(), id), getCurrentUser()]);
   if (!artwork) notFound();
   const telegram = telegramHref(artwork.sellerTelegramContact);
+  const likes = await likeInfoFor(getDb(), [{ id: artwork.id, sellerId: artwork.sellerId }], viewer?.id ?? null);
 
   return (
     <main>
@@ -43,7 +47,10 @@ export default async function ArtworkDetailPage({
             <p className="by">
               Художник: <Link href={`/gallery/artist/${artwork.sellerId}`}>{artwork.sellerDisplayName}</Link>
             </p>
-            <CountUp className="big" value={artwork.price} suffix=" TJS" delay={350} />
+            <div className="price-row">
+              <CountUp className="big" value={artwork.price} suffix=" TJS" delay={350} />
+              <LikeButton artworkId={artwork.id} info={likes[artwork.id]} size="big" />
+            </div>
             {artwork.status === 'sold' && <span className="tag sold">Продано</span>}
             <dl className="spec">
               <dt>Размеры</dt>

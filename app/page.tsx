@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { getDb } from '@/src/db';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { BrandTitle } from '@/src/components/sanat/brand-title';
 import { KoshinBand } from '@/src/components/sanat/koshin-band';
@@ -13,10 +14,13 @@ const delay = (ms: number) => ({ '--d': ms }) as CSSProperties;
 
 export default async function HomePage() {
   let items: Awaited<ReturnType<typeof listPublishedArtworks>>['items'] = [];
+  let likes: Awaited<ReturnType<typeof likeInfoFor>> = {};
   let loadFailed = false;
-  const signedIn = Boolean(await getCurrentUser());
+  const user = await getCurrentUser();
+  const signedIn = Boolean(user);
   try {
     ({ items } = await listPublishedArtworks(getDb(), {}, { page: 1, pageSize: 6 }));
+    likes = await likeInfoFor(getDb(), items, user?.id ?? null);
   } catch (error) {
     console.error('home: failed to load latest artworks', error);
     loadFailed = true;
@@ -71,7 +75,7 @@ export default async function HomePage() {
           ) : items.length === 0 ? (
             <p className="empty">Пока нет опубликованных картин.</p>
           ) : (
-            <ArtworkGrid artworks={items} />
+            <ArtworkGrid artworks={items} likes={likes} />
           )}
         </section>
       </div>

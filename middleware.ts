@@ -7,7 +7,7 @@ import { SESSION_COOKIE, getSessionSecret, readSessionToken } from '@/src/lib/au
 const isSellerRoute = (path: string) => path.startsWith('/dashboard/seller');
 const isAdminRoute = (path: string) => path.startsWith('/admin');
 const isAuthenticatedRoute = (path: string) =>
-  ['/dashboard', '/become-seller', '/choose-role'].some((prefix) => path.startsWith(prefix));
+  ['/dashboard', '/become-seller', '/choose-role', '/favorites'].some((prefix) => path.startsWith(prefix));
 
 // Role is read from our own `users` table, the authorization source of truth
 // everywhere else in this project; the session cookie only carries the user id.
@@ -20,7 +20,10 @@ export default async function middleware(req: NextRequest) {
   const userId = await readSessionToken(req.cookies.get(SESSION_COOKIE)?.value, getSessionSecret());
   const [user] = userId ? await getDb().select().from(users).where(eq(users.id, userId)) : [];
   if (!user) {
-    return NextResponse.redirect(new URL('/sign-in', req.url));
+    // come back here after signing in
+    const signIn = new URL('/sign-in', req.url);
+    signIn.searchParams.set('next', path + req.nextUrl.search);
+    return NextResponse.redirect(signIn);
   }
 
   if (isSellerRoute(path) && user.role !== 'seller') {
@@ -35,5 +38,5 @@ export default async function middleware(req: NextRequest) {
 export const config = {
   // The postgres driver needs Node.js TCP sockets, which the edge runtime lacks.
   runtime: 'nodejs',
-  matcher: ['/dashboard/:path*', '/become-seller/:path*', '/choose-role/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/become-seller/:path*', '/choose-role/:path*', '/admin/:path*', '/favorites'],
 };

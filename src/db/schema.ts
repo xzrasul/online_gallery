@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, bigint, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, bigint, boolean, pgEnum, primaryKey, index } from 'drizzle-orm/pg-core';
 
 export const roleEnum = pgEnum('role', ['buyer', 'seller', 'admin']);
 export const applicationStatusEnum = pgEnum('application_status', [
@@ -89,3 +89,19 @@ export const loginRequests = pgTable('login_requests', {
   confirmedAt: timestamp('confirmed_at'),
   consumedAt: timestamp('consumed_at'),
 });
+
+// One row per (user, artwork) like: the pair is the key, so a work can't be
+// liked twice. Likes go away with the artwork or the user.
+export const artworkLikes = pgTable(
+  'artwork_likes',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    artworkId: uuid('artwork_id')
+      .notNull()
+      .references(() => artworks.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.artworkId] }), index('artwork_likes_artwork_id_idx').on(t.artworkId)],
+);
