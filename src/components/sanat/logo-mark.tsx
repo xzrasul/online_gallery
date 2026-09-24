@@ -1,14 +1,17 @@
-import { VORTEX_ARMS, VORTEX_COLOURS } from '@/src/lib/sanat/vortex-logo';
+import Image from 'next/image';
 
-// The still vortex next to the wordmark (no animation).
+// The painted suzani medallion next to the wordmark (transparent background).
+// 136px source for a 40px mark: sharp on high-density screens, ~12 KB.
 export function LogoMark() {
   return (
-    <svg viewBox="-20 -20 40 40" aria-hidden="true" focusable="false">
-      <circle r="18" fill="#0F2A3A" stroke="#E3B02B" strokeWidth="2" />
-      {VORTEX_ARMS.map((d, i) => (
-        <path key={i} d={d} fill={VORTEX_COLOURS[i]} />
-      ))}
-      <circle r="2.4" fill="#E3B02B" />
-    </svg>
+    <Image
+      className="logo-mark"
+      src="/brand/mandala-logo-136.webp"
+      alt=""
+      width={40}
+      height={40}
+      priority
+      unoptimized
+    />
   );
 }

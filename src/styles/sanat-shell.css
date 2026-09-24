@@ -75,9 +75,9 @@
     font-style: normal;
     color: var(--gold-2);
   }
-  .logo svg {
-    width: 34px;
-    height: 34px;
+  .logo .logo-mark {
+    width: 40px;
+    height: 40px;
     flex: none;
   }
   .links {
