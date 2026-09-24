@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { createArtwork } from '@/src/lib/artworks/seller-operations';
-import { uploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 2000;
@@ -40,7 +40,8 @@ export async function submitNewArtwork(formData: FormData) {
     redirect('/dashboard/seller/new?error=invalid');
   }
 
-  const imageUrl = await uploadArtworkImage(image as File);
+  const imageUrl = await tryUploadArtworkImage(image as File);
+  if (!imageUrl) redirect('/dashboard/seller/new?error=image');
 
   await createArtwork(getDb(), {
     sellerId: user.id,

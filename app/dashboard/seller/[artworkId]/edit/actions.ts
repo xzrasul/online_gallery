@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { getArtworkForOwner, updateArtwork } from '@/src/lib/artworks/seller-operations';
-import { uploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 2000;
@@ -41,7 +41,8 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
     redirect(`/dashboard/seller/${artworkId}/edit?error=invalid`);
   }
 
-  const imageUrl = image instanceof File && image.size > 0 ? await uploadArtworkImage(image) : existing.imageUrl;
+  const imageUrl = image instanceof File && image.size > 0 ? await tryUploadArtworkImage(image) : existing.imageUrl;
+  if (!imageUrl) redirect(`/dashboard/seller/${artworkId}/edit?error=image`);
 
   await updateArtwork(getDb(), {
     artworkId,

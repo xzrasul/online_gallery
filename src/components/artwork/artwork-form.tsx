@@ -1,6 +1,7 @@
 import { Field } from '@/src/components/form/field';
 import { NativeSelect } from '@/src/components/form/native-select';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
+import { ArtworkPhotoInput } from '@/src/components/artwork/artwork-photo-input';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Textarea } from '@/src/components/ui/textarea';
@@ -44,6 +45,14 @@ export function ArtworkForm({
           className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           Проверьте, что все поля заполнены корректно.
+        </p>
+      )}
+      {error === 'image' && (
+        <p
+          role="alert"
+          className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          Не удалось прочитать фото. Сохраните его в формате JPG или PNG и загрузите снова.
         </p>
       )}
       <form action={action} className="mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)] gap-5 rounded-sm border border-border bg-card p-5 sm:p-6">
@@ -91,7 +100,7 @@ export function ArtworkForm({
           </div>
         )}
         <Field label={imageLabel}>
-          <Input type="file" name="image" accept="image/*" required={imageRequired} />
+          <ArtworkPhotoInput required={imageRequired} />
         </Field>
         <Button type="submit" size="lg" className="justify-self-start">
           {submitLabel}

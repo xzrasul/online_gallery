@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { UnreadableImageError, normalizeArtworkImage } from './prepare-image';
 
 export const ARTWORK_IMAGES_BUCKET = 'artworks';
 
@@ -8,12 +9,6 @@ export function getStorageClient() {
   });
 }
 
-// Storage keys must be URL-safe, so only the (sanitised) extension of the
-// original file name is kept.
-function objectPath(fileName: string): string {
-  const ext = fileName.match(/\.([A-Za-z0-9]{1,8})$/)?.[1]?.toLowerCase();
-  return ext ? `${crypto.randomUUID()}.${ext}` : crypto.randomUUID();
-}
 
 // Deletes images this bucket served; URLs from anywhere else are ignored.
 export async function deleteArtworkImages(publicUrls: string[]): Promise<void> {
@@ -24,10 +19,24 @@ export async function deleteArtworkImages(publicUrls: string[]): Promise<void> {
   if (error) throw new Error(`Image delete failed: ${error.message}`);
 }
 
+// For forms: the public URL, or null when the file is not a readable image
+// (so the form can say so instead of failing).
+export async function tryUploadArtworkImage(file: File): Promise<string | null> {
+  try {
+    return await uploadArtworkImage(file);
+  } catch (error) {
+    if (error instanceof UnreadableImageError) return null;
+    throw error;
+  }
+}
+
+// Normalises the photo (see prepare-image.ts) and stores it as <uuid>.webp.
+// Throws UnreadableImageError when the file is not a readable image.
 export async function uploadArtworkImage(file: File): Promise<string> {
+  const image = await normalizeArtworkImage(await file.arrayBuffer());
   const storage = getStorageClient().storage.from(ARTWORK_IMAGES_BUCKET);
-  const path = objectPath(file.name);
-  const { error } = await storage.upload(path, file, { contentType: file.type || undefined });
+  const path = `${crypto.randomUUID()}.webp`;
+  const { error } = await storage.upload(path, image, { contentType: 'image/webp' });
   if (error) throw new Error(`Image upload failed: ${error.message}`);
   return storage.getPublicUrl(path).data.publicUrl;
 }
