@@ -52,44 +52,6 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
                 <li key={fact as string}>{fact}</li>
               ))}
             </ul>
-          </div>
-          <Medal size="sm" />
-        </div>
-
-        <div className="artist-info">
-          <section className="panel" aria-labelledby="about-title">
-            <h2 id="about-title" className="panel-title">
-              О художнике
-            </h2>
-            <p className="bio">{profile.bio}</p>
-          </section>
-
-          <section className="panel buy" aria-labelledby="buy-title">
-            <h2 id="buy-title" className="panel-title">
-              Как купить работу
-            </h2>
-            <ol className="how">
-              <li>
-                <span className="how-n" aria-hidden="true">
-                  1
-                </span>
-                <span>
-                  Выберите картину {available.length > 0 ? 'из работ в продаже ниже.' : '— сейчас свободных работ нет, но можно спросить художника о новых.'}
-                </span>
-              </li>
-              <li>
-                <span className="how-n" aria-hidden="true">
-                  2
-                </span>
-                <span>Напишите художнику в Telegram и назовите картину.</span>
-              </li>
-              <li>
-                <span className="how-n" aria-hidden="true">
-                  3
-                </span>
-                <span>Оплату и доставку вы обсуждаете с художником напрямую.</span>
-              </li>
-            </ol>
             {telegram ? (
               <div className="contact">
                 <a className="btn" href={telegram} target="_blank" rel="noopener noreferrer">
@@ -97,13 +59,19 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
                 </a>
                 <span className="handle">{telegram.replace('https://t.me/', '@')}</span>
               </div>
-            ) : profile.telegramContact ? (
-              <p className="contact-note">Telegram: {profile.telegramContact}</p>
             ) : (
-              <p className="contact-note">Художник пока не оставил контакт в Telegram.</p>
+              profile.telegramContact && <p className="contact muted">Telegram: {profile.telegramContact}</p>
             )}
-          </section>
+          </div>
+          <Medal size="sm" />
         </div>
+
+        <section className="panel" aria-labelledby="about-title">
+          <h2 id="about-title" className="panel-title">
+            О художнике
+          </h2>
+          <p className="bio">{profile.bio}</p>
+        </section>
 
         <section className="panel" id="works" aria-labelledby="works-title">
           <div className="sec-head">
