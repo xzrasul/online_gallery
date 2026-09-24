@@ -19,9 +19,14 @@ export default async function SellerDashboardPage() {
     <main>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1>Личный кабинет продавца</h1>
-        <Link href="/dashboard/seller/new" className={buttonVariants()}>
-          Добавить картину
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/dashboard/seller/profile" className={buttonVariants({ variant: 'outline' })}>
+            Мой профиль
+          </Link>
+          <Link href="/dashboard/seller/new" className={buttonVariants()}>
+            Добавить картину
+          </Link>
+        </div>
       </div>
       <h2 className="mt-8">Мои картины</h2>
       {myArtworks.length === 0 && <p className="mt-4 text-muted-foreground">У вас пока нет картин.</p>}

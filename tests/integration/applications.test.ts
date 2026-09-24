@@ -5,6 +5,8 @@ import { users, sellerApplications } from '../../src/db/schema';
 import {
   createSellerApplication,
   approveOrRejectApplication,
+  getSellerProfile,
+  updateSellerProfile,
 } from '../../src/lib/sellers/applications';
 import { testTelegramId } from '../helpers/test-telegram-id';
 
@@ -148,5 +150,60 @@ describe('seller applications', () => {
     // The resubmission omitted telegramContact, so the previously set value
     // ('@oleg_art') must be cleared to null, not silently left stale.
     expect(application.telegramContact).toBeNull();
+  });
+
+  it('an approved artist edits their profile: live at once, still approved and a seller', async () => {
+    userKeys.add('test_applicant_5');
+    userKeys.add('test_admin_4');
+    const applicant = await insertTestUser('test_applicant_5');
+    const admin = await insertTestUser('test_admin_4');
+    const applicationId = await createSellerApplication(getDb(), {
+      userId: applicant.id,
+      displayName: 'Студия Зарины',
+      bio: 'Сюзане.',
+      telegramContact: '@zarina',
+    });
+    await approveOrRejectApplication(getDb(), { applicationId, adminUserId: admin.id, decision: 'approve' });
+
+    const updated = await updateSellerProfile(getDb(), {
+      userId: applicant.id,
+      displayName: 'Студия Зарины Каримовой',
+      bio: 'Сюзане и батик.',
+    });
+
+    expect(updated).toBe(true);
+    expect(await getSellerProfile(getDb(), applicant.id)).toEqual({
+      displayName: 'Студия Зарины Каримовой',
+      bio: 'Сюзане и батик.',
+      telegramContact: null,
+    });
+    const [application] = await getDb()
+      .select()
+      .from(sellerApplications)
+      .where(eq(sellerApplications.id, applicationId));
+    expect(application.status).toBe('approved');
+    expect(application.reviewedByAdminId).toBe(admin.id);
+    const [user] = await getDb().select().from(users).where(eq(users.id, applicant.id));
+    expect(user.role).toBe('seller');
+  });
+
+  it('a profile cannot be edited before the application is approved', async () => {
+    userKeys.add('test_applicant_6');
+    const applicant = await insertTestUser('test_applicant_6');
+    await createSellerApplication(getDb(), { userId: applicant.id, displayName: 'Ожидает', bio: 'Био.' });
+
+    const updated = await updateSellerProfile(getDb(), {
+      userId: applicant.id,
+      displayName: 'Подмена',
+      bio: 'Другое био.',
+    });
+
+    expect(updated).toBe(false);
+    expect(await getSellerProfile(getDb(), applicant.id)).toBeNull();
+    const [application] = await getDb()
+      .select()
+      .from(sellerApplications)
+      .where(eq(sellerApplications.userId, applicant.id));
+    expect(application.displayName).toBe('Ожидает');
   });
 });

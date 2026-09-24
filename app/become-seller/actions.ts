@@ -4,37 +4,16 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { createSellerApplication } from '@/src/lib/sellers/applications';
+import { parseSellerProfileForm } from '@/src/lib/sellers/profile-form';
 
 export async function submitSellerApplication(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect('/sign-in');
 
-  const displayName = String(formData.get('displayName') ?? '').trim();
-  const bio = String(formData.get('bio') ?? '').trim();
-  const telegramContactRaw = formData.get('telegramContact');
-  const telegramContact =
-    typeof telegramContactRaw === 'string' && telegramContactRaw.trim()
-      ? telegramContactRaw.trim()
-      : undefined;
+  const profile = parseSellerProfileForm(formData);
+  if (!profile) redirect('/become-seller?error=invalid');
 
-  const MAX_DISPLAY_NAME_LENGTH = 200;
-  const MAX_BIO_LENGTH = 2000;
-
-  if (
-    !displayName ||
-    !bio ||
-    displayName.length > MAX_DISPLAY_NAME_LENGTH ||
-    bio.length > MAX_BIO_LENGTH
-  ) {
-    redirect('/become-seller?error=invalid');
-  }
-
-  await createSellerApplication(getDb(), {
-    userId: user.id,
-    displayName,
-    bio,
-    telegramContact,
-  });
+  await createSellerApplication(getDb(), { userId: user.id, ...profile });
 
   redirect('/become-seller/status');
 }
