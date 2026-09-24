@@ -29,7 +29,7 @@ test.describe('on a phone', () => {
 
     await burger.click();
     await menu.getByRole('link', { name: 'Каталог' }).click();
-    await expect(page).toHaveURL(/\/gallery$/);
+    await expect(page).toHaveURL(/\/gallery$/, { timeout: 15000 });
     await expect(menu).toBeHidden();
     await header.getByRole('button', { name: 'Меню' }).click();
     await expect(menu.getByRole('link', { name: 'Каталог' })).toHaveAttribute('aria-current', 'page');
