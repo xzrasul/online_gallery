@@ -1,5 +1,7 @@
 import { Kelly_Slab, Kufam, Roboto_Slab } from 'next/font/google';
+import type { Metadata } from 'next';
 import type { CSSProperties, ReactNode } from 'react';
+import { siteUrl } from '@/src/lib/site-url';
 import { SiteFooter } from '@/src/components/site-footer';
 import { SiteHeader } from '@/src/components/site-header';
 import { PageFrame } from '@/src/components/sanat/page-frame';
@@ -35,10 +37,21 @@ const kufam = Kufam({
 const primary = (font: { style: { fontFamily: string } }) => font.style.fontFamily.split(',')[0];
 const fontBody = `${primary(kelly)}, ${primary(robotoSlab)}, Georgia, serif`;
 
-export const metadata = {
+// Link previews (Telegram, WhatsApp, social networks): every page gets the
+// brand card from app/opengraph-image.png unless it sets its own image.
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
   title: { default: `${BRAND_NAME} — место для искусства`, template: `%s — ${BRAND_NAME}` },
   description: BRAND_TAGLINE,
   applicationName: BRAND_NAME,
+  openGraph: {
+    siteName: BRAND_NAME,
+    locale: 'ru_RU',
+    type: 'website',
+    title: `${BRAND_NAME} — место для искусства`,
+    description: BRAND_TAGLINE,
+  },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport = {

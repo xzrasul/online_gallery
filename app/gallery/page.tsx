@@ -15,6 +15,7 @@ const PAGE_SIZE = 24;
 
 export const metadata = {
   title: 'Каталог картин',
+  description: 'Оригинальные картины напрямую от художников: выбирайте по категории, технике и цене.',
 };
 
 export default async function GalleryPage({

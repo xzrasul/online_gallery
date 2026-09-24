@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { cache } from 'react';
+import { pagePreview, snippet } from '@/src/lib/seo';
 import { getDb } from '@/src/db';
 import { getPublishedArtworkById } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
@@ -10,13 +13,34 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { likeInfoFor } from '@/src/lib/likes/likes';
 import { KoshinBand } from '@/src/components/sanat/koshin-band';
 
+// One query per request, shared by the page and its link preview.
+const loadArtwork = cache((id: string) => getPublishedArtworkById(getDb(), id));
+
+// Link preview: "Title — Artist", price · size · technique, and the photo itself.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const artwork = await loadArtwork((await params).id);
+  if (!artwork) return {};
+  const title = `${artwork.title} — ${artwork.sellerDisplayName}`;
+  const facts = [
+    artwork.status === 'sold' ? 'Продано' : `${artwork.price} TJS`,
+    `${artwork.heightCm}×${artwork.widthCm} см`,
+    artwork.techniqueName,
+  ].join(' · ');
+  const description = snippet(`${facts}. ${artwork.description}`);
+  return {
+    title,
+    description,
+    ...pagePreview({ title, description, image: { url: artwork.imageUrl, alt: artwork.title } }),
+  };
+}
+
 export default async function ArtworkDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [artwork, viewer] = await Promise.all([getPublishedArtworkById(getDb(), id), getCurrentUser()]);
+  const [artwork, viewer] = await Promise.all([loadArtwork(id), getCurrentUser()]);
   if (!artwork) notFound();
   const telegram = telegramHref(artwork.sellerTelegramContact);
   const likes = await likeInfoFor(getDb(), [{ id: artwork.id, sellerId: artwork.sellerId }], viewer?.id ?? null);
