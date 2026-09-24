@@ -8,6 +8,8 @@ import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
 import { catalogHref } from '@/src/lib/catalog-href';
 import { listCategories } from '@/src/lib/catalog/categories';
 import { listTechniques } from '@/src/lib/catalog/techniques';
+import { getCurrentUser } from '@/src/lib/auth/session';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 
 const PAGE_SIZE = 24;
 
@@ -32,7 +34,7 @@ export default async function GalleryPage({
   const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
   const maxPrice = params.maxPrice ? Number(params.maxPrice) : undefined;
 
-  const [{ items, total }, categories, techniques] = await Promise.all([
+  const [{ items, total }, categories, techniques, user] = await Promise.all([
     listPublishedArtworks(
       getDb(),
       {
@@ -45,7 +47,9 @@ export default async function GalleryPage({
     ),
     listCategories(getDb()),
     listTechniques(getDb()),
+    getCurrentUser(),
   ]);
+  const likes = await likeInfoFor(getDb(), items, user?.id ?? null);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeCount = [params.categoryId, params.techniqueId, params.minPrice, params.maxPrice].filter(Boolean).length;
@@ -74,7 +78,7 @@ export default async function GalleryPage({
           {items.length === 0 ? (
             <p className="empty">Ничего не найдено.{activeCount > 0 && ' Попробуйте изменить или сбросить фильтры.'}</p>
           ) : (
-            <ArtworkGrid key={query} artworks={items} revealBase={150} priorityCount={3} />
+            <ArtworkGrid key={query} artworks={items} revealBase={150} priorityCount={3} likes={likes} />
           )}
           <Pagination params={params} page={Math.min(page, totalPages)} totalPages={totalPages} />
         </section>

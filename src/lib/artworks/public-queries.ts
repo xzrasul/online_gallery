@@ -20,6 +20,7 @@ export async function listPublishedArtworks(
       title: artworks.title,
       price: artworks.price,
       imageUrl: artworks.imageUrl,
+      sellerId: artworks.sellerId,
       sellerDisplayName: sellerApplications.displayName,
     })
     .from(artworks)

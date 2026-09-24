@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { LikeButton } from '@/src/components/likes/like-button';
+import type { LikeInfo } from '@/src/lib/likes/likes';
 
 export type ArtworkCardData = {
   id: string;
@@ -10,9 +12,19 @@ export type ArtworkCardData = {
   status?: string;
 };
 
-export function ArtworkCard({ artwork, priority }: { artwork: ArtworkCardData; priority?: boolean }) {
+// The whole card opens the artwork: the title link is stretched over it (a
+// link can't contain the like button, so the card itself is not a link).
+export function ArtworkCard({
+  artwork,
+  priority,
+  like,
+}: {
+  artwork: ArtworkCardData;
+  priority?: boolean;
+  like?: LikeInfo;
+}) {
   return (
-    <Link href={`/gallery/artwork/${artwork.id}`} className="card">
+    <div className="card">
       <div className="art">
         <Image
           src={artwork.imageUrl}
@@ -27,11 +39,20 @@ export function ArtworkCard({ artwork, priority }: { artwork: ArtworkCardData; p
       </div>
       <div className="meta">
         <div>
-          <h3>{artwork.title}</h3>
+          <h3>
+            <Link href={`/gallery/artwork/${artwork.id}`} className="card-link">
+              {artwork.title}
+            </Link>
+          </h3>
           {artwork.sellerDisplayName && <p className="by">{artwork.sellerDisplayName}</p>}
         </div>
         <span className="price">{artwork.price} TJS</span>
       </div>
-    </Link>
+      {like && (
+        <div className="card-like">
+          <LikeButton artworkId={artwork.id} info={like} />
+        </div>
+      )}
+    </div>
   );
 }

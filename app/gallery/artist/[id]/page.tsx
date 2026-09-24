@@ -5,6 +5,8 @@ import { getDb } from '@/src/db';
 import { getArtistPublicProfile } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
 import { plural, sinceMonth } from '@/src/lib/ru-format';
+import { getCurrentUser } from '@/src/lib/auth/session';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { KoshinBand } from '@/src/components/sanat/koshin-band';
 import { Medal } from '@/src/components/sanat/mandala';
@@ -29,10 +31,18 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
   const telegram = telegramHref(profile.telegramContact);
   const available = profile.artworks.filter((a) => a.status === 'published');
   const sold = profile.artworks.filter((a) => a.status === 'sold');
+  const viewer = await getCurrentUser();
+  const likes = await likeInfoFor(
+    getDb(),
+    profile.artworks.map((a) => ({ id: a.id, sellerId: id })),
+    viewer?.id ?? null,
+  );
+  const totalLikes = Object.values(likes).reduce((sum, l) => sum + l.count, 0);
   const facts = [
     profile.joinedAt && `На sanatplace ${sinceMonth(profile.joinedAt)}`,
     available.length > 0 ? `${available.length} ${plural(available.length, WORKS)} в продаже` : 'Сейчас нет работ в продаже',
     sold.length > 0 && `${sold.length} ${plural(sold.length, ['продана', 'проданы', 'продано'])}`,
+    totalLikes > 0 && `${totalLikes} ${plural(totalLikes, ['лайк', 'лайка', 'лайков'])}`,
   ].filter(Boolean);
 
   return (
@@ -85,7 +95,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
           {available.length === 0 ? (
             <p className="empty">Сейчас у художника нет работ в продаже.</p>
           ) : (
-            <ArtworkGrid artworks={available} />
+            <ArtworkGrid artworks={available} likes={likes} />
           )}
         </section>
 
@@ -95,7 +105,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
               <h2 id="sold-title">Уже проданы</h2>
             </div>
             <p className="sold-note">Эти работы нашли своих владельцев. О похожей можно спросить художника.</p>
-            <ArtworkGrid artworks={sold} />
+            <ArtworkGrid artworks={sold} likes={likes} />
           </section>
         )}
       </div>

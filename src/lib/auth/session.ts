@@ -23,10 +23,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   return user ?? null;
 }
 
-// New accounts pick a role first, returning users go to their cabinet.
-export function afterSignInPath(isNewUser: boolean): string {
-  return isNewUser ? '/choose-role' : '/cabinet';
-}
+export { afterSignInPath } from './next-path';
 
 export async function setSessionCookie(res: NextResponse, userId: string): Promise<NextResponse> {
   res.cookies.set(SESSION_COOKIE, await createSessionToken(userId, getSessionSecret()), {

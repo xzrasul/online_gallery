@@ -289,10 +289,107 @@
       border-color 0.4s,
       box-shadow 0.4s;
   }
-  a.card:hover {
+  .card {
+    position: relative;
+  }
+  .card:hover {
     transform: translateY(-3px);
     border-color: var(--gold);
     box-shadow: 0 20px 44px -22px rgba(0, 0, 0, 0.8);
+  }
+  /* the title link covers the whole card; the focus ring goes on the card */
+  .card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .card-link:focus-visible {
+    outline: none;
+  }
+  .card:has(.card-link:focus-visible) {
+    outline: 3px solid var(--gold-2);
+    outline-offset: 3px;
+  }
+  .card-like {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 4;
+  }
+
+  /* ---------- like (heart) ---------- */
+  .like {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 6px 12px 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(8, 20, 31, 0.82);
+    color: var(--ink);
+    font: 400 0.95rem/1 var(--font-body);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      border-color 0.3s,
+      background 0.3s;
+  }
+  .like:hover {
+    border-color: var(--rose);
+  }
+  .like .heart {
+    width: 18px;
+    height: 18px;
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+    transition:
+      fill 0.25s,
+      stroke 0.25s;
+  }
+  .like.on {
+    border-color: var(--rose);
+  }
+  .like.on .heart {
+    fill: var(--rose);
+    stroke: var(--rose);
+  }
+  .like.own {
+    cursor: default;
+    opacity: 0.85;
+  }
+  .like.own:hover {
+    border-color: var(--line);
+  }
+  .heart-wrap {
+    display: inline-grid;
+  }
+  .like.big {
+    min-height: 44px;
+    padding: 8px 16px 8px 12px;
+    font-size: 1.05rem;
+  }
+  .like.big .heart {
+    width: 22px;
+    height: 22px;
+  }
+  .price-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin: 18px 0 22px;
+  }
+  .price-row .big {
+    margin: 0;
   }
   .art {
     position: relative;
