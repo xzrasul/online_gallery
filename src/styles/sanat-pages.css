@@ -261,6 +261,20 @@
   .collage img.pic {
     object-fit: cover;
   }
+  /* fewer than three works: one tall picture, or two side by side */
+  .collage.n1 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .collage.n1 .tile.a {
+    aspect-ratio: 4 / 5;
+  }
+  .collage.n2 .tile.a {
+    grid-row: auto;
+    aspect-ratio: 3 / 4;
+  }
+  .collage.n2 .tile.b {
+    aspect-ratio: 3 / 4;
+  }
 
   .rail {
     --cw: min(232px, 62vw);

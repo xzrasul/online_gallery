@@ -4,8 +4,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 
 // The whole picture, uncropped, in a frame with a small margin. The frame takes
 // the picture's own proportions: `ratio` is the best guess before the image
-// loads (the painting's size in cm, or the showcase file's pixels), then the
-// real pixel ratio takes over. On desktop the frame sticks while the text scrolls.
+// loads (the painting's size in cm), then the real pixel ratio takes over. On desktop the frame sticks while the text scrolls.
 export function ArtworkFrame({
   src,
   alt,

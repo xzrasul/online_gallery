@@ -8,9 +8,8 @@ import { getArtistPublicProfile } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
 import { plural, sinceMonth } from '@/src/lib/ru-format';
 import { getCurrentUser } from '@/src/lib/auth/session';
-import { heartsFor } from '@/src/lib/gallery/likes';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { isUuid, type CardArtwork } from '@/src/lib/gallery/types';
-import { showcaseArtist, showcaseCard, showcaseWorksOf } from '@/src/lib/showcase';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { HeartIcon } from '@/src/components/likes/like-button';
 
@@ -21,28 +20,13 @@ type Profile = {
   info?: string;
   bio: string[];
   telegram?: string | null;
-  mock: boolean;
   available: CardArtwork[];
   sold: CardArtwork[];
-  mockLikes?: number;
 };
 
-// One lookup per request, shared by the page and its metadata. Showcase
-// artists have word ids; anything else must be a uuid to reach the database.
+// One lookup per request, shared by the page and its metadata. Only a uuid
+// can reach the database.
 const loadProfile = cache(async (id: string): Promise<Profile | undefined> => {
-  const mock = showcaseArtist(id);
-  if (mock) {
-    const works = showcaseWorksOf(id);
-    return {
-      name: mock.name,
-      info: mock.info,
-      bio: mock.bio,
-      mock: true,
-      available: works.map(showcaseCard),
-      sold: [],
-      mockLikes: works.reduce((n, w) => n + w.likes, 0),
-    };
-  }
   if (!isUuid(id)) return undefined;
   const p = await getArtistPublicProfile(getDb(), id);
   if (!p) return undefined;
@@ -55,7 +39,6 @@ const loadProfile = cache(async (id: string): Promise<Profile | undefined> => {
       .map((s) => s.trim())
       .filter(Boolean),
     telegram: p.telegramContact,
-    mock: false,
     available: p.artworks.filter((a) => a.status === 'published').map(card),
     sold: p.artworks.filter((a) => a.status === 'sold').map(card),
   };
@@ -82,8 +65,12 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
 
   const viewer = await getCurrentUser();
   const works = [...profile.available, ...profile.sold];
-  const likes = await heartsFor(getDb(), works, viewer?.id ?? null);
-  const totalLikes = profile.mockLikes ?? Object.values(likes).reduce((sum, l) => sum + l.count, 0);
+  const likes = await likeInfoFor(
+    getDb(),
+    works.map((w) => ({ id: w.id, sellerId: id })),
+    viewer?.id ?? null,
+  );
+  const totalLikes = Object.values(likes).reduce((sum, l) => sum + l.count, 0);
   const telegram = telegramHref(profile.telegram ?? null);
   const n = profile.available.length;
 
@@ -112,7 +99,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
             <li>
               <b>{n}</b>
               <span>
-                {plural(n, WORKS)} в продаже{profile.mock && ' · макет'}
+                {plural(n, WORKS)} в продаже
               </span>
             </li>
             {profile.sold.length > 0 && (

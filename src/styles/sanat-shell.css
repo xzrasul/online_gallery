@@ -207,13 +207,6 @@
   .badge.sold {
     color: #f7a6c0;
   }
-  .badge.inline {
-    position: static;
-    display: inline-block;
-    margin-left: 10px;
-    vertical-align: middle;
-    background: rgba(227, 176, 43, 0.14);
-  }
   .eyebrow {
     display: flex;
     align-items: center;

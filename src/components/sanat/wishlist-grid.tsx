@@ -6,14 +6,12 @@ import { ArtworkCard } from '@/src/components/artwork/artwork-card';
 import type { CardArtwork } from '@/src/lib/gallery/types';
 import type { LikeInfo } from '@/src/lib/likes/likes';
 import { plural } from '@/src/lib/ru-format';
-import { showcaseArtwork, showcaseCard } from '@/src/lib/showcase';
-import { useLocalWishlist, WISH_EVENT, type WishDetail } from '@/src/lib/wishlist/client';
+import { WISH_EVENT, type WishDetail } from '@/src/lib/wishlist/client';
 
-// The wishlist: works liked in the database, then showcase works hearted in
-// this browser. Taking the heart off removes the card straight away.
+// The wishlist: works the user liked. Taking the heart off removes the card
+// straight away.
 export function WishlistGrid({ saved, likes }: { saved: CardArtwork[]; likes: Record<string, LikeInfo> }) {
   const [removed, setRemoved] = useState<Set<string>>(() => new Set());
-  const localIds = useLocalWishlist();
 
   useEffect(() => {
     const onWish = (e: Event) => {
@@ -29,10 +27,7 @@ export function WishlistGrid({ saved, likes }: { saved: CardArtwork[]; likes: Re
     return () => window.removeEventListener(WISH_EVENT, onWish);
   }, []);
 
-  const local = localIds.map(showcaseArtwork).flatMap((w) => (w ? [showcaseCard(w)] : []));
-  const items = [...saved.filter((w) => !removed.has(w.id)), ...local];
-  const heart = (w: CardArtwork): LikeInfo =>
-    likes[w.id] ?? { count: showcaseArtwork(w.id)?.likes ?? 0, liked: true, state: 'active' };
+  const items = saved.filter((w) => !removed.has(w.id));
 
   return (
     <>
@@ -51,7 +46,7 @@ export function WishlistGrid({ saved, likes }: { saved: CardArtwork[]; likes: Re
         <ul className="grid cards">
           {items.map((w) => (
             <li key={w.id}>
-              <ArtworkCard artwork={w} like={heart(w)} />
+              <ArtworkCard artwork={w} like={likes[w.id]} />
             </li>
           ))}
         </ul>

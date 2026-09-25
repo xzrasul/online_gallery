@@ -5,8 +5,8 @@ import { Pagination } from '@/src/components/artwork/pagination';
 import { CatalogFilters, type ActiveTag } from '@/src/components/sanat/catalog-filters';
 import { catalogHref, type CatalogParams } from '@/src/lib/catalog-href';
 import { loadCatalogOptions, searchCatalog } from '@/src/lib/gallery/catalog';
-import { heartsFor } from '@/src/lib/gallery/likes';
 import { getCurrentUser } from '@/src/lib/auth/session';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { plural } from '@/src/lib/ru-format';
 
 const PAGE_SIZE = 24;
@@ -22,8 +22,8 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   const page = Number.isFinite(parsedPage) ? Math.max(1, Math.floor(parsedPage)) : 1;
 
   const [options, user] = await Promise.all([loadCatalogOptions(getDb()), getCurrentUser()]);
-  const { items, total } = await searchCatalog(getDb(), params, { page, pageSize: PAGE_SIZE }, options);
-  const likes = await heartsFor(getDb(), items, user?.id ?? null);
+  const { items, total } = await searchCatalog(getDb(), params, { page, pageSize: PAGE_SIZE });
+  const likes = await likeInfoFor(getDb(), items, user?.id ?? null);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const nameOf = (list: { id: string; name: string }[], id?: string) => list.find((o) => o.id === id)?.name ?? '…';

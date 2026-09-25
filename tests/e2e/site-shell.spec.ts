@@ -43,7 +43,7 @@ test.describe('on a phone', () => {
   });
 
   test('the page has no horizontal scroll', async ({ page }) => {
-    for (const path of ['/', '/gallery', '/artists', '/sell', '/sign-in', '/gallery/artwork/mona-lisa', '/gallery/artist/van-gogh']) {
+    for (const path of ['/', '/gallery', '/artists', '/sell', '/sign-in']) {
       await page.goto(path);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBe(0);
