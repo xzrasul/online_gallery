@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type MouseEvent } from 'react';
 import { WishCount } from '@/src/components/sanat/wish-count';
+import { startNavProgress } from '@/src/components/sanat/instant-feedback';
 import { prefersReducedMotion } from '@/src/lib/sanat/reveal';
 
 type Item = { href: string; label: string; current: (path: string) => boolean; wish?: boolean };
@@ -100,7 +101,9 @@ export function BurgerMenu({ signedIn, wishCount }: { signedIn: boolean; wishCou
     const q = String(new FormData(e.currentTarget).get('q') ?? '').trim();
     e.currentTarget.reset();
     close();
-    router.push(q ? `/gallery?q=${encodeURIComponent(q)}` : '/gallery');
+    const href = q ? `/gallery?q=${encodeURIComponent(q)}` : '/gallery';
+    if (href !== location.pathname + location.search) startNavProgress();
+    router.push(href);
   };
 
   return (

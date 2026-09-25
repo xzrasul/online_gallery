@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Field } from '@/src/components/form/field';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Textarea } from '@/src/components/ui/textarea';
 import { getDb } from '@/src/db';
@@ -11,6 +10,7 @@ import { MAX_BIO_LENGTH, MAX_DISPLAY_NAME_LENGTH } from '@/src/lib/sellers/profi
 import { AVATAR_MESSAGES, type AvatarResult } from '@/src/lib/sellers/avatar';
 import { AvatarForm } from '@/src/components/sanat/avatar-form';
 import { submitSellerAvatar, submitSellerProfile } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export const metadata = {
   title: 'Мой профиль',
@@ -91,9 +91,9 @@ export default async function SellerProfilePage({
               defaultValue={profile.telegramContact ?? ''}
             />
           </Field>
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg">
             Сохранить профиль
-          </Button>
+          </SubmitButton>
         </form>
       </div>
     </main>

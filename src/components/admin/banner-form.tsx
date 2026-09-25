@@ -4,11 +4,11 @@ import { useEffect, useRef, useState, type ChangeEvent, type CSSProperties } fro
 import { Field } from '@/src/components/form/field';
 import { NativeSelect } from '@/src/components/form/native-select';
 import { SlideBody } from '@/src/components/home/slide-body';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { BANNER_LIMITS, DEFAULT_OVERLAY, toLocalDateTime } from '@/src/lib/home/banner-form';
 import type { Banner, HeroSlide } from '@/src/lib/home/banners';
 import { MAX_UPLOAD_BYTES, shrinkPhoto } from '@/src/lib/uploads/shrink-photo';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 type Option = { id: string; title: string; artist: string };
 
@@ -229,9 +229,9 @@ export function BannerForm({
           <input type="checkbox" name="isActive" defaultChecked={banner?.isActive ?? true} />
           Активен
         </label>
-        <Button type="submit" size="lg" className="justify-self-start">
+        <SubmitButton size="lg" className="justify-self-start">
           {banner ? 'Сохранить' : 'Добавить баннер'}
-        </Button>
+        </SubmitButton>
       </form>
 
       <div className="grid content-start gap-5 lg:sticky lg:top-6">

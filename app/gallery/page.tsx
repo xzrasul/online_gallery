@@ -21,8 +21,12 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) ? Math.max(1, Math.floor(parsedPage)) : 1;
 
-  const [options, user] = await Promise.all([loadCatalogOptions(getDb()), getCurrentUser()]);
-  const { items, total } = await searchCatalog(getDb(), params, { page, pageSize: PAGE_SIZE });
+  // independent lookups go to the database together
+  const [options, user, { items, total }] = await Promise.all([
+    loadCatalogOptions(getDb()),
+    getCurrentUser(),
+    searchCatalog(getDb(), params, { page, pageSize: PAGE_SIZE }),
+  ]);
   const likes = await likeInfoFor(getDb(), items, user?.id ?? null);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 

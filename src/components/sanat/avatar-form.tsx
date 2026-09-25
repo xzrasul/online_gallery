@@ -1,7 +1,7 @@
 import { ArtworkPhotoInput } from '@/src/components/artwork/artwork-photo-input';
 import { ArtistAvatar } from '@/src/components/sanat/artist-avatar';
-import { Button } from '@/src/components/ui/button';
 import { AVATAR_SIDE } from '@/src/lib/sellers/avatar';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 // An artist's photo with "upload" and "remove". `userId` goes along for the
 // admin's form (the cabinet's action knows whose photo it is).
@@ -23,18 +23,18 @@ export function AvatarForm({
         {userId && <input type="hidden" name="userId" value={userId} />}
         <ArtworkPhotoInput required name="avatar" maxSide={AVATAR_SIDE} />
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" variant="outline">
+          <SubmitButton variant="outline">
             Загрузить фото
-          </Button>
+          </SubmitButton>
         </div>
       </form>
       {url && (
         <form action={action}>
           {userId && <input type="hidden" name="userId" value={userId} />}
           <input type="hidden" name="remove" value="1" />
-          <Button type="submit" variant="ghost">
+          <SubmitButton variant="ghost">
             Убрать фото
-          </Button>
+          </SubmitButton>
         </form>
       )}
     </div>

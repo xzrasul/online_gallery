@@ -63,10 +63,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ArtistPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const profile = await loadProfile(id);
+  const [profile, viewer] = await Promise.all([loadProfile(id), getCurrentUser()]);
   if (!profile) notFound();
 
-  const viewer = await getCurrentUser();
   const works = [...profile.available, ...profile.sold];
   const likes = await likeInfoFor(
     getDb(),

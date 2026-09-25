@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/src/components/ui/button';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 // A delete button that asks once more in place: the first press turns it into
 // "Точно удалить?" with a "Нет" next to it (for a few seconds).
@@ -34,9 +35,9 @@ export function ConfirmDelete({
   return (
     <form action={action} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="id" value={id} />
-      <Button type="submit" variant="destructive" autoFocus aria-label={`Точно удалить: ${what}`}>
+      <SubmitButton variant="destructive" autoFocus aria-label={`Точно удалить: ${what}`}>
         Точно удалить?
-      </Button>
+      </SubmitButton>
       <Button type="button" variant="ghost" onClick={() => setAsking(false)}>
         Нет
       </Button>

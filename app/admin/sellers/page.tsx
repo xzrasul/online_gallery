@@ -3,12 +3,12 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { sellerApplications } from '@/src/db/schema';
 import { AdminNav } from '@/src/components/admin/admin-nav';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { listPublicArtists } from '@/src/lib/artworks/public-queries';
 import { AVATAR_MESSAGES, type AvatarResult } from '@/src/lib/sellers/avatar';
 import { AvatarForm } from '@/src/components/sanat/avatar-form';
 import { approveApplication, rejectApplication, setArtistAvatar } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export default async function AdminSellersPage({ searchParams }: { searchParams: Promise<{ photo?: string }> }) {
   const role = await requireStaff();
@@ -32,14 +32,14 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <form action={approveApplication}>
                 <input type="hidden" name="applicationId" value={application.id} />
-                <Button type="submit">Одобрить</Button>
+                <SubmitButton>Одобрить</SubmitButton>
               </form>
               <form action={rejectApplication} className="flex w-full gap-2 sm:w-auto sm:flex-1">
                 <input type="hidden" name="applicationId" value={application.id} />
                 <Input type="text" name="reason" placeholder="Причина отказа" aria-label="Причина отказа" />
-                <Button type="submit" variant="outline">
+                <SubmitButton variant="outline">
                   Отклонить
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </section>

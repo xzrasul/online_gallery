@@ -4,8 +4,8 @@ import { getDb } from '@/src/db';
 import { requireStaff } from '@/src/lib/auth/staff';
 import { DB_TABLES, columnsOf, display, getRow, isTableName, type ColumnInfo } from '@/src/lib/admin/db-editor';
 import { AdminNav } from '@/src/components/admin/admin-nav';
-import { Button } from '@/src/components/ui/button';
 import { removeRow, saveRow } from '../../actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export const metadata = { title: 'База данных', robots: { index: false, follow: false } };
 
@@ -123,9 +123,9 @@ export default async function RowPage({
           <Field key={c.key} c={c} value={row?.[c.key]} inserting={inserting} />
         ))}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg">
             {inserting ? 'Добавить' : 'Сохранить'}
-          </Button>
+          </SubmitButton>
           <Link href={`/admin/database/${table}`} className="inline-flex min-h-10 items-center px-2 text-muted-foreground hover:text-brand">
             К таблице
           </Link>
@@ -146,9 +146,9 @@ export default async function RowPage({
             Да, удалить эту запись
           </label>
           <div>
-            <Button type="submit" variant="destructive" size="lg">
+            <SubmitButton variant="destructive" size="lg">
               Удалить
-            </Button>
+            </SubmitButton>
           </div>
         </form>
       )}

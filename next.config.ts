@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    // A page visited in the last 30 s opens at once from the browser's memory
+    // instead of asking the server again (server actions that change data
+    // revalidate, which clears this memory).
+    staleTimes: { dynamic: 30, static: 180 },
     serverActions: {
       // Artwork photos are posted through server actions. The form shrinks them
       // in the browser first; this leaves room for a large one without JS while

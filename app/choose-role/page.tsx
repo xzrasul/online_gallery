@@ -1,7 +1,7 @@
-import { Button } from '@/src/components/ui/button';
 import { BRAND_NAME } from '@/src/lib/brand';
 import { safeNextPath } from '@/src/lib/auth/next-path';
 import { chooseBuyer, chooseSeller } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export default async function ChooseRolePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const next = safeNextPath((await searchParams).next);
@@ -12,14 +12,14 @@ export default async function ChooseRolePage({ searchParams }: { searchParams: P
         <div className="mt-6 grid gap-3">
           <form action={chooseBuyer}>
             {next && <input type="hidden" name="next" value={next} />}
-            <Button type="submit" size="lg" className="w-full">
+            <SubmitButton size="lg" className="w-full">
               Я покупатель
-            </Button>
+            </SubmitButton>
           </form>
           <form action={chooseSeller}>
-            <Button type="submit" size="lg" variant="outline" className="w-full">
+            <SubmitButton size="lg" variant="outline" className="w-full">
               Хочу продавать картины
-            </Button>
+            </SubmitButton>
           </form>
         </div>
       </div>
