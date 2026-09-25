@@ -3,7 +3,7 @@ import { RevealCards } from '@/src/components/sanat/reveal-cards';
 import type { LikeInfo } from '@/src/lib/likes/likes';
 
 // `priorityCount`: how many leading images load eagerly (above-the-fold grids).
-// `likes`: like-button state per artwork id (see likeInfoFor); no hearts without it.
+// `likes`: heart state per artwork id (see likeInfoFor); no hearts without it.
 export function ArtworkGrid({
   artworks,
   revealBase,

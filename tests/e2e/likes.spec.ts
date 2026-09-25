@@ -66,16 +66,18 @@ test('a guest signs in from the heart, comes back, likes, and finds the work in 
     await page.reload();
     await expect(page.getByRole('button', { name: /Убрать из избранного\. 1 лайк$/ })).toBeVisible();
 
-    await page.getByRole('banner').getByRole('link', { name: 'Избранное' }).click();
+    await page.getByRole('banner').getByRole('link', { name: /Wishlist/ }).click();
     await expect(page).toHaveURL(/\/favorites$/, { timeout: 15000 });
     await expect(page.getByText(title)).toBeVisible();
 
+    // taking the heart off removes the card at once; wait for the server before reloading
+    const saved = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/favorites'));
     await page.getByRole('button', { name: /Убрать из избранного/ }).click();
-    const unliked = page.getByRole('button', { name: /Добавить в избранное\. 0 лайков$/ });
-    await expect(unliked).toBeVisible();
-    await expect(unliked).not.toHaveAttribute('aria-busy');
+    await expect(page.getByText(title)).toHaveCount(0);
+    await expect(page.getByText('Wishlist пока пуст')).toBeVisible();
+    await saved;
     await page.reload();
-    await expect(page.getByText('Здесь будут картины, которые вам понравились.')).toBeVisible();
+    await expect(page.getByText('Wishlist пока пуст')).toBeVisible();
   } finally {
     await getDb().delete(users).where(eq(users.telegramId, fanTelegramId));
     await cleanup();

@@ -6,6 +6,7 @@ import { setArtworkLike } from '@/src/lib/likes/actions';
 import type { LikeInfo } from '@/src/lib/likes/likes';
 import { plural } from '@/src/lib/ru-format';
 import { cn } from '@/src/lib/utils';
+import { emitWish, setLocalWish, useLocalWishlist } from '@/src/lib/wishlist/client';
 
 const LIKES: [string, string, string] = ['лайк', 'лайка', 'лайков'];
 
@@ -17,34 +18,41 @@ function useHydrated() {
   return hydrated;
 }
 
-function Heart() {
+export function HeartIcon() {
   return (
-    <svg className="heart" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M12 20.3 4.9 13.5a4.6 4.6 0 0 1 6.5-6.6l.6.6.6-.6a4.6 4.6 0 0 1 6.5 6.6Z" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 20.5s-7.6-4.6-9.4-9.3C1.4 8 3.3 5 6.6 5c2 0 3.4 1.1 5.4 3.2C14 6.1 15.4 5 17.4 5c3.3 0 5.2 3 4 6.2-1.8 4.7-9.4 9.3-9.4 9.3z" />
     </svg>
   );
 }
 
-// The heart with its count. Guests are sent to sign in and brought back to the
-// artwork; an artist sees the count on their own work but cannot like it.
-// Clicks show at once and roll back if the server says no.
+// The wishlist heart over an artwork picture. Guests are sent to sign in and
+// brought back to the artwork; an artist sees their own work's heart but cannot
+// like it. Clicks show at once and roll back if the server says no. `local`
+// works (the showcase) are remembered in this browser instead of the database.
 export function LikeButton({
   artworkId,
   info,
+  local = false,
   size = 'card',
 }: {
   artworkId: string;
   info: LikeInfo;
+  local?: boolean;
   size?: 'card' | 'big';
 }) {
   const [committed, setCommitted] = useState({ liked: info.liked, count: info.count });
   const [shown, setShown] = useOptimistic(committed);
   const [pending, startTransition] = useTransition();
   const [popped, setPopped] = useState(0);
+  const localIds = useLocalWishlist();
   // A click before the page is interactive would be lost silently; say so instead.
   const hydrated = useHydrated();
-  const countLabel = `${shown.count} ${plural(shown.count, LIKES)}`;
-  const className = cn('like', size === 'big' && 'big', shown.liked && 'on');
+
+  const liked = local ? localIds.includes(artworkId) : shown.liked;
+  const count = local ? info.count + (liked ? 1 : 0) : shown.count;
+  const countLabel = `${count} ${plural(count, LIKES)}`;
+  const className = cn('heart', size === 'big' && 'big', liked && 'on');
 
   if (info.state === 'guest') {
     return (
@@ -54,8 +62,7 @@ export function LikeButton({
         aria-label={`Войдите, чтобы добавить в избранное. ${countLabel}`}
         title="Войдите, чтобы добавить в избранное"
       >
-        <Heart />
-        <span className="like-n">{shown.count}</span>
+        <HeartIcon />
       </Link>
     );
   }
@@ -63,23 +70,32 @@ export function LikeButton({
   if (info.state === 'own') {
     return (
       <span className={cn(className, 'own')} role="img" aria-label={`Это ваша работа. ${countLabel}`} title="Это ваша работа">
-        <Heart />
-        <span className="like-n">{shown.count}</span>
+        <HeartIcon />
       </span>
     );
   }
 
   const toggle = () => {
-    const next = !shown.liked;
+    const next = !liked;
     if (next) setPopped((n) => n + 1);
+    if (local) {
+      setLocalWish(artworkId, next);
+      return;
+    }
+    emitWish({ id: artworkId, liked: next });
     startTransition(async () => {
       setShown({ liked: next, count: Math.max(0, shown.count + (next ? 1 : -1)) });
       const result = await setArtworkLike(artworkId, next).catch(() => null);
-      if (result?.ok) setCommitted({ liked: result.liked, count: result.count });
-      else if (result?.reason === 'sign_in') {
-        window.location.assign(`/sign-in?next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`);
+      if (result?.ok) {
+        setCommitted({ liked: result.liked, count: result.count });
+        if (result.liked !== next) emitWish({ id: artworkId, liked: result.liked });
+      } else {
+        // the optimistic state falls back to the last committed one
+        emitWish({ id: artworkId, liked: !next });
+        if (result?.reason === 'sign_in') {
+          window.location.assign(`/sign-in?next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`);
+        }
       }
-      // anything else: the optimistic state falls back to the last committed one
     });
   };
 
@@ -87,17 +103,16 @@ export function LikeButton({
     <button
       type="button"
       className={className}
-      aria-pressed={shown.liked}
-      aria-label={`${shown.liked ? 'Убрать из избранного' : 'Добавить в избранное'}. ${countLabel}`}
-      title={shown.liked ? 'Убрать из избранного' : 'Добавить в избранное'}
+      aria-pressed={liked}
+      aria-label={`${liked ? 'Убрать из избранного' : 'Добавить в избранное'}. ${countLabel}`}
+      title={liked ? 'Убрать из Wishlist' : 'Добавить в Wishlist'}
       aria-busy={pending || undefined}
       aria-disabled={!hydrated || undefined}
       onClick={hydrated ? toggle : undefined}
     >
-      <span className="heart-wrap" key={popped} data-pop={popped > 0 || undefined}>
-        <Heart />
+      <span className="heart-in" key={popped} data-pop={popped > 0 || undefined}>
+        <HeartIcon />
       </span>
-      <span className="like-n">{shown.count}</span>
     </button>
   );
 }

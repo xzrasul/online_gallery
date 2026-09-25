@@ -1,19 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { LikeButton } from '@/src/components/likes/like-button';
+import type { CardArtwork } from '@/src/lib/gallery/types';
 import type { LikeInfo } from '@/src/lib/likes/likes';
 
-export type ArtworkCardData = {
-  id: string;
-  title: string;
-  price: number;
-  imageUrl: string;
-  sellerDisplayName?: string;
-  status?: string;
-};
+export type ArtworkCardData = CardArtwork;
 
-// The whole card opens the artwork: the title link is stretched over it (a
-// link can't contain the like button, so the card itself is not a link).
+// One rounded block: the picture and the text under it share the card's inner
+// padding. The whole card opens the artwork (the title link is stretched over
+// it: a link can't contain the heart button, so the card itself is not a link).
 export function ArtworkCard({
   artwork,
   priority,
@@ -23,36 +18,39 @@ export function ArtworkCard({
   priority?: boolean;
   like?: LikeInfo;
 }) {
+  const href = `/gallery/artwork/${artwork.id}`;
   return (
-    <div className="card">
+    <article className="card">
       <div className="art">
         <Image
           src={artwork.imageUrl}
-          alt={artwork.title}
+          alt=""
           fill
           priority={priority}
-          sizes="(min-width: 1200px) 360px, (min-width: 700px) 45vw, 100vw"
+          sizes="(min-width: 1200px) 290px, (min-width: 860px) 31vw, 50vw"
           unoptimized
           className="pic"
+          style={artwork.focus ? { objectPosition: artwork.focus } : undefined}
+          draggable={false}
         />
-        {artwork.status === 'sold' && <span className="tag">Продано</span>}
+        {artwork.status === 'sold' ? (
+          <span className="badge sold">Продано</span>
+        ) : (
+          artwork.mock && <span className="badge">макет</span>
+        )}
+        {like && <LikeButton artworkId={artwork.id} info={like} local={artwork.mock} />}
       </div>
       <div className="meta">
-        <div>
-          <h3>
-            <Link href={`/gallery/artwork/${artwork.id}`} className="card-link">
-              {artwork.title}
-            </Link>
-          </h3>
+        <h3 title={artwork.title}>
+          <Link href={href} className="card-link">
+            {artwork.title}
+          </Link>
+        </h3>
+        <div className="mrow">
           {artwork.sellerDisplayName && <p className="by">{artwork.sellerDisplayName}</p>}
+          <span className="price">{artwork.price} TJS</span>
         </div>
-        <span className="price">{artwork.price} TJS</span>
       </div>
-      {like && (
-        <div className="card-like">
-          <LikeButton artworkId={artwork.id} info={like} />
-        </div>
-      )}
-    </div>
+    </article>
   );
 }

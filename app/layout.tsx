@@ -1,41 +1,32 @@
-import { Kelly_Slab, Kufam, Roboto_Slab } from 'next/font/google';
+import { Kufam, Oswald } from 'next/font/google';
 import type { Metadata } from 'next';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { siteUrl } from '@/src/lib/site-url';
 import { SiteFooter } from '@/src/components/site-footer';
 import { SiteHeader } from '@/src/components/site-header';
+import { Backdrop } from '@/src/components/sanat/backdrop';
+import { LoadingScreen } from '@/src/components/sanat/loading-screen';
+import { LOADING_BOOT_SCRIPT } from '@/src/lib/sanat/loading';
 import { PageFrame } from '@/src/components/sanat/page-frame';
-import { Stage } from '@/src/components/sanat/stage';
 import { SvgDefs } from '@/src/components/sanat/svg-defs';
 import { BRAND_NAME, BRAND_TAGLINE } from '@/src/lib/brand';
 import './globals.css';
 
-// Kelly Slab everywhere. It has no Tajik letters (ғ ӣ қ ӯ ҳ ҷ), so the browser
-// takes just those glyphs from Roboto Slab.
-const kelly = Kelly_Slab({
-  weight: '400',
-  subsets: ['latin', 'latin-ext', 'cyrillic'],
-  variable: '--font-kelly',
+// Oswald everywhere: 500 for text, 600 for headings. Its cyrillic-ext subset
+// carries the Tajik letters (Ғ Ӣ Қ Ӯ Ҳ Ҷ).
+const oswald = Oswald({
+  weight: ['500', '600'],
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext'],
+  variable: '--font-oswald',
   display: 'swap',
 });
-const robotoSlab = Roboto_Slab({
-  weight: '400',
-  subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
-  variable: '--font-roboto-slab',
-  display: 'swap',
-});
-// Only for the Arabic-script «صنعت» on the home page.
+// Only for the Arabic-script «صنعت».
 const kufam = Kufam({
   weight: '700',
   subsets: ['arabic'],
   variable: '--font-kufam',
   display: 'swap',
 });
-
-// next/font's family lists end with a metric-adjusted local(Arial) face, which
-// would catch the Tajik letters before Roboto Slab. Chain the primary families only.
-const primary = (font: { style: { fontFamily: string } }) => font.style.fontFamily.split(',')[0];
-const fontBody = `${primary(kelly)}, ${primary(robotoSlab)}, Georgia, serif`;
 
 // Link previews (Telegram, WhatsApp, social networks): every page gets the
 // brand card from app/opengraph-image.png unless it sets its own image.
@@ -57,22 +48,28 @@ export const metadata: Metadata = {
 export const viewport = {
   themeColor: '#08141F',
   colorScheme: 'dark',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="ru"
-      className={`${kelly.variable} ${robotoSlab.variable} ${kufam.variable}`}
-      style={{ '--font-body': fontBody } as CSSProperties}
-    >
+    // the boot script sets data-load on <html> before hydration
+    <html lang="ru" className={`${oswald.variable} ${kufam.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: LOADING_BOOT_SCRIPT }} />
+        <noscript>
+          <style>{'.loader{display:none}'}</style>
+        </noscript>
+      </head>
       <body>
         <SvgDefs />
-        <Stage>
+        <LoadingScreen />
+        <Backdrop />
+        <div className="stage">
           <SiteHeader />
           <PageFrame>{children}</PageFrame>
           <SiteFooter />
-        </Stage>
+        </div>
       </body>
     </html>
   );

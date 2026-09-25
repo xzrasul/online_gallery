@@ -8,23 +8,66 @@ import { getArtistPublicProfile } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
 import { plural, sinceMonth } from '@/src/lib/ru-format';
 import { getCurrentUser } from '@/src/lib/auth/session';
-import { likeInfoFor } from '@/src/lib/likes/likes';
+import { heartsFor } from '@/src/lib/gallery/likes';
+import { isUuid, type CardArtwork } from '@/src/lib/gallery/types';
+import { showcaseArtist, showcaseCard, showcaseWorksOf } from '@/src/lib/showcase';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
-import { KoshinBand } from '@/src/components/sanat/koshin-band';
-import { Medal } from '@/src/components/sanat/mandala';
+import { HeartIcon } from '@/src/components/likes/like-button';
 
 const WORKS: [string, string, string] = ['работа', 'работы', 'работ'];
 
-// One query per request, shared by the page and its metadata.
-const loadProfile = cache((id: string) => getArtistPublicProfile(getDb(), id));
+type Profile = {
+  name: string;
+  info?: string;
+  bio: string[];
+  telegram?: string | null;
+  mock: boolean;
+  available: CardArtwork[];
+  sold: CardArtwork[];
+  mockLikes?: number;
+};
+
+// One lookup per request, shared by the page and its metadata. Showcase
+// artists have word ids; anything else must be a uuid to reach the database.
+const loadProfile = cache(async (id: string): Promise<Profile | undefined> => {
+  const mock = showcaseArtist(id);
+  if (mock) {
+    const works = showcaseWorksOf(id);
+    return {
+      name: mock.name,
+      info: mock.info,
+      bio: mock.bio,
+      mock: true,
+      available: works.map(showcaseCard),
+      sold: [],
+      mockLikes: works.reduce((n, w) => n + w.likes, 0),
+    };
+  }
+  if (!isUuid(id)) return undefined;
+  const p = await getArtistPublicProfile(getDb(), id);
+  if (!p) return undefined;
+  const card = (a: (typeof p.artworks)[number]): CardArtwork => ({ ...a, sellerId: id, sellerDisplayName: p.displayName });
+  return {
+    name: p.displayName,
+    info: p.joinedAt ? `На sanatplace ${sinceMonth(p.joinedAt)}` : undefined,
+    bio: p.bio
+      .split(/\n\s*\n|\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+    telegram: p.telegramContact,
+    mock: false,
+    available: p.artworks.filter((a) => a.status === 'published').map(card),
+    sold: p.artworks.filter((a) => a.status === 'sold').map(card),
+  };
+});
 
 // Link preview: the artist's name, bio, and their newest work on sale (or sold).
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const profile = await loadProfile((await params).id);
   if (!profile) return {};
-  const title = `${profile.displayName} — художник`;
-  const description = snippet(profile.bio);
-  const cover = profile.artworks.find((a) => a.status === 'published') ?? profile.artworks[0];
+  const title = `${profile.name} — художник`;
+  const description = snippet(profile.bio.join(' '));
+  const cover = profile.available[0] ?? profile.sold[0];
   return {
     title,
     description,
@@ -37,84 +80,100 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
   const profile = await loadProfile(id);
   if (!profile) notFound();
 
-  const telegram = telegramHref(profile.telegramContact);
-  const available = profile.artworks.filter((a) => a.status === 'published');
-  const sold = profile.artworks.filter((a) => a.status === 'sold');
   const viewer = await getCurrentUser();
-  const likes = await likeInfoFor(
-    getDb(),
-    profile.artworks.map((a) => ({ id: a.id, sellerId: id })),
-    viewer?.id ?? null,
-  );
-  const totalLikes = Object.values(likes).reduce((sum, l) => sum + l.count, 0);
-  const facts = [
-    profile.joinedAt && `На sanatplace ${sinceMonth(profile.joinedAt)}`,
-    available.length > 0 ? `${available.length} ${plural(available.length, WORKS)} в продаже` : 'Сейчас нет работ в продаже',
-    sold.length > 0 && `${sold.length} ${plural(sold.length, ['продана', 'проданы', 'продано'])}`,
-    totalLikes > 0 && `${totalLikes} ${plural(totalLikes, ['лайк', 'лайка', 'лайков'])}`,
-  ].filter(Boolean);
+  const works = [...profile.available, ...profile.sold];
+  const likes = await heartsFor(getDb(), works, viewer?.id ?? null);
+  const totalLikes = profile.mockLikes ?? Object.values(likes).reduce((sum, l) => sum + l.count, 0);
+  const telegram = telegramHref(profile.telegram ?? null);
+  const n = profile.available.length;
 
   return (
     <main>
-      <KoshinBand />
-      <div className="wrap stack">
-        <Link className="btn alt sm back" href="/gallery">
-          ← В каталог
-        </Link>
+      <div className="wrap stack pg">
+        <nav className="crumbs" aria-label="Путь">
+          <Link href="/">Главная</Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/artists">Художники</Link>
+          <span aria-hidden="true">/</span>
+          <span>{profile.name}</span>
+        </nav>
 
-        <div className="head-row">
-          <div>
-            <p className="eyebrow">Художник</p>
-            <h1 className="t artist-name">{profile.displayName}</h1>
-            <ul className="facts" aria-label="Коротко о художнике">
-              {facts.map((fact) => (
-                <li key={fact as string}>{fact}</li>
-              ))}
-            </ul>
-            {telegram ? (
-              <div className="contact">
-                <a className="btn" href={telegram} target="_blank" rel="noopener noreferrer">
-                  Написать в Telegram
-                </a>
-                <span className="handle">{telegram.replace('https://t.me/', '@')}</span>
-              </div>
-            ) : (
-              profile.telegramContact && <p className="contact muted">Telegram: {profile.telegramContact}</p>
-            )}
+        <div className="panel prof">
+          <div className="prof-head">
+            <span className="avatar avatar-xl" aria-hidden="true">
+              {profile.name.charAt(0).toUpperCase()}
+            </span>
+            <div className="prof-id">
+              <h1 className="t">{profile.name}</h1>
+              {profile.info && <p className="prof-info">{profile.info}</p>}
+            </div>
           </div>
-          <Medal size="sm" />
+          <ul className="prof-stats" aria-label="Коротко о художнике">
+            <li>
+              <b>{n}</b>
+              <span>
+                {plural(n, WORKS)} в продаже{profile.mock && ' · макет'}
+              </span>
+            </li>
+            {profile.sold.length > 0 && (
+              <li>
+                <b>{profile.sold.length}</b>
+                <span>{plural(profile.sold.length, ['продана', 'проданы', 'продано'])}</span>
+              </li>
+            )}
+            <li>
+              <b>
+                <HeartIcon />
+                {totalLikes}
+              </b>
+              <span>{plural(totalLikes, ['лайк', 'лайка', 'лайков'])} всего</span>
+            </li>
+          </ul>
+          {profile.bio.length > 0 && (
+            <>
+              <h2 className="sub">Биография</h2>
+              <div className="bio">
+                {profile.bio.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+            </>
+          )}
+          {telegram ? (
+            <div className="contact">
+              <a className="btn" href={telegram} target="_blank" rel="noopener noreferrer">
+                Написать в Telegram
+              </a>
+              <span className="handle">{telegram.replace('https://t.me/', '@')}</span>
+            </div>
+          ) : (
+            profile.telegram && <p className="contact handle">Telegram: {profile.telegram}</p>
+          )}
         </div>
 
-        <section className="panel" aria-labelledby="about-title">
-          <h2 id="about-title" className="panel-title">
-            О художнике
-          </h2>
-          <p className="bio">{profile.bio}</p>
-        </section>
-
-        <section className="panel" id="works" aria-labelledby="works-title">
+        <section className="sec" id="works" aria-labelledby="works-title">
           <div className="sec-head">
             <h2 id="works-title">Работы в продаже</h2>
-            {available.length > 0 && (
-              <span className="count">
-                {available.length} {plural(available.length, WORKS)}
-              </span>
+            {n > 0 && (
+              <p className="count">
+                {n} {plural(n, WORKS)}
+              </p>
             )}
           </div>
-          {available.length === 0 ? (
+          {n === 0 ? (
             <p className="empty">Сейчас у художника нет работ в продаже.</p>
           ) : (
-            <ArtworkGrid artworks={available} likes={likes} />
+            <ArtworkGrid artworks={profile.available} likes={likes} />
           )}
         </section>
 
-        {sold.length > 0 && (
-          <section className="panel" aria-labelledby="sold-title">
+        {profile.sold.length > 0 && (
+          <section className="sec" aria-labelledby="sold-title">
             <div className="sec-head">
               <h2 id="sold-title">Уже проданы</h2>
             </div>
             <p className="sold-note">Эти работы нашли своих владельцев. О похожей можно спросить художника.</p>
-            <ArtworkGrid artworks={sold} likes={likes} />
+            <ArtworkGrid artworks={profile.sold} likes={likes} />
           </section>
         )}
       </div>

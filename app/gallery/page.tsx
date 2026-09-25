@@ -1,15 +1,13 @@
+import Link from 'next/link';
 import { getDb } from '@/src/db';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { Pagination } from '@/src/components/artwork/pagination';
-import { CatalogFilters } from '@/src/components/sanat/catalog-filters';
-import { KoshinBand } from '@/src/components/sanat/koshin-band';
-import { Medal } from '@/src/components/sanat/mandala';
-import { listPublishedArtworks } from '@/src/lib/artworks/public-queries';
-import { catalogHref } from '@/src/lib/catalog-href';
-import { listCategories } from '@/src/lib/catalog/categories';
-import { listTechniques } from '@/src/lib/catalog/techniques';
+import { CatalogFilters, type ActiveTag } from '@/src/components/sanat/catalog-filters';
+import { catalogHref, type CatalogParams } from '@/src/lib/catalog-href';
+import { loadCatalogOptions, searchCatalog } from '@/src/lib/gallery/catalog';
+import { heartsFor } from '@/src/lib/gallery/likes';
 import { getCurrentUser } from '@/src/lib/auth/session';
-import { likeInfoFor } from '@/src/lib/likes/likes';
+import { plural } from '@/src/lib/ru-format';
 
 const PAGE_SIZE = 24;
 
@@ -18,71 +16,50 @@ export const metadata = {
   description: 'Оригинальные картины напрямую от художников: выбирайте по категории, технике и цене.',
 };
 
-export default async function GalleryPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    categoryId?: string;
-    techniqueId?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    page?: string;
-  }>;
-}) {
+export default async function GalleryPage({ searchParams }: { searchParams: Promise<CatalogParams> }) {
   const params = await searchParams;
   const parsedPage = Number(params.page);
   const page = Number.isFinite(parsedPage) ? Math.max(1, Math.floor(parsedPage)) : 1;
-  const minPrice = params.minPrice ? Number(params.minPrice) : undefined;
-  const maxPrice = params.maxPrice ? Number(params.maxPrice) : undefined;
 
-  const [{ items, total }, categories, techniques, user] = await Promise.all([
-    listPublishedArtworks(
-      getDb(),
-      {
-        categoryId: params.categoryId || undefined,
-        techniqueId: params.techniqueId || undefined,
-        minPrice: Number.isFinite(minPrice) ? minPrice : undefined,
-        maxPrice: Number.isFinite(maxPrice) ? maxPrice : undefined,
-      },
-      { page, pageSize: PAGE_SIZE },
-    ),
-    listCategories(getDb()),
-    listTechniques(getDb()),
-    getCurrentUser(),
-  ]);
-  const likes = await likeInfoFor(getDb(), items, user?.id ?? null);
-
+  const [options, user] = await Promise.all([loadCatalogOptions(getDb()), getCurrentUser()]);
+  const { items, total } = await searchCatalog(getDb(), params, { page, pageSize: PAGE_SIZE }, options);
+  const likes = await heartsFor(getDb(), items, user?.id ?? null);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const activeCount = [params.categoryId, params.techniqueId, params.minPrice, params.maxPrice].filter(Boolean).length;
-  // A new query remounts the filters (fresh field values, folded) and replays the cards' reveal.
+
+  const nameOf = (list: { id: string; name: string }[], id?: string) => list.find((o) => o.id === id)?.name ?? '…';
+  const tags: ActiveTag[] = [];
+  if (params.categoryId) tags.push({ label: `Категория: ${nameOf(options.categories, params.categoryId)}`, href: catalogHref(params, 1, ['categoryId']) });
+  if (params.artistId) tags.push({ label: `Художник: ${nameOf(options.artists, params.artistId)}`, href: catalogHref(params, 1, ['artistId']) });
+  if (params.techniqueId) tags.push({ label: `Техника: ${nameOf(options.techniques, params.techniqueId)}`, href: catalogHref(params, 1, ['techniqueId']) });
+  if (params.minPrice || params.maxPrice) {
+    const range = [params.minPrice && `от ${params.minPrice}`, params.maxPrice && `до ${params.maxPrice}`].filter(Boolean).join(' ');
+    tags.push({ label: `Цена: ${range} TJS`, href: catalogHref(params, 1, ['minPrice', 'maxPrice']) });
+  }
+  // A new query replays the cards' reveal.
   const query = catalogHref(params, page);
 
   return (
     <main>
-      <KoshinBand />
-      <div className="wrap stack">
+      <div className="wrap stack pg">
         <div className="head-row">
           <h1 className="t">Каталог картин</h1>
-          <Medal size="sm" />
+          <p className="count" aria-live="polite">
+            {total} {plural(total, ['картина', 'картины', 'картин'])}
+          </p>
         </div>
-        <CatalogFilters
-          key={query}
-          categories={categories}
-          techniques={techniques}
-          values={params}
-          activeCount={activeCount}
-        />
-        <section className="panel" aria-labelledby="list-title">
-          <div className="sec-head">
-            <h2 id="list-title">Список картин</h2>
+        <CatalogFilters options={options} values={params} activeCount={tags.length} tags={tags} query={query} />
+        {items.length === 0 ? (
+          <div className="empty">
+            <h3>Ничего не найдено</h3>
+            <p>Попробуйте изменить запрос или убрать часть фильтров.</p>
+            <Link className="btn" href="/gallery">
+              Сбросить фильтры
+            </Link>
           </div>
-          {items.length === 0 ? (
-            <p className="empty">Ничего не найдено.{activeCount > 0 && ' Попробуйте изменить или сбросить фильтры.'}</p>
-          ) : (
-            <ArtworkGrid key={query} artworks={items} revealBase={150} priorityCount={3} likes={likes} />
-          )}
-          <Pagination params={params} page={Math.min(page, totalPages)} totalPages={totalPages} />
-        </section>
+        ) : (
+          <ArtworkGrid key={query} artworks={items} revealBase={150} priorityCount={4} likes={likes} />
+        )}
+        <Pagination params={params} page={Math.min(page, totalPages)} totalPages={totalPages} />
       </div>
     </main>
   );

@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { BotLogin } from '@/src/components/auth/bot-login';
-import { KoshinBand } from '@/src/components/sanat/koshin-band';
 import { Medal } from '@/src/components/sanat/mandala';
 import { BRAND_NAME } from '@/src/lib/brand';
 import { safeNextPath } from '@/src/lib/auth/next-path';
@@ -19,11 +18,9 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
 
   return (
     <main>
-      <KoshinBand />
-      <div className="wrap signin">
+      <div className="wrap signin pg">
         <Medal size="md" />
         <div className="panel login">
-          <KoshinBand small />
           <div className="body">
             <h1>Вход в {BRAND_NAME}</h1>
             <p>

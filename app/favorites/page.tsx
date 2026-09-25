@@ -1,13 +1,11 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
-import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { likeInfoFor, listFavorites } from '@/src/lib/likes/likes';
-import { plural } from '@/src/lib/ru-format';
+import { WishlistGrid } from '@/src/components/sanat/wishlist-grid';
 
 export const metadata = {
-  title: 'Избранное',
+  title: 'Wishlist',
 };
 
 // Every artwork the signed-in user (buyer or artist) has liked, newest like first.
@@ -19,28 +17,18 @@ export default async function FavoritesPage() {
   const likes = await likeInfoFor(getDb(), favourites, user.id);
 
   return (
-    <main className="stack favorites">
-      <div>
-        <h1 className="t">Избранное</h1>
-        <p className="muted">
-          {favourites.length > 0
-            ? `${favourites.length} ${plural(favourites.length, ['картина', 'картины', 'картин'])}, которые вам понравились.`
-            : 'Здесь будут картины, которые вам понравились.'}
-        </p>
+    <main>
+      <div className="wrap stack pg">
+        <div className="head-row">
+          <div>
+            <h1 className="t">Wishlist</h1>
+            <p className="fav-sub">Картины, которые вы отметили сердечком</p>
+          </div>
+        </div>
+        <section className="sec wish" aria-label="Отмеченные картины">
+          <WishlistGrid saved={favourites} likes={likes} />
+        </section>
       </div>
-      <section className="panel" aria-label="Понравившиеся картины">
-        {favourites.length === 0 ? (
-          <p className="empty">
-            Отмечайте сердцем картины в{' '}
-            <Link href="/gallery" className="more">
-              каталоге
-            </Link>
-            , и они появятся здесь.
-          </p>
-        ) : (
-          <ArtworkGrid artworks={favourites} likes={likes} />
-        )}
-      </section>
     </main>
   );
 }
