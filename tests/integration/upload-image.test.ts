@@ -29,6 +29,6 @@ describe('uploadArtworkImage', () => {
 
   it('refuses a file that is not an image, without uploading anything', async () => {
     const junk = new File([new Uint8Array([137, 80, 78, 71])], 'fake.png', { type: 'image/png' });
-    expect(await tryUploadArtworkImage(junk)).toBeNull();
+    expect(await tryUploadArtworkImage(junk)).toEqual({ error: 'image' });
   });
 });

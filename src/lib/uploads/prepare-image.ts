@@ -1,5 +1,3 @@
-import sharp from 'sharp';
-
 // Every artwork photo is stored the same way: turned upright (EXIF orientation),
 // at most 2000px on its long side, as WebP, with all metadata removed — phone
 // photos carry GPS coordinates, which must not end up public.
@@ -13,8 +11,12 @@ export class UnreadableImageError extends Error {
   }
 }
 
+// sharp is a native module, loaded only when a photo is processed: if it
+// can't load on the server, the pages that hold the upload form still open,
+// and the upload fails with a message instead of the whole page failing.
 export async function normalizeArtworkImage(input: ArrayBuffer | Buffer): Promise<Buffer> {
   const buffer = Buffer.isBuffer(input) ? input : Buffer.from(input);
+  const { default: sharp } = await import('sharp');
   try {
     return await sharp(buffer, { failOn: 'error' })
       .rotate()

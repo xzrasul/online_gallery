@@ -41,8 +41,12 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
     redirect(`/dashboard/seller/${artworkId}/edit?error=invalid`);
   }
 
-  const imageUrl = image instanceof File && image.size > 0 ? await tryUploadArtworkImage(image) : existing.imageUrl;
-  if (!imageUrl) redirect(`/dashboard/seller/${artworkId}/edit?error=image`);
+  let imageUrl = existing.imageUrl;
+  if (image instanceof File && image.size > 0) {
+    const upload = await tryUploadArtworkImage(image);
+    if (upload.error) redirect(`/dashboard/seller/${artworkId}/edit?error=${upload.error}`);
+    imageUrl = upload.url!;
+  }
 
   await updateArtwork(getDb(), {
     artworkId,
