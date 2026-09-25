@@ -13,9 +13,11 @@ test('/cabinet sends each user to the cabinet of their role', async ({ page }) =
     // the header link points at /cabinet
     await expect(page.getByRole('banner').getByRole('link', { name: 'Личный кабинет' })).toHaveAttribute('href', '/cabinet');
 
-    // new buyer without an application: the role picker
+    // buyer without an application: the buyer cabinet (the role picker is only
+    // for the first sign-in), with a way to start selling
     await page.goto('/cabinet');
-    await expect(page).toHaveURL(/\/choose-role/);
+    await expect(page).toHaveURL(/\/dashboard\/buyer$/);
+    await expect(page.getByRole('link', { name: 'Подать заявку продавца' })).toHaveAttribute('href', '/become-seller');
 
     // buyer with an application: the application status page
     await getDb().insert(sellerApplications).values({
