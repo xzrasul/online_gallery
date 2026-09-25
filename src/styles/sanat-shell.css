@@ -443,6 +443,20 @@
     height: 100%;
   }
 
+  /* ---------- page change (app/loading.tsx) ---------- */
+  .page-wait {
+    display: grid;
+    place-items: center;
+    min-height: 50vh;
+  }
+  .page-wait-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--soft-2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+  }
+
   /* ---------- first-load screen ---------- */
   html[data-load='loading'],
   html[data-load='loading'] body {
