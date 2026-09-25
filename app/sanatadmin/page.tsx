@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getStaffRole } from '@/src/lib/auth/staff';
 import { staffSignIn } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export const metadata = {
   title: 'Вход для администрации',
@@ -37,9 +38,9 @@ export default async function StaffSignInPage({ searchParams }: { searchParams: 
           <span>Пароль</span>
           <input name="password" type="password" autoComplete="current-password" required />
         </label>
-        <button type="submit" className="btn wide">
+        <SubmitButton plain className="btn wide">
           Войти
-        </button>
+        </SubmitButton>
       </form>
     </main>
   );

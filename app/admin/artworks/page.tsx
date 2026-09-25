@@ -3,9 +3,9 @@ import { getDb } from '@/src/db';
 import { listPendingArtworks } from '@/src/lib/artworks/admin-operations';
 import { AdminNav } from '@/src/components/admin/admin-nav';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { approveArtwork, rejectArtwork } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export default async function AdminArtworksPage() {
   const role = await requireStaff();
@@ -34,14 +34,14 @@ export default async function AdminArtworksPage() {
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <form action={approveArtwork}>
                   <input type="hidden" name="artworkId" value={artwork.id} />
-                  <Button type="submit">Одобрить</Button>
+                  <SubmitButton>Одобрить</SubmitButton>
                 </form>
                 <form action={rejectArtwork} className="flex w-full gap-2 sm:w-auto sm:flex-1">
                   <input type="hidden" name="artworkId" value={artwork.id} />
                   <Input type="text" name="reason" placeholder="Причина отказа" aria-label="Причина отказа" />
-                  <Button type="submit" variant="outline">
+                  <SubmitButton variant="outline">
                     Отклонить
-                  </Button>
+                  </SubmitButton>
                 </form>
               </div>
             </div>

@@ -5,8 +5,9 @@ import { getDb } from '@/src/db';
 import { listArtworksForSeller } from '@/src/lib/artworks/seller-operations';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
 import { StatusBadge } from '@/src/components/artwork/status-badge';
-import { Button, buttonVariants } from '@/src/components/ui/button';
+import { buttonVariants } from '@/src/components/ui/button';
 import { markAsSold } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export default async function SellerDashboardPage() {
   const user = await getCurrentUser();
@@ -53,9 +54,9 @@ export default async function SellerDashboardPage() {
                 {artwork.status === 'published' && (
                   <form action={markAsSold} className="flex">
                     <input type="hidden" name="artworkId" value={artwork.id} />
-                    <Button type="submit" variant="outline" size="sm">
+                    <SubmitButton variant="outline" size="sm">
                       Отметить как продано
-                    </Button>
+                    </SubmitButton>
                   </form>
                 )}
               </div>

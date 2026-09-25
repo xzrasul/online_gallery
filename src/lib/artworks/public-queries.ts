@@ -54,21 +54,23 @@ export async function listPublishedArtworks(
   }
   const where = and(...conditions);
 
-  const items = await db
-    .select(CARD_COLUMNS)
-    .from(artworks)
-    .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
-    .innerJoin(techniques, eq(artworks.techniqueId, techniques.id))
-    .where(where)
-    .orderBy(...ORDER[sort])
-    .limit(pagination.pageSize)
-    .offset((pagination.page - 1) * pagination.pageSize);
-
-  const [{ total }] = await db
-    .select({ total: sql<number>`count(*)::int` })
-    .from(artworks)
-    .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
-    .where(where);
+  // the page and the total are asked for together
+  const [items, [{ total }]] = await Promise.all([
+    db
+      .select(CARD_COLUMNS)
+      .from(artworks)
+      .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
+      .innerJoin(techniques, eq(artworks.techniqueId, techniques.id))
+      .where(where)
+      .orderBy(...ORDER[sort])
+      .limit(pagination.pageSize)
+      .offset((pagination.page - 1) * pagination.pageSize),
+    db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(artworks)
+      .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
+      .where(where),
+  ]);
 
   return { items, total };
 }

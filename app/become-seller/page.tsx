@@ -1,9 +1,9 @@
 import { Field } from '@/src/components/form/field';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Textarea } from '@/src/components/ui/textarea';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { submitSellerApplication } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export default async function BecomeSellerPage({
   searchParams,
@@ -39,9 +39,9 @@ export default async function BecomeSellerPage({
               defaultValue={user?.username ? `@${user.username}` : undefined}
             />
           </Field>
-          <Button type="submit" size="lg">
+          <SubmitButton size="lg">
             Отправить на рассмотрение
-          </Button>
+          </SubmitButton>
         </form>
       </div>
     </main>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { catalogHref, type CatalogParams } from '@/src/lib/catalog-href';
 import type { CatalogOptions } from '@/src/lib/gallery/catalog';
+import { startNavProgress } from '@/src/components/sanat/instant-feedback';
 
 export type ActiveTag = { label: string; href: string };
 
@@ -63,6 +64,7 @@ export function CatalogFilters({
   };
   const apply = (replace = false) => {
     const href = hrefFromForm();
+    if (href !== location.pathname + location.search) startNavProgress();
     if (replace) router.replace(href, { scroll: false });
     else router.push(href, { scroll: false });
   };

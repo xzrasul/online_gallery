@@ -7,6 +7,7 @@ import { AdminNav } from '@/src/components/admin/admin-nav';
 import { ConfirmDelete } from '@/src/components/admin/confirm-delete';
 import { Button, buttonVariants } from '@/src/components/ui/button';
 import { moveBannerAction, removeBanner, toggleBanner } from './actions';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 export const metadata = { title: 'Баннеры' };
 
@@ -81,9 +82,9 @@ export default async function AdminBannersPage({
                   <form action={moveBannerAction}>
                     <input type="hidden" name="id" value={b.id} />
                     <input type="hidden" name="dir" value="up" />
-                    <Button type="submit" variant="outline" disabled={k === 0} aria-label={`Выше: ${b.title}`}>
+                    <SubmitButton variant="outline" disabled={k === 0} aria-label={`Выше: ${b.title}`}>
                       Вверх
-                    </Button>
+                    </SubmitButton>
                   </form>
                   <form action={moveBannerAction}>
                     <input type="hidden" name="id" value={b.id} />
@@ -100,9 +101,9 @@ export default async function AdminBannersPage({
                   <form action={toggleBanner}>
                     <input type="hidden" name="id" value={b.id} />
                     <input type="hidden" name="active" value={b.isActive ? '0' : '1'} />
-                    <Button type="submit" variant={b.isActive ? 'outline' : 'default'} aria-label={`${b.isActive ? 'Выключить' : 'Включить'}: ${b.title}`}>
+                    <SubmitButton variant={b.isActive ? 'outline' : 'default'} aria-label={`${b.isActive ? 'Выключить' : 'Включить'}: ${b.title}`}>
                       {b.isActive ? 'Выключить' : 'Включить'}
-                    </Button>
+                    </SubmitButton>
                   </form>
                   <Link href={`/admin/banners/${b.id}`} className={buttonVariants({ variant: 'outline' })}>
                     Изменить

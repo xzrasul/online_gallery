@@ -2,9 +2,9 @@ import { Field } from '@/src/components/form/field';
 import { NativeSelect } from '@/src/components/form/native-select';
 import { ArtworkImage } from '@/src/components/artwork/artwork-image';
 import { ArtworkPhotoInput } from '@/src/components/artwork/artwork-photo-input';
-import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Textarea } from '@/src/components/ui/textarea';
+import { SubmitButton } from '@/src/components/form/submit-button';
 
 type Option = { id: string; name: string };
 type Defaults = {
@@ -122,9 +122,9 @@ export function ArtworkForm({
         <Field label={imageLabel}>
           <ArtworkPhotoInput required={imageRequired} />
         </Field>
-        <Button type="submit" size="lg" className="justify-self-start">
+        <SubmitButton size="lg" className="justify-self-start">
           {submitLabel}
-        </Button>
+        </SubmitButton>
       </form>
     </>
   );
