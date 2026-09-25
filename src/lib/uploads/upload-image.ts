@@ -19,14 +19,18 @@ export async function deleteArtworkImages(publicUrls: string[]): Promise<void> {
   if (error) throw new Error(`Image delete failed: ${error.message}`);
 }
 
-// For forms: the public URL, or null when the file is not a readable image
-// (so the form can say so instead of failing).
-export async function tryUploadArtworkImage(file: File): Promise<string | null> {
+// For forms: the public URL, or why there is none, so the form can say so
+// instead of failing: 'image' when the file is not a readable image, 'upload'
+// when the server could not process or store it (the cause is logged).
+export async function tryUploadArtworkImage(
+  file: File,
+): Promise<{ url: string; error?: undefined } | { url?: undefined; error: 'image' | 'upload' }> {
   try {
-    return await uploadArtworkImage(file);
+    return { url: await uploadArtworkImage(file) };
   } catch (error) {
-    if (error instanceof UnreadableImageError) return null;
-    throw error;
+    if (error instanceof UnreadableImageError) return { error: 'image' };
+    console.error('artwork image upload failed', error);
+    return { error: 'upload' };
   }
 }
 

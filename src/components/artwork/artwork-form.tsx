@@ -55,6 +55,14 @@ export function ArtworkForm({
           Не удалось прочитать фото. Сохраните его в формате JPG или PNG и загрузите снова.
         </p>
       )}
+      {error === 'upload' && (
+        <p
+          role="alert"
+          className="mt-4 rounded-sm border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          Не удалось сохранить фото на сервере. Попробуйте ещё раз чуть позже.
+        </p>
+      )}
       <form action={action} className="mt-6 grid max-w-xl grid-cols-[minmax(0,1fr)] gap-5 rounded-sm border border-border bg-card p-5 sm:p-6">
         <Field label="Название">
           <Input type="text" name="title" defaultValue={defaults?.title} required />

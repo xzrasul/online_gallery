@@ -40,8 +40,9 @@ export async function submitNewArtwork(formData: FormData) {
     redirect('/dashboard/seller/new?error=invalid');
   }
 
-  const imageUrl = await tryUploadArtworkImage(image as File);
-  if (!imageUrl) redirect('/dashboard/seller/new?error=image');
+  const upload = await tryUploadArtworkImage(image as File);
+  if (upload.error) redirect(`/dashboard/seller/new?error=${upload.error}`);
+  const imageUrl = upload.url!;
 
   await createArtwork(getDb(), {
     sellerId: user.id,

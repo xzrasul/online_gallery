@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // sharp's native binary and libvips are loaded at run time, and the build's
+  // file tracing misses them, so Vercel's functions came without them and the
+  // artwork pages failed with a 500. Ship them with the routes that upload.
+  outputFileTracingIncludes: {
+    '/dashboard/seller/**': [
+      './node_modules/sharp/**/*',
+      './node_modules/@img/sharp-linux-x64/**/*',
+      './node_modules/@img/sharp-libvips-linux-x64/**/*',
+    ],
+  },
   experimental: {
     serverActions: {
       // Artwork photos are posted through server actions. The form shrinks them
