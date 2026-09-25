@@ -24,7 +24,8 @@ export const parseSort = (value: string | undefined): CatalogSort =>
   SORTS.includes(value as CatalogSort) ? (value as CatalogSort) : 'new';
 
 // Everything the catalog's filter panel offers. Categories carry their work
-// counts and empty ones are left out; so are artists with nothing on sale.
+// counts, empty ones included (0), so the full list is always there; artists
+// with nothing on sale are left out.
 export async function loadCatalogOptions(db: Db): Promise<CatalogOptions> {
   const [categories, techniques, counts, artists] = await Promise.all([
     listCategories(db),
@@ -33,9 +34,7 @@ export async function loadCatalogOptions(db: Db): Promise<CatalogOptions> {
     listPublicArtists(db),
   ]);
   return {
-    categories: categories
-      .map((c) => ({ id: c.id, name: c.name, count: counts.get(c.id) ?? 0 }))
-      .filter((c) => c.count > 0),
+    categories: categories.map((c) => ({ id: c.id, name: c.name, count: counts.get(c.id) ?? 0 })),
     techniques: techniques.map((t) => ({ id: t.id, name: t.name })),
     artists: artists.filter((a) => a.works > 0).map((a) => ({ id: a.id, name: a.displayName })),
   };
