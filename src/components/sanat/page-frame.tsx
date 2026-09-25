@@ -13,7 +13,8 @@ function isPublicPage(pathname: string) {
     pathname === '/artists' ||
     pathname === '/favorites' ||
     pathname === '/sell' ||
-    pathname === '/sign-in'
+    pathname === '/sign-in' ||
+    pathname === '/sanatadmin'
   );
 }
 

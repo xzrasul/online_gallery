@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { signInAsNewUser } from './helpers/auth';
+import { signInAsNewUser, signInAsStaff } from './helpers/auth';
 import { testTelegramId } from '../helpers/test-telegram-id';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
@@ -41,7 +41,7 @@ test('admin approves a pending artwork', async ({ page }) => {
   try {
     const adminUser = await signInAsNewUser(page, 'artwork_mod_admin');
     adminUserId = adminUser.id;
-    await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
+    await signInAsStaff(page, 'moderator');
 
     await page.goto('/admin/artworks');
     await expect(page.getByText(artworkTitle)).toBeVisible();

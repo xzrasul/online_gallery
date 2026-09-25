@@ -1,33 +1,26 @@
 'use server';
 
-import { getCurrentUser } from '@/src/lib/auth/session';
+import { requireStaff } from '@/src/lib/auth/staff';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/src/db';
 import { approveOrRejectArtwork } from '@/src/lib/artworks/admin-operations';
 
-async function requireAdmin() {
-  const admin = await getCurrentUser();
-  if (!admin) redirect('/sign-in');
-  if (admin.role !== 'admin') redirect('/');
-  return admin;
-}
-
 export async function approveArtwork(formData: FormData) {
-  const admin = await requireAdmin();
+  await requireStaff();
   const artworkId = String(formData.get('artworkId') ?? '').trim();
   if (!artworkId) redirect('/admin/artworks');
-  await approveOrRejectArtwork(getDb(), { artworkId, adminUserId: admin.id, decision: 'approve' });
+  await approveOrRejectArtwork(getDb(), { artworkId, adminUserId: null, decision: 'approve' });
   revalidatePath('/admin/artworks');
 }
 
 export async function rejectArtwork(formData: FormData) {
-  const admin = await requireAdmin();
+  await requireStaff();
   const artworkId = String(formData.get('artworkId') ?? '').trim();
   if (!artworkId) redirect('/admin/artworks');
   await approveOrRejectArtwork(getDb(), {
     artworkId,
-    adminUserId: admin.id,
+    adminUserId: null,
     decision: 'reject',
     reason: String(formData.get('reason') || ''),
   });

@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { eq } from 'drizzle-orm';
-import { getDb } from '../../src/db';
-import { users } from '../../src/db/schema';
-import { signInAsNewUser, signOut } from './helpers/auth';
+import { signInAsNewUser, signInAsStaff, signOut } from './helpers/auth';
 
 test('admin approves a pending seller application', async ({ page }) => {
   // Sign in the future seller and submit an application.
@@ -19,9 +16,8 @@ test('admin approves a pending seller application', async ({ page }) => {
 
   await signOut(page);
 
-  // Sign in a second account and promote it to admin directly in the DB.
-  const adminUser = await signInAsNewUser(page, 'moderation_admin');
-  await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
+  // The moderator signs in at /sanatadmin (no Telegram account needed).
+  await signInAsStaff(page, 'moderator');
 
   await page.goto('/admin/sellers');
   await expect(page.getByText(displayName)).toBeVisible();
