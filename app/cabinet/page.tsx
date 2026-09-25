@@ -18,5 +18,6 @@ export default async function CabinetPage() {
     .from(sellerApplications)
     .where(eq(sellerApplications.userId, user.id));
 
-  redirect(application ? '/become-seller/status' : '/choose-role');
+  // the role picker is only for the first sign-in: a buyer is a buyer from then on
+  redirect(application ? '/become-seller/status' : '/dashboard/buyer');
 }
