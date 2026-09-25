@@ -1,109 +1,14 @@
-/* sanatplace motion. Timings are the reference's (sanatplace-reference.html).
-   Only transform, opacity, clip-path and translate are animated. */
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(26px);
-    filter: blur(6px);
-  }
+/* sanatplace motion: light, transform and opacity only, and none of it for
+   visitors who ask for reduced motion. */
+
+@keyframes band {
   to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
+    transform: translateX(-48px);
   }
 }
-@keyframes chIn {
-  from {
-    opacity: 0;
-    transform: translateY(0.6em) rotate(8deg) scale(0.84);
-    filter: blur(12px);
-  }
-  60% {
-    filter: blur(0);
-  }
+@keyframes bar {
   to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
-}
-@keyframes sheen {
-  0%,
-  55% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(250%);
-  }
-}
-@keyframes sheen-in {
-  0%,
-  55% {
-    transform: translateX(40%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-@keyframes draw {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-@keyframes bloom {
-  from {
-    opacity: 0;
-    transform: scale(0.3) rotate(-80deg);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes turn {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.45);
-  }
-}
-@keyframes glow {
-  from {
-    opacity: 0.5;
-    transform: scale(0.93);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1.07);
-  }
-}
-@keyframes march {
-  to {
-    transform: translateX(48px);
-  }
-}
-@keyframes marchs {
-  to {
-    transform: translateX(32px);
-  }
-}
-@keyframes glint {
-  0%,
-  60% {
-    transform: translateX(-130%);
-  }
-  100% {
-    transform: translateX(130%);
+    width: 90%;
   }
 }
 @keyframes spin {
@@ -111,459 +16,253 @@
     transform: rotate(360deg);
   }
 }
-@keyframes halo {
-  0% {
-    opacity: 1;
-    transform: scale(1, 1);
+@keyframes spin-r {
+  to {
+    transform: rotate(-360deg);
   }
-  70%,
-  100% {
+}
+@keyframes breathe {
+  50% {
+    transform: scale(1.35);
+  }
+}
+@keyframes loader-failsafe {
+  to {
     opacity: 0;
-    transform: scale(var(--hx, 1.1), var(--hy, 1.8));
+    visibility: hidden;
   }
 }
-@keyframes heartpop {
-  0% {
-    transform: scale(1);
-  }
-  35% {
-    transform: scale(1.38);
-  }
-  65% {
-    transform: scale(0.92);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-/* the heart pulses once when liked (the element is remounted per like) */
-.heart-wrap[data-pop] {
-  animation: heartpop 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
-}
-@keyframes menuin {
+@keyframes pg-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    transform: translateY(12px);
   }
 }
-@keyframes navin {
+@keyframes tile-in {
   from {
     opacity: 0;
-    transform: translateY(-18px);
+    transform: translateY(16px) scale(0.96);
   }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+}
+@keyframes menu-out {
   to {
-    opacity: 1;
-    transform: none;
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+}
+@keyframes item-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes heart-pop {
+  40% {
+    transform: scale(1.3);
+  }
+}
+@keyframes bar-up {
+  from {
+    transform: translateY(100%);
   }
 }
 
 @layer components {
-  /* living background layers */
-  .stage > .beams {
-    position: absolute;
-    left: var(--cx, 75%);
-    top: var(--cy, 320px);
-    width: 2200px;
-    height: 2200px;
-    margin: -1100px 0 0 -1100px;
-    z-index: -1;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    opacity: 0.9;
-    will-change: transform;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0 6deg,
-      rgba(255, 214, 120, 0.2) 26deg,
-      transparent 58deg 116deg,
-      rgba(110, 225, 205, 0.17) 146deg,
-      transparent 182deg 234deg,
-      rgba(240, 110, 150, 0.16) 272deg,
-      transparent 314deg 360deg
-    );
-    -webkit-mask-image: radial-gradient(circle closest-side, #000 0, #000 34%, transparent 100%);
-    mask-image: radial-gradient(circle closest-side, #000 0, #000 34%, transparent 100%);
-    animation: spin 80s linear infinite;
-  }
-  .stage > .motes {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-  /* the warm light: a 560px-radius glow that follows the pointer by transform
-     (composited), instead of repainting a full-screen gradient on every move */
-  .stage > .spot {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 1120px;
-    height: 1120px;
-    margin: -560px 0 0 -560px;
-    z-index: -1;
-    pointer-events: none;
-    mix-blend-mode: screen;
-    opacity: 0;
-    transform: translate3d(var(--px, 50vw), var(--py, -40vh), 0);
-    will-change: transform;
-    transition: opacity 0.8s;
-    background: radial-gradient(
-      circle closest-side,
-      rgba(240, 198, 79, 0.13),
-      rgba(90, 220, 200, 0.05) 46%,
-      transparent 70%
-    );
-  }
-  .stage.moved > .spot {
-    opacity: 1;
-  }
-
-  /* header / nav */
-  /* the burger button, not its wrapper: a transformed wrapper would become the
-     containing block of the absolutely placed menu panel */
-  .logo,
-  .links,
-  .burger {
-    animation: navin 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both 0.1s;
-  }
-  .links,
-  .burger {
-    animation-delay: 0.25s;
-  }
-  /* (the vortex logo mark itself stays still: no hover spin) */
-  .mobile-menu:not([hidden]) {
-    animation: menuin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .links .link {
-    background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0% 1.5px no-repeat;
-    transition: background-size 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .links .link:hover,
-  .links .link[aria-current='page'] {
-    background-size: 100% 1.5px;
-  }
-  .back {
-    transition:
-      transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-      background 0.3s,
-      border-color 0.3s;
-  }
-  .back:hover {
-    transform: translateX(-5px);
-  }
-
-  /* buttons: a glint runs across on hover, press shrinks */
-  .btn {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  .btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: linear-gradient(105deg, transparent 34%, rgba(255, 255, 255, 0.5) 50%, transparent 66%);
-    transform: translateX(-130%);
-  }
-  .btn:hover::after {
-    transition: transform 0.85s cubic-bezier(0.2, 0.7, 0.2, 1);
-    transform: translateX(130%);
-  }
-  .btn:active {
-    transform: scale(0.965);
-  }
-  /* main buttons breathe with a soft gold halo: a layer behind the button that
-     grows and fades (transform + opacity; an animated box-shadow repaints every frame) */
-  .halo {
-    position: relative;
-    display: inline-flex;
-    isolation: isolate;
-  }
-  .halo.wide {
-    display: flex;
-  }
-  .halo::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: 12px;
-    background: rgba(227, 176, 43, 0.55);
-    opacity: 0;
-    pointer-events: none;
-    will-change: transform, opacity;
-    animation: halo 3s ease-out infinite 2.2s;
-  }
-  /* 20px of halo around the button, as a scale of its own size */
-  .actions .halo {
-    --hx: 1.31;
-    --hy: 1.83;
-  }
-  .login .halo {
-    --hx: 1.1;
-    --hy: 1.83;
-  }
-
-  /* entrance for the hero */
-  .in {
-    animation: rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    animation-delay: calc(var(--d, 0) * 1ms + 320ms);
-  }
-  .eyebrow::before {
-    transform-origin: left center;
-    animation: draw 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both 0.35s;
-  }
-  .ch {
-    display: inline-block;
-    animation: chIn 1.05s cubic-bezier(0.2, 0.9, 0.25, 1) both;
-    animation-delay: calc(var(--i) * 70ms + 380ms);
-  }
-  h1.brand em {
-    display: inline-block;
-    position: relative;
-  }
-  h1.brand em .ch {
-    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
-  }
-  /* the glint over "place" (see brand-title.tsx): a soft-edged window, 40% of
-     the word wide, slides left to right; the bright copy inside slides back so
-     it stays exactly over the letters */
-  .sheen {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 40%;
-    overflow: hidden;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
-    transform: translateX(-100%);
-    will-change: transform;
-    animation: sheen 5.5s ease-in-out infinite 2.6s;
-  }
-  .sheen-in {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 250%;
-    white-space: nowrap;
-    color: #fff6cf;
-    text-shadow: none;
-    transform: translateX(40%);
-    will-change: transform;
-    animation: sheen-in 5.5s ease-in-out infinite 2.6s;
-  }
-  .sc-ch {
-    display: inline-block;
-  }
-
-  /* mandala: blooms from the centre out, then keeps breathing */
-  .mandala {
-    translate: calc(var(--mx, 0) * 14px) calc(var(--my, 0) * 14px);
-    transition: translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .medal-lg .bl,
-  .medal-sm .bl,
-  .medal-md .bl {
-    animation: bloom 1.15s cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
-    animation-delay: calc(var(--bd) * 0.13s + 0.5s);
-  }
-  .sa {
-    animation: turn 120s linear infinite;
-  }
-  .sb {
-    animation: turn 95s linear infinite reverse;
-  }
-  .sc {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: turn 150s linear infinite reverse;
-  }
-  .sd {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: turn 110s linear infinite;
-  }
-  .pulse {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: pulse 3.2s ease-in-out infinite;
-  }
-  .medal-lg,
-  .medal-sm,
-  .medal-md {
-    position: relative;
-    isolation: isolate;
-  }
-  .medal-lg::before,
-  .medal-sm::before,
-  .medal-md::before {
-    content: '';
-    position: absolute;
-    inset: -24%;
-    z-index: -1;
-    border-radius: 50%;
-    pointer-events: none;
-    background: radial-gradient(circle, rgba(228, 90, 134, 0.36) 0, rgba(227, 176, 43, 0.15) 40%, transparent 68%);
-    animation: glow 4.5s ease-in-out infinite alternate;
-  }
-
-  /* moving koshin bands */
-  .march {
-    animation: march 5.5s linear infinite;
-  }
-  .dband.s .march {
-    animation-name: marchs;
-  }
-  .site-footer .march {
-    animation-direction: reverse;
-  }
-  .dband {
-    position: relative;
-    overflow: hidden;
-  }
-  .dband::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(100deg, transparent 42%, rgba(255, 240, 190, 0.4) 50%, transparent 58%);
-    mix-blend-mode: overlay;
-    animation: glint 8s ease-in-out infinite;
-  }
-  .site-footer .dband::after {
-    animation-delay: 3.5s;
-  }
-
-  /* pictures: diagonal sheen + slow zoom on hover (no filters on real photos) */
-  .art::after {
-    content: '';
-    position: absolute;
-    inset: -10% -70%;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(105deg, transparent 43%, rgba(255, 255, 255, 0.2) 50%, transparent 57%);
-    transform: translateX(-75%);
-  }
-  .card:hover .art::after,
-  .frame:hover .art::after {
-    transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
-    transform: translateX(75%);
-  }
-  .art .tag {
-    z-index: 2;
-  }
-  .art img.pic {
-    transition: transform 1.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .card:hover .art img.pic {
-    transform: scale(1.11);
-  }
-  .frame:hover .art img.pic {
-    transform: scale(1.07);
-  }
-
-  /* scroll reveal (attributes are set by script only) */
-  [data-reveal] {
-    opacity: 0;
-    translate: 0 36px;
-    transition:
-      opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
-      translate 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-    transition-delay: var(--rd, 0ms);
-  }
-  [data-reveal='in'] {
-    opacity: 1;
-    translate: 0 0;
-  }
-  .dband[data-reveal] {
-    opacity: 1;
-    translate: 0 0;
-    clip-path: inset(0 50%);
-    transition: clip-path 1.2s cubic-bezier(0.7, 0, 0.2, 1) var(--rd, 0ms);
-  }
-  .dband[data-reveal='in'] {
-    clip-path: inset(0 0);
-  }
-  .card[data-reveal] {
-    transition:
-      opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
-      translate 1s cubic-bezier(0.2, 0.8, 0.2, 1),
-      transform 0.25s,
-      border-color 0.4s,
-      box-shadow 0.4s;
-    transition-delay: var(--rd, 0ms), var(--rd, 0ms), 0s, 0s, 0s;
-  }
-  .card[data-reveal] .art img.pic {
-    clip-path: circle(0% at 68% 32%);
-    transition:
-      clip-path 1.6s cubic-bezier(0.3, 0.7, 0.2, 1) calc(var(--rd, 0ms) + 200ms),
-      transform 1.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-  .card[data-reveal='in'] .art img.pic {
-    clip-path: circle(150% at 68% 32%);
-  }
-
-  /* cards: tilt + glare (fine pointers only) */
-  @media (hover: hover) and (pointer: fine) {
-    .card {
-      position: relative;
-      transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-      transition:
-        transform 0.28s ease-out,
-        border-color 0.4s,
-        box-shadow 0.4s;
+  @media (prefers-reduced-motion: no-preference) {
+    /* the ornament band marches sideways by one diamond, forever */
+    .dband svg {
+      animation: band 2.4s linear infinite;
     }
-    .card:hover {
-      transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-5px);
-      border-color: var(--gold);
-      box-shadow:
-        0 26px 50px -22px rgba(0, 0, 0, 0.85),
-        0 0 32px -6px rgba(227, 176, 43, 0.28);
+
+    /* the loading vortex: rings turning at their own speed, alternating direction */
+    .loader .sa {
+      animation: spin 16s linear infinite;
     }
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 3;
-      background: radial-gradient(360px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 236, 178, 0.2), transparent 62%);
+    .loader .sb {
+      animation: spin-r 11s linear infinite;
+    }
+    .loader .sc {
+      animation: spin 8s linear infinite;
+    }
+    .loader .sd {
+      animation: spin-r 6s linear infinite;
+    }
+    .loader .bl:last-child .sa {
+      animation: spin-r 4.5s linear infinite;
+    }
+    .loader .pulse {
+      animation: breathe 1.6s ease-in-out infinite;
+    }
+    .loader .ml {
+      will-change: transform;
+    }
+
+    /* hold every entrance until the loading screen lifts */
+    html[data-load='loading'] .stage *,
+    html[data-load='loading'] .burger {
+      animation-play-state: paused !important;
+    }
+
+    /* page open: blocks rise in one after another */
+    .pg > * {
+      animation: pg-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    }
+    .pg > :nth-child(2) {
+      animation-delay: 0.07s;
+    }
+    .pg > :nth-child(3) {
+      animation-delay: 0.14s;
+    }
+    .pg > :nth-child(n + 4) {
+      animation-delay: 0.2s;
+    }
+    /* home: the heading, then the collage tile by tile */
+    .hero-copy > * {
+      animation: pg-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    }
+    .hero-copy > :nth-child(2) {
+      animation-delay: 0.08s;
+    }
+    .collage .tile {
+      animation: tile-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    }
+    .collage .tile.a {
+      animation-delay: 0.08s;
+    }
+    .collage .tile.b {
+      animation-delay: 0.18s;
+    }
+    .collage .tile.c {
+      animation-delay: 0.28s;
+    }
+
+    /* grid cards rise in as they scroll into view (see src/lib/sanat/reveal.ts) */
+    .grid .card[data-reveal] {
       opacity: 0;
-      transition: opacity 0.35s;
+      transform: translateY(22px);
     }
-    .card:hover::after {
+    .grid .card[data-reveal='in'] {
       opacity: 1;
+      transform: none;
+      transition:
+        opacity 0.6s ease var(--rd, 0ms),
+        transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) var(--rd, 0ms);
+    }
+    /* rail cards waiting off to the right */
+    .rail > .rv {
+      opacity: 0;
+      transform: translateY(28px);
+      transition:
+        opacity 0.7s ease,
+        transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .rail > .rv.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* the burger pops in; its icon turns into a cross */
+    .burger {
+      animation: pop-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.25) 0.25s backwards;
+      transition:
+        background-color 0.2s,
+        transform 0.15s,
+        bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .burger:active {
+      transform: scale(0.93);
+    }
+    .burger svg {
+      transition:
+        transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.2s ease;
+    }
+    .burger .b-x {
+      transform: rotate(-90deg) scale(0.5);
+    }
+    .burger[aria-expanded='true'] .b-x {
+      transform: none;
+    }
+    .burger[aria-expanded='true'] .b-o {
+      transform: rotate(90deg) scale(0.5);
+    }
+    /* the menu grows out of the button's corner, items following one by one */
+    .menu {
+      transform-origin: 100% 100%;
+      animation: menu-in 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .menu.closing {
+      animation: menu-out 0.17s ease forwards;
+      pointer-events: none;
+    }
+    .menu:not(.closing) > * {
+      animation: item-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+      animation-delay: calc(0.03s + var(--i, 0) * 0.035s);
+    }
+
+    /* the price bar slides up */
+    .buybar {
+      animation: bar-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s backwards;
+    }
+
+    /* a heart pulses once when liked */
+    .heart [data-pop] svg {
+      animation: heart-pop 0.4s ease;
+    }
+
+    .fbtn .chev {
+      transition: transform 0.2s ease;
+    }
+
+    /* small hover touches, pointer devices only */
+    @media (hover: hover) {
+      .grid .card {
+        transition:
+          background-color 0.2s,
+          transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+      .grid .card:hover {
+        transform: translateY(-4px);
+      }
+      .art img.pic,
+      .collage .tile img.pic {
+        transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+      .grid .card:hover .art img.pic,
+      .rail .card:hover .art img.pic,
+      .collage .tile:hover img.pic {
+        transform: scale(1.045);
+      }
+      .btn {
+        transition:
+          background-color 0.2s,
+          transform 0.15s;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
     }
   }
 
-  @media (max-width: 700px) {
-    .stage > .beams {
-      width: 1500px;
-      height: 1500px;
-      margin: -750px 0 0 -750px;
+  @media (prefers-reduced-motion: reduce) {
+    .loader-bar i {
+      width: 100%;
+      animation: none;
     }
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-  .stage > .beams,
-  .stage > .motes,
-  .stage > .spot {
-    display: none !important;
+    .loader.done {
+      transition: none;
+    }
   }
 }

@@ -38,10 +38,10 @@ test('the home page greets visitors and shows the newest published artwork', asy
 
   try {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1, name: 'sanatplace' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'В каталог' })).toHaveAttribute('href', '/gallery');
-    await expect(page.getByRole('link', { name: 'Хочу продавать картины' })).toHaveAttribute('href', '/sign-in');
-    await expect(page.getByText(artworkTitle)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: 'Картины прямо от художников' })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Все картины/ })).toHaveAttribute('href', '/gallery');
+    // the newest real work opens the "Новые поступления" rail
+    await expect(page.getByRole('group', { name: 'Новые поступления' }).getByText(artworkTitle)).toBeVisible();
   } finally {
     await getDb().delete(artworks).where(eq(artworks.id, artworkId));
     await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, seller.id));

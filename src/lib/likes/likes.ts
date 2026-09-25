@@ -70,6 +70,16 @@ export async function likeInfoFor(
   return result;
 }
 
+// How many public works the user has liked (the header's wishlist badge).
+export async function countFavorites(db: Db, userId: string): Promise<number> {
+  const [row] = await db
+    .select({ n: count() })
+    .from(artworkLikes)
+    .innerJoin(artworks, eq(artworkLikes.artworkId, artworks.id))
+    .where(and(eq(artworkLikes.userId, userId), inArray(artworks.status, [...VISIBLE])));
+  return row?.n ?? 0;
+}
+
 // The user's favourites: works they liked that are still public, most recently liked first.
 export async function listFavorites(db: Db, userId: string) {
   return db

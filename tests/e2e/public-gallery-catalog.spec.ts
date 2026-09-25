@@ -71,5 +71,7 @@ test('catalog filters stay folded until opened and fold again after applying', a
 
   await expect(page).toHaveURL(/minPrice=1&maxPrice=999999/);
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(toggle).toContainText('2');
+  // a price range counts as one filter (one tag under the search)
+  await expect(toggle).toContainText('1');
+  await expect(page.getByRole('link', { name: 'Убрать: Цена: от 1 до 999999 TJS' })).toBeVisible();
 });

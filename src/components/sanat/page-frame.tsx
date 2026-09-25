@@ -2,18 +2,25 @@
 
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { KoshinBand } from '@/src/components/sanat/koshin-band';
-import { pageNameOf } from '@/src/components/sanat/stage';
 
-// The redesigned public pages lay themselves out edge to edge (hero, bands).
-// Every other page (cabinets, admin, artist profile) gets a band under the
-// header and the standard content column.
+// The public pages lay themselves out (hero, edge-to-edge band, grids). Every
+// other page (cabinets, admin, forms) gets the standard content column.
+function isPublicPage(pathname: string) {
+  return (
+    pathname === '/' ||
+    pathname === '/gallery' ||
+    pathname.startsWith('/gallery/') ||
+    pathname === '/artists' ||
+    pathname === '/favorites' ||
+    pathname === '/sell' ||
+    pathname === '/sign-in'
+  );
+}
+
 export function PageFrame({ children }: { children: ReactNode }) {
-  const page = pageNameOf(usePathname());
-  if (page !== 'other') return <div className="page">{children}</div>;
+  if (isPublicPage(usePathname())) return <div className="page">{children}</div>;
   return (
     <div className="page">
-      <KoshinBand />
       <div className="wrap page-plain">{children}</div>
     </div>
   );

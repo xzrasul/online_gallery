@@ -1,9 +1,8 @@
-// Reveal on scroll: panels, bands and cards rise and fade in as they enter the
-// viewport; cards in a row are staggered by 130ms. Once done, the attribute is
+// Reveal on scroll: grid cards rise and fade in as they enter the viewport;
+// cards in a row are staggered by 130ms. Once done, the attribute is
 // dropped so it never fights with hover. State lives in attributes, not classes:
 // React re-renders className (e.g. the filters opening) and would wipe a class.
 
-export const REVEAL_SELECTOR = '.dband,.panel,.frame,.head-row,.back';
 export const CARD_SELECTOR = '.card';
 
 export function prefersReducedMotion() {

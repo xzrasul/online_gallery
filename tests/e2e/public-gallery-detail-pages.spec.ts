@@ -57,7 +57,7 @@ test('artist page and artwork page render for a published artwork, and a pending
 
     await page.goto(`/gallery/artist/${seller.id}`);
     await expect(page.getByRole('heading', { name: /Детали-тест студия/ })).toBeVisible();
-    await expect(page.getByText('1 работа в продаже')).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Коротко о художнике' })).toContainText(/1\s*работа в продаже/);
     await expect(page.getByRole('heading', { name: 'Как купить работу' })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Написать в Telegram' })).toHaveAttribute('href', 'https://t.me/detail_test');
     const forSale = page.getByRole('region', { name: 'Работы в продаже' });
