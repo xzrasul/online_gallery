@@ -105,3 +105,14 @@ export const artworkLikes = pgTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.artworkId] }), index('artwork_likes_artwork_id_idx').on(t.artworkId)],
 );
+
+// The admin's picks for the home page collage: slot a (tall), b, c. An empty
+// slot, or one whose work is no longer on sale, falls back to the newest work.
+export const homeCollage = pgTable('home_collage', {
+  slot: text('slot').primaryKey(),
+  artworkId: uuid('artwork_id')
+    .notNull()
+    .unique()
+    .references(() => artworks.id, { onDelete: 'cascade' }),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});

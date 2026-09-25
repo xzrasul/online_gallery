@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { getDb } from '@/src/db';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { searchCatalog } from '@/src/lib/gallery/catalog';
+import { loadCollagePicks } from '@/src/lib/home/collage';
+import { resolveCollage } from '@/src/lib/home/collage-slots';
 import { likeInfoFor, type LikeInfo } from '@/src/lib/likes/likes';
 import { plural } from '@/src/lib/ru-format';
 import { ArtworkCard } from '@/src/components/artwork/artwork-card';
@@ -16,16 +18,20 @@ export default async function HomePage() {
   let items: Awaited<ReturnType<typeof searchCatalog>>['items'] = [];
   let total = 0;
   let likes: Record<string, LikeInfo> = {};
+  let picks: Awaited<ReturnType<typeof loadCollagePicks>> = {};
   let loadFailed = false;
   try {
-    ({ items, total } = await searchCatalog(getDb(), {}, { page: 1, pageSize: RAIL_SIZE }));
+    [{ items, total }, picks] = await Promise.all([
+      searchCatalog(getDb(), {}, { page: 1, pageSize: RAIL_SIZE }),
+      loadCollagePicks(getDb()),
+    ]);
     likes = await likeInfoFor(getDb(), items, user?.id ?? null);
   } catch (error) {
     console.error('home: failed to load latest artworks', error);
     loadFailed = true;
   }
-  // the newest works: one tall picture and two square ones
-  const tiles = items.slice(0, 3).map((w, i) => ({ ...w, slot: 'abc'[i] }));
+  // one tall picture and two square ones: the admin's picks, else the newest works
+  const tiles = resolveCollage(picks, items);
 
   return (
     <main>

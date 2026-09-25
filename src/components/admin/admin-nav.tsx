@@ -3,7 +3,11 @@ import { staffSignOut } from '@/app/sanatadmin/actions';
 import type { StaffRole } from '@/src/lib/auth/staff';
 
 // Moderators: applications, artworks, categories, techniques. The admin also
-// gets the database editor.
+// gets the database editor and the home page collage.
+const ADMIN_LINKS = [
+  { href: '/admin/database', label: 'База данных' },
+  { href: '/admin/collage', label: 'Коллаж на главной' },
+];
 const LINKS = [
   { href: '/admin/sellers', label: 'Заявки продавцов' },
   { href: '/admin/artworks', label: 'Картины на модерации' },
@@ -15,7 +19,7 @@ const pill =
   'inline-flex min-h-11 shrink-0 items-center rounded-full border border-border bg-card px-4 text-sm hover:border-brand hover:text-brand';
 
 export function AdminNav({ role }: { role: StaffRole }) {
-  const links = role === 'admin' ? [{ href: '/admin/database', label: 'База данных' }, ...LINKS] : LINKS;
+  const links = role === 'admin' ? [...ADMIN_LINKS, ...LINKS] : LINKS;
   return (
     <div className="mb-7 flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
