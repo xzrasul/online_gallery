@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
+// Artwork, banner and avatar images live in Supabase Storage's public buckets.
+const supabaseHost = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).hostname : '*.supabase.co';
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [{ protocol: 'https', hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }],
+    formats: ['image/avif', 'image/webp'],
+    // stored images don't change (new uploads get new names)
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
   // sharp's native binary and libvips are loaded at run time, and the build's
   // file tracing misses them, so Vercel's functions came without them and the
   // artwork pages failed with a 500. Ship them with the routes that upload.

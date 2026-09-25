@@ -36,12 +36,13 @@ export async function createSellerApplication(
 export async function getSellerProfile(
   db: Db,
   userId: string,
-): Promise<{ displayName: string; bio: string; telegramContact: string | null } | null> {
+): Promise<{ displayName: string; bio: string; telegramContact: string | null; avatarUrl: string | null } | null> {
   const [row] = await db
     .select({
       displayName: sellerApplications.displayName,
       bio: sellerApplications.bio,
       telegramContact: sellerApplications.telegramContact,
+      avatarUrl: sellerApplications.avatarUrl,
     })
     .from(sellerApplications)
     .where(and(eq(sellerApplications.userId, userId), eq(sellerApplications.status, 'approved')));
@@ -65,6 +66,25 @@ export async function updateSellerProfile(
     .where(and(eq(sellerApplications.userId, input.userId), eq(sellerApplications.status, 'approved')))
     .returning({ id: sellerApplications.id });
   return rows.length > 0;
+}
+
+// Sets (or with null, removes) an approved artist's photo. Returns the
+// previous photo's URL so the caller can delete the old file, or undefined
+// when there is no approved artist with this id.
+export async function setSellerAvatar(
+  db: Db,
+  userId: string,
+  avatarUrl: string | null,
+): Promise<{ previous: string | null } | undefined> {
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ previous: sellerApplications.avatarUrl })
+      .from(sellerApplications)
+      .where(and(eq(sellerApplications.userId, userId), eq(sellerApplications.status, 'approved')));
+    if (!row) return undefined;
+    await tx.update(sellerApplications).set({ avatarUrl }).where(eq(sellerApplications.userId, userId));
+    return row;
+  });
 }
 
 export async function approveOrRejectApplication(

@@ -5,15 +5,19 @@ import { sellerApplications } from '@/src/db/schema';
 import { AdminNav } from '@/src/components/admin/admin-nav';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
-import { approveApplication, rejectApplication } from './actions';
+import { listPublicArtists } from '@/src/lib/artworks/public-queries';
+import { AVATAR_MESSAGES, type AvatarResult } from '@/src/lib/sellers/avatar';
+import { AvatarForm } from '@/src/components/sanat/avatar-form';
+import { approveApplication, rejectApplication, setArtistAvatar } from './actions';
 
-export default async function AdminSellersPage() {
+export default async function AdminSellersPage({ searchParams }: { searchParams: Promise<{ photo?: string }> }) {
   const role = await requireStaff();
+  const { photo } = await searchParams;
 
-  const pending = await getDb()
-    .select()
-    .from(sellerApplications)
-    .where(eq(sellerApplications.status, 'pending'));
+  const [pending, artists] = await Promise.all([
+    getDb().select().from(sellerApplications).where(eq(sellerApplications.status, 'pending')),
+    listPublicArtists(getDb()),
+  ]);
 
   return (
     <main>
@@ -41,6 +45,27 @@ export default async function AdminSellersPage() {
           </section>
         ))}
       </div>
+
+      <h2 id="artists" className="mt-12 scroll-mt-6">
+        Фото художников
+      </h2>
+      <p className="mt-2 text-muted-foreground">
+        Фото показывается на странице художника и в списке художников. Без фото — первая буква имени.
+      </p>
+      {photo && photo in AVATAR_MESSAGES && (
+        <p role={photo === 'saved' || photo === 'removed' ? 'status' : 'alert'} className="notice mt-4 max-w-2xl">
+          {AVATAR_MESSAGES[photo as AvatarResult]}
+        </p>
+      )}
+      {artists.length === 0 && <p className="mt-4 text-muted-foreground">Одобренных художников пока нет.</p>}
+      <ul className="mt-6 grid max-w-2xl gap-4">
+        {artists.map((a) => (
+          <li key={a.id} className="rounded-sm bg-card p-5">
+            <h3 className="mb-3 text-xl">{a.displayName}</h3>
+            <AvatarForm action={setArtistAvatar} name={a.displayName} url={a.avatarUrl} userId={a.id} />
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }

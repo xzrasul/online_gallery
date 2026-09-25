@@ -14,7 +14,7 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
 
 // Returns a smaller WebP (or JPEG where WebP can't be encoded) copy, or the
 // original file when it can't be decoded here (the server then decides).
-export async function shrinkPhoto(file: File): Promise<ShrunkPhoto | null> {
+export async function shrinkPhoto(file: File, maxSide = MAX_PHOTO_SIDE): Promise<ShrunkPhoto | null> {
   if (!file.type.startsWith('image/') || file.type === 'image/gif') return null;
   let bitmap: ImageBitmap;
   try {
@@ -22,7 +22,7 @@ export async function shrinkPhoto(file: File): Promise<ShrunkPhoto | null> {
   } catch {
     return null;
   }
-  const scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
   const width = Math.round(bitmap.width * scale);
   const height = Math.round(bitmap.height * scale);
   const canvas = document.createElement('canvas');

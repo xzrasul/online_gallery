@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getDb } from '@/src/db';
 import { listPublicArtists } from '@/src/lib/artworks/public-queries';
 import { plural, sinceMonth } from '@/src/lib/ru-format';
+import { ArtistAvatar } from '@/src/components/sanat/artist-avatar';
 
 export const metadata = {
   title: 'Художники',
@@ -17,6 +18,7 @@ export default async function ArtistsPage() {
     id: a.id,
     name: a.displayName,
     info: a.joinedAt ? `На sanatplace ${sinceMonth(a.joinedAt)}` : 'Художник sanatplace',
+    avatarUrl: a.avatarUrl,
     works: a.works,
     from: a.minPrice,
   }));
@@ -35,9 +37,7 @@ export default async function ArtistsPage() {
             <li key={a.id}>
               <Link className="artist" href={`/gallery/artist/${a.id}`}>
                 <div className="row">
-                  <span className="avatar" aria-hidden="true">
-                    {a.name.charAt(0).toUpperCase()}
-                  </span>
+                  <ArtistAvatar name={a.name} url={a.avatarUrl} />
                   <div>
                     <h2>{a.name}</h2>
                     <p>{a.info}</p>

@@ -26,6 +26,7 @@ type Shown = {
   categoryId: string;
   categoryName: string;
   techniqueName: string;
+  year: number | null;
   size: string;
   artistId: string;
   artistName: string;
@@ -38,17 +39,25 @@ const loadArtwork = cache(async (id: string): Promise<Shown | undefined> => {
   if (!isUuid(id)) return undefined;
   const a = await getPublishedArtworkById(getDb(), id);
   if (!a) return undefined;
+  // the stored photo's real proportions, else the painting's size in cm
+  const ratio =
+    a.widthPx && a.heightPx
+      ? a.widthPx / a.heightPx
+      : a.widthCm > 0 && a.heightCm > 0
+        ? a.widthCm / a.heightCm
+        : 4 / 5;
   return {
     id: a.id,
     title: a.title,
     description: a.description,
     price: a.price,
     imageUrl: a.imageUrl,
-    ratio: a.widthCm > 0 && a.heightCm > 0 ? a.widthCm / a.heightCm : 4 / 5,
+    ratio,
     sold: a.status === 'sold',
     categoryId: a.categoryId,
     categoryName: a.categoryName,
     techniqueName: a.techniqueName,
+    year: a.year,
     size: `${a.heightCm}×${a.widthCm} см`,
     artistId: a.sellerId,
     artistName: a.sellerDisplayName,
@@ -79,12 +88,20 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
   const likes = await likeInfoFor(getDb(), [{ id: artwork.id, sellerId: artwork.artistId }, ...more], viewer?.id ?? null);
   const telegram = telegramHref(artwork.telegram ?? null);
   const categoryHref = `/gallery?categoryId=${encodeURIComponent(artwork.categoryId)}`;
+  const artistHref = `/gallery/artist/${artwork.artistId}`;
 
+  // Guests sign in first and come back here; the artist is reached in Telegram.
   let contact: ReactNode;
   if (artwork.sold) contact = <span className="buybar-note">Работа продана</span>;
+  else if (!viewer)
+    contact = (
+      <Link className="btn btn-tg" href={`/sign-in?next=${encodeURIComponent(`/gallery/artwork/${artwork.id}`)}`}>
+        Написать в Telegram
+      </Link>
+    );
   else if (telegram)
     contact = (
-      <a className="btn" href={telegram} target="_blank" rel="noopener noreferrer">
+      <a className="btn btn-tg" href={telegram} target="_blank" rel="noopener noreferrer">
         Написать в Telegram
       </a>
     );
@@ -112,7 +129,7 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
             </div>
             <h1 className="t">{artwork.title}</h1>
             <p className="by">
-              Художник: <Link href={`/gallery/artist/${artwork.artistId}`}>{artwork.artistName}</Link>
+              Художник: <Link href={artistHref}>{artwork.artistName}</Link>
             </p>
             {artwork.sold ? <p className="stock sold">Продано</p> : <p className="stock">В наличии</p>}
             <dl className="spec">
@@ -122,6 +139,16 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
               <dd>{artwork.categoryName}</dd>
               <dt>Техника</dt>
               <dd>{artwork.techniqueName}</dd>
+              {artwork.year && (
+                <>
+                  <dt>Год</dt>
+                  <dd>{artwork.year}</dd>
+                </>
+              )}
+              <dt>Художник</dt>
+              <dd>
+                <Link href={artistHref}>{artwork.artistName}</Link>
+              </dd>
             </dl>
             {artwork.description && (
               <>
@@ -129,7 +156,9 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
                 <p className="desc">{artwork.description}</p>
               </>
             )}
-            <p className="small">Оплату и доставку вы обсуждаете напрямую с художником.</p>
+            <p className="small">
+              Оплату и доставку вы обсуждаете напрямую с художником. Для связи нужно войти через Telegram.
+            </p>
           </div>
         </div>
         {more.length > 0 && (

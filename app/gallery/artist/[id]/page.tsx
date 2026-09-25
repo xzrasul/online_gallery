@@ -12,11 +12,13 @@ import { likeInfoFor } from '@/src/lib/likes/likes';
 import { isUuid, type CardArtwork } from '@/src/lib/gallery/types';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { HeartIcon } from '@/src/components/likes/like-button';
+import { ArtistAvatar } from '@/src/components/sanat/artist-avatar';
 
 const WORKS: [string, string, string] = ['работа', 'работы', 'работ'];
 
 type Profile = {
   name: string;
+  avatarUrl: string | null;
   info?: string;
   bio: string[];
   telegram?: string | null;
@@ -30,9 +32,10 @@ const loadProfile = cache(async (id: string): Promise<Profile | undefined> => {
   if (!isUuid(id)) return undefined;
   const p = await getArtistPublicProfile(getDb(), id);
   if (!p) return undefined;
-  const card = (a: (typeof p.artworks)[number]): CardArtwork => ({ ...a, sellerId: id, sellerDisplayName: p.displayName });
+  const card = (a: (typeof p.artworks)[number]): CardArtwork => a;
   return {
     name: p.displayName,
+    avatarUrl: p.avatarUrl,
     info: p.joinedAt ? `На sanatplace ${sinceMonth(p.joinedAt)}` : undefined,
     bio: p.bio
       .split(/\n\s*\n|\r?\n/)
@@ -87,9 +90,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
 
         <div className="panel prof">
           <div className="prof-head">
-            <span className="avatar avatar-xl" aria-hidden="true">
-              {profile.name.charAt(0).toUpperCase()}
-            </span>
+            <ArtistAvatar name={profile.name} url={profile.avatarUrl} size="xl" />
             <div className="prof-id">
               <h1 className="t">{profile.name}</h1>
               {profile.info && <p className="prof-info">{profile.info}</p>}
@@ -128,7 +129,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
           )}
           {telegram ? (
             <div className="contact">
-              <a className="btn" href={telegram} target="_blank" rel="noopener noreferrer">
+              <a className="btn btn-tg" href={telegram} target="_blank" rel="noopener noreferrer">
                 Написать в Telegram
               </a>
               <span className="handle">{telegram.replace('https://t.me/', '@')}</span>
@@ -140,7 +141,7 @@ export default async function ArtistPublicPage({ params }: { params: Promise<{ i
 
         <section className="sec" id="works" aria-labelledby="works-title">
           <div className="sec-head">
-            <h2 id="works-title">Работы в продаже</h2>
+            <h2 id="works-title">Работы</h2>
             {n > 0 && (
               <p className="count">
                 {n} {plural(n, WORKS)}

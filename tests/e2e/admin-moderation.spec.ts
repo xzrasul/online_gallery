@@ -25,5 +25,7 @@ test('admin approves a pending seller application', async ({ page }) => {
     .locator('section', { hasText: displayName })
     .getByRole('button', { name: 'Одобрить' })
     .click();
-  await expect(page.getByText(displayName)).not.toBeVisible();
+  // the application leaves the queue; the new artist shows up under "Фото художников"
+  await expect(page.locator('section', { hasText: displayName })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 3, name: displayName })).toBeVisible();
 });

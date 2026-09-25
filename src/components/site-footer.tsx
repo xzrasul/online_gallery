@@ -1,20 +1,14 @@
 import Link from 'next/link';
-import { KoshinBand } from '@/src/components/sanat/koshin-band';
-import { LogoMark } from '@/src/components/sanat/logo-mark';
+import { Logo } from '@/src/components/sanat/logo';
 import { BRAND_NAME } from '@/src/lib/brand';
 
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <KoshinBand />
       <div className="wrap">
         <div className="foot">
           <div>
-            <Link href="/" className="logo">
-              <LogoMark />
-              <span>sanatplace</span>
-            </Link>
-            <p>Оригинальные картины напрямую от художников.</p>
+            <Logo />
           </div>
           <nav aria-label="Покупателям">
             <h4>Покупателям</h4>

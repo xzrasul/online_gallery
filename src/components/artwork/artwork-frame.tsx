@@ -1,10 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, type CSSProperties, type ReactNode } from 'react';
+import { isStorageUrl } from '@/src/lib/uploads/buckets';
 
-// The whole picture, uncropped, in a frame with a small margin. The frame takes
-// the picture's own proportions: `ratio` is the best guess before the image
-// loads (the painting's size in cm), then the real pixel ratio takes over. On desktop the frame sticks while the text scrolls.
+// The whole picture, uncropped, in a white frame on a pale tile. The frame
+// takes the picture's proportions: `ratio` is the best guess before the image
+// loads (the stored pixel size, else the painting's size in cm), then the real
+// one takes over. On desktop the frame sticks while the text scrolls.
 export function ArtworkFrame({
   src,
   alt,
@@ -20,13 +23,15 @@ export function ArtworkFrame({
   return (
     <div className="frame">
       <div className="art" style={{ '--ar': ar.toFixed(4) } as CSSProperties}>
-        {/* eslint-disable-next-line @next/next/no-img-element -- natural size needed; remote uploads are not optimised anyway */}
-        <img
+        <Image
           className="pic full"
           src={src}
           alt={alt}
-          fetchPriority="high"
-          decoding="async"
+          width={1400}
+          height={Math.round(1400 / ratio)}
+          sizes="(min-width: 1240px) 520px, (min-width: 860px) 42vw, 90vw"
+          priority
+          unoptimized={!isStorageUrl(src)}
           draggable={false}
           onLoad={(e) => {
             const img = e.currentTarget;

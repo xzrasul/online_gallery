@@ -11,17 +11,23 @@ test('first sign-in from the sign-in page leads to the role-choice screen', asyn
   await devLogin.getByRole('button', { name: 'Войти как тестовый пользователь' }).click();
 
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
-  await expect(page.getByRole('heading')).toContainText('Как вы хотите');
+  await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toContainText('Как вы хотите');
 });
 
-test('a signed-in user can sign out from the header', async ({ page }) => {
+test('a signed-in user can sign out from the menu', async ({ page }) => {
   await page.goto(`/auth/dev-login?id=${testTelegramId(`sign_out_${Date.now()}`)}`);
   await expect(page).toHaveURL(/\/choose-role/, { timeout: 15000 });
 
-  const header = page.getByRole('banner');
-  await header.getByRole('button', { name: 'Выйти' }).click();
+  const menu = page.getByRole('navigation', { name: 'Основная навигация' });
+  await page.getByRole('button', { name: 'Меню' }).click();
+  await expect(menu.getByRole('link', { name: 'Профиль' })).toHaveAttribute('href', '/cabinet');
+  await menu.getByRole('button', { name: 'Выйти' }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(header.getByRole('link', { name: 'Войти через Telegram' })).toBeVisible();
+  // sign-out reloads the page: retry until the menu button is interactive
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Меню' }).click();
+    await expect(menu.getByRole('link', { name: 'Войти через Telegram' })).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 15000 });
 
   await page.goto('/dashboard/buyer');
   await expect(page).toHaveURL(/\/sign-in/);

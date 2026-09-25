@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { BotLogin } from '@/src/components/auth/bot-login';
-import { Medal } from '@/src/components/sanat/mandala';
 import { BRAND_NAME } from '@/src/lib/brand';
 import { safeNextPath } from '@/src/lib/auth/next-path';
 
@@ -9,8 +8,11 @@ export const metadata = {
   title: 'Вход',
 };
 
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const next = safeNextPath((await searchParams).next);
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string; why?: string }> }) {
+  const params = await searchParams;
+  const next = safeNextPath(params.next);
+  // guests who pressed a heart
+  const why = params.why === 'wish' ? 'Войдите, чтобы добавить в избранное.' : null;
   if (await getCurrentUser()) redirect(next ?? '/cabinet');
 
   const botUsername = process.env.TELEGRAM_BOT_USERNAME;
@@ -19,7 +21,6 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   return (
     <main>
       <div className="wrap signin pg">
-        <Medal size="md" />
         <div className="panel login">
           <div className="body">
             <h1>Вход в {BRAND_NAME}</h1>
@@ -27,7 +28,9 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
               Вход подтверждается в нашем Telegram-боте — без паролей, номера телефона и СМС. При первом входе
               аккаунт создастся автоматически.
             </p>
-            {next && <p className="notice">После входа вы вернётесь туда, где были.</p>}
+            {(why || next) && (
+              <p className="notice">{why ? `${why} После входа вы вернётесь к картине.` : 'После входа вы вернётесь туда, где были.'}</p>
+            )}
             {botUsername ? (
               <BotLogin botUsername={botUsername} next={next} />
             ) : (

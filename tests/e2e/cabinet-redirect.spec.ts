@@ -10,8 +10,11 @@ test('/cabinet sends each user to the cabinet of their role', async ({ page }) =
 
   const user = await signInAsNewUser(page, 'cabinet_redirect');
   try {
-    // the header link points at /cabinet
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Личный кабинет' })).toHaveAttribute('href', '/cabinet');
+    // the menu's "Профиль" points at /cabinet
+    await page.getByRole('button', { name: 'Меню' }).click();
+    await expect(
+      page.getByRole('navigation', { name: 'Основная навигация' }).getByRole('link', { name: 'Профиль' }),
+    ).toHaveAttribute('href', '/cabinet');
 
     // buyer without an application: the buyer cabinet (the role picker is only
     // for the first sign-in), with a way to start selling

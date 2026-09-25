@@ -12,6 +12,10 @@ type ArtworkInput = {
   categoryId: string;
   techniqueId: string;
   imageUrl: string;
+  year?: number | null;
+  // the stored photo's size; left out on an edit that keeps the old photo
+  widthPx?: number;
+  heightPx?: number;
 };
 
 export async function createArtwork(db: Db, input: ArtworkInput): Promise<string> {
@@ -27,6 +31,9 @@ export async function createArtwork(db: Db, input: ArtworkInput): Promise<string
       categoryId: input.categoryId,
       techniqueId: input.techniqueId,
       imageUrl: input.imageUrl,
+      year: input.year ?? null,
+      widthPx: input.widthPx ?? null,
+      heightPx: input.heightPx ?? null,
     })
     .returning({ id: artworks.id });
   return row.id;
@@ -47,6 +54,8 @@ export async function updateArtwork(
       categoryId: input.categoryId,
       techniqueId: input.techniqueId,
       imageUrl: input.imageUrl,
+      ...(input.year !== undefined && { year: input.year }),
+      ...(input.widthPx !== undefined && { widthPx: input.widthPx, heightPx: input.heightPx }),
       status: 'pending',
       rejectionReason: null,
       reviewedAt: null,

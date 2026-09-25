@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/src/db';
 import { approveOrRejectApplication } from '@/src/lib/sellers/applications';
+import { changeSellerAvatar } from '@/src/lib/sellers/avatar';
+import { isUuid } from '@/src/lib/gallery/types';
 
 export async function approveApplication(formData: FormData) {
   await requireStaff();
@@ -33,4 +35,15 @@ export async function rejectApplication(formData: FormData) {
     reason: String(formData.get('reason') || ''),
   });
   revalidatePath('/admin/sellers');
+}
+
+// Staff set or remove an artist's photo.
+export async function setArtistAvatar(formData: FormData) {
+  await requireStaff();
+  const userId = String(formData.get('userId') ?? '');
+  if (!isUuid(userId)) redirect('/admin/sellers');
+  const result = await changeSellerAvatar(userId, formData);
+  revalidatePath('/artists');
+  revalidatePath(`/gallery/artist/${userId}`);
+  redirect(`/admin/sellers?photo=${result}#artists`);
 }

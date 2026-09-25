@@ -3,10 +3,10 @@ import { staffSignOut } from '@/app/sanatadmin/actions';
 import type { StaffRole } from '@/src/lib/auth/staff';
 
 // Moderators: applications, artworks, categories, techniques. The admin also
-// gets the database editor and the home page collage.
+// gets the database editor and the home page banners.
 const ADMIN_LINKS = [
   { href: '/admin/database', label: 'База данных' },
-  { href: '/admin/collage', label: 'Коллаж на главной' },
+  { href: '/admin/banners', label: 'Баннеры' },
 ];
 const LINKS = [
   { href: '/admin/sellers', label: 'Заявки продавцов' },

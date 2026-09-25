@@ -47,8 +47,8 @@ test('a guest signs in from the heart, comes back, likes, and finds the work in 
   try {
     await page.goto(`/gallery/artwork/${artworkId}`);
     await page.getByRole('link', { name: /Войдите, чтобы добавить в избранное/ }).click();
-    await expect(page).toHaveURL(/\/sign-in\?next=/, { timeout: 15000 });
-    await expect(page.getByText('После входа вы вернётесь туда, где были.')).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-in\?why=wish&next=/, { timeout: 15000 });
+    await expect(page.getByText(/Войдите, чтобы добавить в избранное\. После входа вы вернётесь к картине\./)).toBeVisible();
 
     const devLogin = page.getByRole('form', { name: 'Вход для разработки' });
     await devLogin.getByLabel('Telegram ID').fill(String(fanTelegramId));
@@ -67,7 +67,8 @@ test('a guest signs in from the heart, comes back, likes, and finds the work in 
     await page.reload();
     await expect(page.getByRole('button', { name: /Убрать из избранного\. 1 лайк$/ })).toBeVisible();
 
-    await page.getByRole('banner').getByRole('link', { name: /Wishlist/ }).click();
+    await page.getByRole('button', { name: 'Меню' }).click();
+    await page.getByRole('navigation', { name: 'Основная навигация' }).getByRole('link', { name: /Wishlist/ }).click();
     await expect(page).toHaveURL(/\/favorites$/, { timeout: 15000 });
     await expect(page.getByText(title)).toBeVisible();
 
