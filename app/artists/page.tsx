@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { getDb } from '@/src/db';
 import { listPublicArtists } from '@/src/lib/artworks/public-queries';
 import { plural, sinceMonth } from '@/src/lib/ru-format';
-import { showcaseArtists, showcaseWorksOf } from '@/src/lib/showcase';
 
 export const metadata = {
   title: 'Художники',
@@ -14,27 +13,13 @@ const WORKS: [string, string, string] = ['работа', 'работы', 'раб
 // Every artist on the site; a card opens the artist's own page.
 export default async function ArtistsPage() {
   const real = await listPublicArtists(getDb());
-  const artists = [
-    ...real.map((a) => ({
-      id: a.id,
-      name: a.displayName,
-      info: a.joinedAt ? `На sanatplace ${sinceMonth(a.joinedAt)}` : 'Художник sanatplace',
-      works: a.works,
-      from: a.minPrice,
-      mock: false,
-    })),
-    ...showcaseArtists.map((a) => {
-      const works = showcaseWorksOf(a.id);
-      return {
-        id: a.id,
-        name: a.name,
-        info: a.info,
-        works: works.length,
-        from: Math.min(...works.map((w) => w.price)),
-        mock: true,
-      };
-    }),
-  ];
+  const artists = real.map((a) => ({
+    id: a.id,
+    name: a.displayName,
+    info: a.joinedAt ? `На sanatplace ${sinceMonth(a.joinedAt)}` : 'Художник sanatplace',
+    works: a.works,
+    from: a.minPrice,
+  }));
 
   return (
     <main>
@@ -60,7 +45,6 @@ export default async function ArtistsPage() {
                 </div>
                 <p>
                   {a.works > 0 ? `${a.works} ${plural(a.works, WORKS)}${a.from ? ` · от ${a.from} TJS` : ''}` : 'Пока нет работ в продаже'}
-                  {a.mock && <span className="badge inline">макет</span>}
                 </p>
               </Link>
             </li>

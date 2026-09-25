@@ -30,15 +30,10 @@ export function ArtworkCard({
           sizes="(min-width: 1200px) 290px, (min-width: 860px) 31vw, 50vw"
           unoptimized
           className="pic"
-          style={artwork.focus ? { objectPosition: artwork.focus } : undefined}
           draggable={false}
         />
-        {artwork.status === 'sold' ? (
-          <span className="badge sold">Продано</span>
-        ) : (
-          artwork.mock && <span className="badge">макет</span>
-        )}
-        {like && <LikeButton artworkId={artwork.id} info={like} local={artwork.mock} />}
+        {artwork.status === 'sold' && <span className="badge sold">Продано</span>}
+        {like && <LikeButton artworkId={artwork.id} info={like} />}
       </div>
       <div className="meta">
         <h3 title={artwork.title}>

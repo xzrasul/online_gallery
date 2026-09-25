@@ -7,10 +7,9 @@ import { getDb } from '@/src/db';
 import { getPublishedArtworkById } from '@/src/lib/artworks/public-queries';
 import { telegramHref } from '@/src/lib/telegram';
 import { getCurrentUser } from '@/src/lib/auth/session';
+import { likeInfoFor } from '@/src/lib/likes/likes';
 import { moreByArtist } from '@/src/lib/gallery/catalog';
-import { heartsFor } from '@/src/lib/gallery/likes';
 import { isUuid } from '@/src/lib/gallery/types';
-import { showcaseArtist, showcaseArtwork, showcaseImage, showcaseTermId } from '@/src/lib/showcase';
 import { ArtworkFrame } from '@/src/components/artwork/artwork-frame';
 import { ArtworkGrid } from '@/src/components/artwork/artwork-grid';
 import { BuyBar } from '@/src/components/artwork/buy-bar';
@@ -24,40 +23,18 @@ type Shown = {
   imageUrl: string;
   ratio: number;
   sold: boolean;
-  mock: boolean;
-  categoryId?: string;
+  categoryId: string;
   categoryName: string;
   techniqueName: string;
-  size?: string;
-  year?: number;
+  size: string;
   artistId: string;
   artistName: string;
   telegram?: string | null;
 };
 
-// One lookup per request, shared by the page and its link preview. Showcase
-// works have word ids; anything else must be a uuid to reach the database.
+// One lookup per request, shared by the page and its link preview. Only a
+// uuid can reach the database.
 const loadArtwork = cache(async (id: string): Promise<Shown | undefined> => {
-  const mock = showcaseArtwork(id);
-  if (mock) {
-    return {
-      id: mock.id,
-      title: mock.title,
-      description: mock.description,
-      price: mock.price,
-      imageUrl: showcaseImage(mock, true),
-      ratio: mock.width / mock.height,
-      sold: false,
-      mock: true,
-      categoryId: showcaseTermId(mock.category),
-      categoryName: mock.category,
-      techniqueName: mock.technique,
-      size: mock.size,
-      year: mock.year,
-      artistId: mock.artistId,
-      artistName: showcaseArtist(mock.artistId)?.name ?? '',
-    };
-  }
   if (!isUuid(id)) return undefined;
   const a = await getPublishedArtworkById(getDb(), id);
   if (!a) return undefined;
@@ -69,7 +46,6 @@ const loadArtwork = cache(async (id: string): Promise<Shown | undefined> => {
     imageUrl: a.imageUrl,
     ratio: a.widthCm > 0 && a.heightCm > 0 ? a.widthCm / a.heightCm : 4 / 5,
     sold: a.status === 'sold',
-    mock: false,
     categoryId: a.categoryId,
     categoryName: a.categoryName,
     techniqueName: a.techniqueName,
@@ -85,9 +61,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const artwork = await loadArtwork((await params).id);
   if (!artwork) return {};
   const title = `${artwork.title} — ${artwork.artistName}`;
-  const facts = [artwork.sold ? 'Продано' : `${artwork.price} TJS`, artwork.size, artwork.techniqueName]
-    .filter(Boolean)
-    .join(' · ');
+  const facts = [artwork.sold ? 'Продано' : `${artwork.price} TJS`, artwork.size, artwork.techniqueName].join(' · ');
   const description = snippet(`${facts}. ${artwork.description}`);
   return {
     title,
@@ -102,10 +76,9 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
   if (!artwork) notFound();
 
   const more = await moreByArtist(getDb(), artwork.artistId, artwork.id);
-  const self = { id: artwork.id, title: artwork.title, price: artwork.price, imageUrl: '', sellerId: artwork.artistId, mock: artwork.mock };
-  const likes = await heartsFor(getDb(), [self, ...more], viewer?.id ?? null);
+  const likes = await likeInfoFor(getDb(), [{ id: artwork.id, sellerId: artwork.artistId }, ...more], viewer?.id ?? null);
   const telegram = telegramHref(artwork.telegram ?? null);
-  const categoryHref = artwork.categoryId ? `/gallery?categoryId=${encodeURIComponent(artwork.categoryId)}` : '/gallery';
+  const categoryHref = `/gallery?categoryId=${encodeURIComponent(artwork.categoryId)}`;
 
   let contact: ReactNode;
   if (artwork.sold) contact = <span className="buybar-note">Работа продана</span>;
@@ -116,12 +89,6 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
       </a>
     );
   else if (artwork.telegram) contact = <span className="buybar-note">Telegram: {artwork.telegram}</span>;
-  else if (artwork.mock)
-    contact = (
-      <span className="btn" aria-disabled="true" title="Это макет: связаться с художником нельзя">
-        Написать в Telegram
-      </span>
-    );
 
   return (
     <main className="has-buybar">
@@ -135,15 +102,13 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
         </nav>
         <div className="work">
           <ArtworkFrame src={artwork.imageUrl} alt={`${artwork.title}, ${artwork.artistName}`} ratio={artwork.ratio}>
-            {artwork.mock && <span className="badge">макет</span>}
-            <LikeButton artworkId={artwork.id} info={likes[artwork.id]} local={artwork.mock} size="big" />
+            <LikeButton artworkId={artwork.id} info={likes[artwork.id]} size="big" />
           </ArtworkFrame>
           <div className="panel info">
             <div className="chips">
               <Link className="chip" href={categoryHref}>
                 {artwork.categoryName}
               </Link>
-              {artwork.mock && <span className="chip tag">Классика · макет</span>}
             </div>
             <h1 className="t">{artwork.title}</h1>
             <p className="by">
@@ -151,22 +116,12 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
             </p>
             {artwork.sold ? <p className="stock sold">Продано</p> : <p className="stock">В наличии</p>}
             <dl className="spec">
-              {artwork.size && (
-                <>
-                  <dt>Размеры</dt>
-                  <dd>{artwork.size}</dd>
-                </>
-              )}
+              <dt>Размеры</dt>
+              <dd>{artwork.size}</dd>
               <dt>Категория</dt>
               <dd>{artwork.categoryName}</dd>
               <dt>Техника</dt>
               <dd>{artwork.techniqueName}</dd>
-              {artwork.year && (
-                <>
-                  <dt>Год</dt>
-                  <dd>{artwork.year}</dd>
-                </>
-              )}
             </dl>
             {artwork.description && (
               <>
@@ -174,11 +129,7 @@ export default async function ArtworkDetailPage({ params }: { params: Promise<{ 
                 <p className="desc">{artwork.description}</p>
               </>
             )}
-            <p className="small">
-              {artwork.mock
-                ? 'Это макет: репродукция из общественного достояния, цена и наличие условные.'
-                : 'Оплату и доставку вы обсуждаете напрямую с художником.'}
-            </p>
+            <p className="small">Оплату и доставку вы обсуждаете напрямую с художником.</p>
           </div>
         </div>
         {more.length > 0 && (

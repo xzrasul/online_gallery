@@ -6,7 +6,7 @@ import { setArtworkLike } from '@/src/lib/likes/actions';
 import type { LikeInfo } from '@/src/lib/likes/likes';
 import { plural } from '@/src/lib/ru-format';
 import { cn } from '@/src/lib/utils';
-import { emitWish, setLocalWish, useLocalWishlist } from '@/src/lib/wishlist/client';
+import { emitWish } from '@/src/lib/wishlist/client';
 
 const LIKES: [string, string, string] = ['лайк', 'лайка', 'лайков'];
 
@@ -28,29 +28,25 @@ export function HeartIcon() {
 
 // The wishlist heart over an artwork picture. Guests are sent to sign in and
 // brought back to the artwork; an artist sees their own work's heart but cannot
-// like it. Clicks show at once and roll back if the server says no. `local`
-// works (the showcase) are remembered in this browser instead of the database.
+// like it. Clicks show at once and roll back if the server says no.
 export function LikeButton({
   artworkId,
   info,
-  local = false,
   size = 'card',
 }: {
   artworkId: string;
   info: LikeInfo;
-  local?: boolean;
   size?: 'card' | 'big';
 }) {
   const [committed, setCommitted] = useState({ liked: info.liked, count: info.count });
   const [shown, setShown] = useOptimistic(committed);
   const [pending, startTransition] = useTransition();
   const [popped, setPopped] = useState(0);
-  const localIds = useLocalWishlist();
   // A click before the page is interactive would be lost silently; say so instead.
   const hydrated = useHydrated();
 
-  const liked = local ? localIds.includes(artworkId) : shown.liked;
-  const count = local ? info.count + (liked ? 1 : 0) : shown.count;
+  const liked = shown.liked;
+  const count = shown.count;
   const countLabel = `${count} ${plural(count, LIKES)}`;
   const className = cn('heart', size === 'big' && 'big', liked && 'on');
 
@@ -78,10 +74,6 @@ export function LikeButton({
   const toggle = () => {
     const next = !liked;
     if (next) setPopped((n) => n + 1);
-    if (local) {
-      setLocalWish(artworkId, next);
-      return;
-    }
     emitWish({ id: artworkId, liked: next });
     startTransition(async () => {
       setShown({ liked: next, count: Math.max(0, shown.count + (next ? 1 : -1)) });

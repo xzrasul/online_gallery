@@ -1,5 +1,4 @@
-// What an artwork card needs, whether the work comes from the database or is a
-// showcase («макет») piece.
+// What an artwork card needs.
 export type CardArtwork = {
   id: string;
   title: string;
@@ -8,10 +7,6 @@ export type CardArtwork = {
   sellerId?: string;
   sellerDisplayName?: string;
   status?: string;
-  /** A showcase piece: made-up price and stock, shown with a «макет» badge. */
-  mock?: boolean;
-  /** object-position for the card crop. */
-  focus?: string;
 };
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
