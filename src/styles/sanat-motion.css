@@ -21,6 +21,11 @@
     transform: rotate(-360deg);
   }
 }
+@keyframes wait-in {
+  from {
+    opacity: 0;
+  }
+}
 @keyframes breathe {
   50% {
     transform: scale(1.35);
@@ -107,6 +112,14 @@
     }
     .loader .ml {
       will-change: transform;
+    }
+
+    /* page change: fade the spinner in late, so fast pages never flash it */
+    .page-wait {
+      animation: wait-in 0.2s ease 0.15s backwards;
+    }
+    .page-wait-ring {
+      animation: spin 0.8s linear infinite;
     }
 
     /* hold every entrance until the loading screen lifts */
