@@ -93,6 +93,16 @@
     border-radius: calc(var(--radius) - var(--pad, 10px));
     background: var(--card-hover);
   }
+  /* on a card the picture sits above the stretched title link (its isolation
+     would otherwise trap the heart underneath it) and lets clicks through to
+     the link; only the heart takes them */
+  .card .art {
+    z-index: 2;
+    pointer-events: none;
+  }
+  .card .art .heart {
+    pointer-events: auto;
+  }
   .art img.pic {
     display: block;
     width: 100%;

@@ -4,6 +4,7 @@ import { getDb } from '../../src/db';
 import { artworks, categories, sellerApplications, techniques, users } from '../../src/db/schema';
 import { createArtwork } from '../../src/lib/artworks/seller-operations';
 import { testTelegramId } from '../helpers/test-telegram-id';
+import { signInAsNewUser } from './helpers/auth';
 
 async function seedArtist(label: string) {
   const [artist] = await getDb()
@@ -99,4 +100,21 @@ test('an artist sees the count on their own work but cannot like it', async ({ p
 test('favourites need a signed-in user', async ({ page }) => {
   await page.goto('/favorites');
   await expect(page).toHaveURL(/\/sign-in\?next=%2Ffavorites/, { timeout: 15000 });
+});
+
+test('the heart on a catalog card likes the work instead of opening it', async ({ page }) => {
+  test.setTimeout(60_000);
+  const { title, cleanup } = await seedArtist('likes_card_artist');
+  const fan = await signInAsNewUser(page, 'likes_card_fan');
+  try {
+    await page.goto(`/gallery?q=${encodeURIComponent(title)}`);
+    const heart = page.getByRole('button', { name: /Добавить в избранное/ });
+    // nothing may sit on top of the heart (the card's stretched title link did)
+    await heart.click({ timeout: 10_000 });
+    await expect(page).toHaveURL(/\/gallery\?q=/);
+    await expect(page.getByRole('button', { name: /Убрать из избранного\. 1 лайк$/ })).toHaveAttribute('aria-pressed', 'true');
+  } finally {
+    await getDb().delete(users).where(eq(users.id, fan.id));
+    await cleanup();
+  }
 });
