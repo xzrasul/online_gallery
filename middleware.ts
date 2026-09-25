@@ -16,12 +16,12 @@ export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // The admin area is for staff signed in at /sanatadmin (login and password),
-  // not for Telegram accounts. The database editor and the home page collage
+  // not for Telegram accounts. The database editor and the home page banners
   // are for the admin only.
   if (isAdminRoute(path)) {
     const role = await readStaffToken(req.cookies.get(STAFF_COOKIE)?.value, getSessionSecret());
     if (!role) return NextResponse.redirect(new URL('/sanatadmin', req.url));
-    if ((path.startsWith('/admin/database') || path.startsWith('/admin/collage')) && role !== 'admin') {
+    if ((path.startsWith('/admin/database') || path.startsWith('/admin/banners')) && role !== 'admin') {
       return NextResponse.redirect(new URL('/admin/sellers', req.url));
     }
     return NextResponse.next();

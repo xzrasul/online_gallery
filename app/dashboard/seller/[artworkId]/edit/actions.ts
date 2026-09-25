@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { getArtworkForOwner, updateArtwork } from '@/src/lib/artworks/seller-operations';
 import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { parseYear } from '@/src/lib/artworks/year';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 2000;
@@ -24,6 +25,7 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
   const widthCm = Number(formData.get('widthCm'));
   const categoryId = String(formData.get('categoryId') ?? '').trim();
   const techniqueId = String(formData.get('techniqueId') ?? '').trim();
+  const year = parseYear(formData.get('year'));
   const image = formData.get('image');
 
   const validNumbers =
@@ -36,16 +38,17 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
     description.length > MAX_DESCRIPTION_LENGTH ||
     !validNumbers ||
     !categoryId ||
-    !techniqueId
+    !techniqueId ||
+    year === undefined
   ) {
     redirect(`/dashboard/seller/${artworkId}/edit?error=invalid`);
   }
 
-  let imageUrl = existing.imageUrl;
+  let photo: { imageUrl: string; widthPx?: number; heightPx?: number } = { imageUrl: existing.imageUrl };
   if (image instanceof File && image.size > 0) {
     const upload = await tryUploadArtworkImage(image);
-    if (upload.error) redirect(`/dashboard/seller/${artworkId}/edit?error=${upload.error}`);
-    imageUrl = upload.url!;
+    if (upload.error !== undefined) redirect(`/dashboard/seller/${artworkId}/edit?error=${upload.error}`);
+    photo = { imageUrl: upload.url, widthPx: upload.width, heightPx: upload.height };
   }
 
   await updateArtwork(getDb(), {
@@ -58,7 +61,8 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
     widthCm,
     categoryId,
     techniqueId,
-    imageUrl,
+    ...photo,
+    year,
   });
 
   redirect('/dashboard/seller');

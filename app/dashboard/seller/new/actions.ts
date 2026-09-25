@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { createArtwork } from '@/src/lib/artworks/seller-operations';
 import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { parseYear } from '@/src/lib/artworks/year';
 
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 2000;
@@ -21,6 +22,7 @@ export async function submitNewArtwork(formData: FormData) {
   const widthCm = Number(formData.get('widthCm'));
   const categoryId = String(formData.get('categoryId') ?? '').trim();
   const techniqueId = String(formData.get('techniqueId') ?? '').trim();
+  const year = parseYear(formData.get('year'));
   const image = formData.get('image');
 
   const validNumbers =
@@ -34,6 +36,7 @@ export async function submitNewArtwork(formData: FormData) {
     !validNumbers ||
     !categoryId ||
     !techniqueId ||
+    year === undefined ||
     !(image instanceof File) ||
     image.size === 0
   ) {
@@ -41,8 +44,7 @@ export async function submitNewArtwork(formData: FormData) {
   }
 
   const upload = await tryUploadArtworkImage(image as File);
-  if (upload.error) redirect(`/dashboard/seller/new?error=${upload.error}`);
-  const imageUrl = upload.url!;
+  if (upload.error !== undefined) redirect(`/dashboard/seller/new?error=${upload.error}`);
 
   await createArtwork(getDb(), {
     sellerId: user.id,
@@ -53,7 +55,10 @@ export async function submitNewArtwork(formData: FormData) {
     widthCm,
     categoryId,
     techniqueId,
-    imageUrl,
+    imageUrl: upload.url,
+    widthPx: upload.width,
+    heightPx: upload.height,
+    year,
   });
 
   redirect('/dashboard/seller');

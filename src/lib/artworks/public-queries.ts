@@ -1,8 +1,24 @@
 import { and, asc, count, desc, eq, gte, ilike, inArray, lte, min, or, sql, type SQL } from 'drizzle-orm';
 import type { Db } from '../../db';
-import { artworks, categories, techniques, sellerApplications } from '../../db/schema';
+import { artworks, categories, techniques, sellerApplications, users } from '../../db/schema';
 
 export type CatalogSort = 'new' | 'asc' | 'desc' | 'az';
+
+// What an artwork card shows. Needs the techniques and seller_applications joins.
+export const CARD_COLUMNS = {
+  id: artworks.id,
+  title: artworks.title,
+  price: artworks.price,
+  imageUrl: artworks.imageUrl,
+  status: artworks.status,
+  year: artworks.year,
+  techniqueName: techniques.name,
+  sellerId: artworks.sellerId,
+  sellerDisplayName: sellerApplications.displayName,
+};
+
+// The artist's photo: the one they uploaded, else their Telegram photo.
+export const ARTIST_AVATAR = sql<string | null>`coalesce(${sellerApplications.avatarUrl}, ${users.photoUrl})`;
 
 const ORDER: Record<CatalogSort, SQL[]> = {
   new: [desc(artworks.submittedAt)],
@@ -39,16 +55,10 @@ export async function listPublishedArtworks(
   const where = and(...conditions);
 
   const items = await db
-    .select({
-      id: artworks.id,
-      title: artworks.title,
-      price: artworks.price,
-      imageUrl: artworks.imageUrl,
-      sellerId: artworks.sellerId,
-      sellerDisplayName: sellerApplications.displayName,
-    })
+    .select(CARD_COLUMNS)
     .from(artworks)
     .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
+    .innerJoin(techniques, eq(artworks.techniqueId, techniques.id))
     .where(where)
     .orderBy(...ORDER[sort])
     .limit(pagination.pageSize)
@@ -80,16 +90,24 @@ export async function listPublicArtists(db: Db) {
       id: sellerApplications.userId,
       displayName: sellerApplications.displayName,
       joinedAt: sellerApplications.reviewedAt,
+      avatarUrl: ARTIST_AVATAR,
       works: sql<number>`count(${artworks.id})::int`,
       minPrice: min(artworks.price),
     })
     .from(sellerApplications)
+    .innerJoin(users, eq(users.id, sellerApplications.userId))
     .leftJoin(
       artworks,
       and(eq(artworks.sellerId, sellerApplications.userId), eq(artworks.status, 'published')),
     )
     .where(eq(sellerApplications.status, 'approved'))
-    .groupBy(sellerApplications.userId, sellerApplications.displayName, sellerApplications.reviewedAt)
+    .groupBy(
+      sellerApplications.userId,
+      sellerApplications.displayName,
+      sellerApplications.reviewedAt,
+      sellerApplications.avatarUrl,
+      users.photoUrl,
+    )
     .orderBy(desc(sql`count(${artworks.id})`), asc(sellerApplications.displayName));
 }
 
@@ -102,6 +120,9 @@ export async function getPublishedArtworkById(db: Db, id: string) {
       price: artworks.price,
       heightCm: artworks.heightCm,
       widthCm: artworks.widthCm,
+      widthPx: artworks.widthPx,
+      heightPx: artworks.heightPx,
+      year: artworks.year,
       imageUrl: artworks.imageUrl,
       status: artworks.status,
       categoryId: artworks.categoryId,
@@ -128,20 +149,18 @@ export async function getArtistPublicProfile(db: Db, sellerId: string) {
       bio: sellerApplications.bio,
       telegramContact: sellerApplications.telegramContact,
       joinedAt: sellerApplications.reviewedAt,
+      avatarUrl: ARTIST_AVATAR,
     })
     .from(sellerApplications)
+    .innerJoin(users, eq(users.id, sellerApplications.userId))
     .where(eq(sellerApplications.userId, sellerId));
   if (!profile) return undefined;
 
   const artworkRows = await db
-    .select({
-      id: artworks.id,
-      title: artworks.title,
-      price: artworks.price,
-      imageUrl: artworks.imageUrl,
-      status: artworks.status,
-    })
+    .select(CARD_COLUMNS)
     .from(artworks)
+    .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
+    .innerJoin(techniques, eq(artworks.techniqueId, techniques.id))
     .where(and(eq(artworks.sellerId, sellerId), inArray(artworks.status, ['published', 'sold'])))
     .orderBy(desc(artworks.submittedAt));
 

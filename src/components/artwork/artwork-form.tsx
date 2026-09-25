@@ -16,6 +16,7 @@ type Defaults = {
   categoryId: string;
   techniqueId: string;
   imageUrl: string;
+  year?: number | null;
 };
 
 export function ArtworkForm({
@@ -81,6 +82,17 @@ export function ArtworkForm({
             <Input type="number" name="widthCm" min="1" defaultValue={defaults?.widthCm} required />
           </Field>
         </div>
+        <Field label="Год написания (необязательно)">
+          <Input
+            type="number"
+            name="year"
+            min="1000"
+            max={new Date().getFullYear()}
+            inputMode="numeric"
+            placeholder="Например, 2024"
+            defaultValue={defaults?.year ?? ''}
+          />
+        </Field>
         <Field label="Категория">
           <NativeSelect name="categoryId" defaultValue={defaults?.categoryId ?? ''} required>
             {!defaults && <option value="">Выберите категорию</option>}

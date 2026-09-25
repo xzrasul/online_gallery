@@ -176,6 +176,7 @@ describe('seller applications', () => {
       displayName: 'Студия Зарины Каримовой',
       bio: 'Сюзане и батик.',
       telegramContact: null,
+      avatarUrl: null,
     });
     const [application] = await getDb()
       .select()

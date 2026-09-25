@@ -53,7 +53,7 @@ export function LikeButton({
   if (info.state === 'guest') {
     return (
       <Link
-        href={`/sign-in?next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`}
+        href={`/sign-in?why=wish&next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`}
         className={className}
         aria-label={`Войдите, чтобы добавить в избранное. ${countLabel}`}
         title="Войдите, чтобы добавить в избранное"
@@ -85,7 +85,7 @@ export function LikeButton({
         // the optimistic state falls back to the last committed one
         emitWish({ id: artworkId, liked: !next });
         if (result?.reason === 'sign_in') {
-          window.location.assign(`/sign-in?next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`);
+          window.location.assign(`/sign-in?why=wish&next=${encodeURIComponent(`/gallery/artwork/${artworkId}`)}`);
         }
       }
     });

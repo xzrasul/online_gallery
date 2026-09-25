@@ -10,7 +10,9 @@ export const metadata = {
 // For artists: what selling here looks like, and the way in.
 export default async function SellPage() {
   const user = await getCurrentUser();
-  const start = user ? { href: '/choose-role', label: 'Хочу продавать картины' } : { href: '/sign-in', label: 'Войти через Telegram' };
+  const start = user
+    ? { href: '/choose-role', label: 'Хочу продавать картины', tg: false }
+    : { href: '/sign-in', label: 'Войти через Telegram', tg: true };
   return (
     <main>
       <div className="wrap stack pg">
@@ -21,7 +23,7 @@ export default async function SellPage() {
             Покажите свои картины тем, кто ищет живое искусство. Вход через Telegram: без паролей, номеров телефонов и
             SMS-кодов.
           </p>
-          <Link className="btn" href={start.href}>
+          <Link className={start.tg ? 'btn btn-tg' : 'btn'} href={start.href}>
             {start.label}
           </Link>
         </div>

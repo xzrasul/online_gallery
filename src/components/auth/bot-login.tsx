@@ -70,7 +70,7 @@ export function BotLogin({ botUsername, next }: { botUsername: string; next?: st
     return (
       <div className="grid gap-4">
         <span className="halo wide">
-          <a href={state.botUrl} target="_blank" rel="noopener noreferrer" className="btn wide">
+          <a href={state.botUrl} target="_blank" rel="noopener noreferrer" className="btn btn-tg wide">
             Открыть @{botUsername}
           </a>
         </span>
@@ -100,7 +100,7 @@ export function BotLogin({ botUsername, next }: { botUsername: string; next?: st
         </p>
       )}
       <span className="halo wide">
-        <button type="button" onClick={start} disabled={state.step === 'starting'} className="btn wide">
+        <button type="button" onClick={start} disabled={state.step === 'starting'} className="btn btn-tg wide">
           {state.step === 'starting' && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
           Войти через Telegram
         </button>

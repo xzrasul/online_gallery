@@ -7,6 +7,8 @@ export type CardArtwork = {
   sellerId?: string;
   sellerDisplayName?: string;
   status?: string;
+  techniqueName?: string | null;
+  year?: number | null;
 };
 
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

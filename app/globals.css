@@ -1,21 +1,14 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '../src/styles/sanat-shell.css';
-@import '../src/styles/sanat-pages.css';
-@import '../src/styles/sanat-motion.css';
+@import '../src/styles/site.css';
 
-/* One dark theme only: bind shadcn's `dark:` variant to a class we never set. */
+/* One light theme only: bind shadcn's `dark:` variant to a class we never set. */
 @custom-variant dark (&:is(.dark *));
 
 /* Tailwind (cabinets, admin, forms) reads the same tokens as the public pages. */
 @theme inline {
-  --font-sans: var(--font-display);
-  --font-serif: var(--font-display);
-  /* Oswald is loaded in 500 and 600 only: no synthetic bold anywhere. */
-  --font-weight-normal: 500;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 600;
+  --font-sans: var(--serif);
+  --font-serif: var(--serif);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -34,13 +27,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-brand: var(--brand);
-  --color-gold: var(--gold);
-  --color-gold-2: var(--gold-2);
+  --color-brand: var(--sage);
   --color-ink: var(--ink);
-  --color-ink-2: var(--ink-2);
-  --color-night: var(--night);
-  /* One radius for every rounded thing; anything under 40px tall ends up a pill. */
+  --color-ink-2: var(--mute);
   --radius-xs: var(--radius);
   --radius-sm: var(--radius);
   --radius-md: var(--radius);
@@ -52,52 +41,49 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
   /* ---- sanatplace tokens ---- */
-  --ground: #08141f;
-  --night: var(--ground);
-  --night-2: #0d1f30;
-  --card: #0f2436;
-  --card-hover: #163350;
-  --ink: #f4efe0;
-  --ink-2: #b9c6c4;
-  --gold: #e3b02b;
-  --gold-2: #f0c64f;
-  --rose: #e45a86;
-  --crim: #b7264b;
-  --green: #6fc08a;
-  --on-gold: #1a1405;
-  --soft: rgba(244, 239, 224, 0.1);
-  --soft-2: rgba(244, 239, 224, 0.18);
-  --field: rgba(244, 239, 224, 0.09);
-  --line: rgba(244, 239, 224, 0.14);
-  --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-  --radius: 20px;
-  --font-display: var(--font-oswald), 'Arial Narrow', sans-serif;
-  --font-arabic: var(--font-kufam), 'Noto Naskh Arabic', sans-serif;
-  /* kept for older rules that ask for the body font */
-  --font-body: var(--font-display);
+  --bg: #ffffff;
+  --ink: #232a25;
+  --ink-soft: #454e47;
+  --mute: #8d958f;
+  --sage: #617f6c;
+  --sage-d: #4b6656;
+  --sage-l: #eaeeea;
+  --sage-xl: #f4f6f3;
+  --line: #dde2dd;
+  --field-line: #cfd5d0;
+  --btn-line: #c5ccc6;
+  --tile: #e7e7e5;
+  --rose: #c9566f;
+  --green: #4f8a63;
+  --tg: #2aabee;
+  --tg-d: #229ed9;
+  --ring-soft: rgba(97, 127, 108, 0.22);
+  --shadow: 0 10px 24px rgba(30, 40, 34, 0.16);
+  --radius: 6px;
+  --serif: var(--font-cormorant), 'Cormorant Garamond', 'Times New Roman', Georgia, serif;
 
   /* ---- shadcn tokens, mapped onto the palette ---- */
-  --background: var(--ground);
+  --background: var(--bg);
   --foreground: var(--ink);
+  --card: var(--sage-xl);
   --card-foreground: var(--ink);
-  --popover: var(--night-2);
+  --popover: var(--bg);
   --popover-foreground: var(--ink);
-  --primary: var(--gold);
-  --primary-foreground: var(--on-gold);
-  --secondary: var(--card-hover);
+  --primary: var(--sage);
+  --primary-foreground: #fff;
+  --secondary: var(--sage-l);
   --secondary-foreground: var(--ink);
-  --muted: var(--card-hover);
-  --muted-foreground: var(--ink-2);
-  --accent: rgba(227, 176, 43, 0.16);
+  --muted: var(--sage-xl);
+  --muted-foreground: #6f7872;
+  --accent: var(--sage-l);
   --accent-foreground: var(--ink);
-  --destructive: #f07a8f;
+  --destructive: #b3413a;
   --border: var(--line);
-  --input: var(--soft-2);
-  --ring: var(--gold-2);
-  --brand: var(--gold-2);
+  --input: var(--field-line);
+  --ring: var(--sage);
 }
 
 @layer base {
@@ -105,15 +91,14 @@
     @apply border-border;
   }
   html {
-    background: var(--ground);
+    font-size: 112.5%;
+    background: var(--bg);
   }
-  /* no background on body: it would cover the fixed painted .bg (z-index -1) */
   body {
     margin: 0;
+    background: var(--bg);
     color: var(--ink);
-    font: 500 1rem/1.5 var(--font-display);
-    letter-spacing: 0.015em;
-    font-synthesis: none;
+    font: 500 1rem/1.5 var(--serif);
     -webkit-font-smoothing: antialiased;
     overflow-x: clip;
   }
@@ -121,32 +106,29 @@
   h2,
   h3,
   h4 {
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  }
-  h1 {
-    font-size: clamp(1.7rem, 3.2vw, 2.4rem);
-    line-height: 1.08;
-  }
-  h2 {
-    font-size: clamp(1.3rem, 2.3vw, 1.7rem);
+    font-weight: 500;
     line-height: 1.1;
   }
+  h1 {
+    font-size: clamp(2.1rem, 4.4vw, 3.1rem);
+    line-height: 1.05;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+  }
   h3 {
-    font-size: 1.1rem;
-    line-height: 1.2;
+    font-size: 1.3rem;
   }
   b,
   strong,
   th {
-    font-weight: 600;
+    font-weight: 700;
   }
   a {
     color: inherit;
   }
   :focus-visible {
-    outline: 3px solid var(--gold-2);
+    outline: 2px solid var(--sage);
     outline-offset: 3px;
   }
   button,
@@ -155,22 +137,11 @@
   textarea {
     font-family: inherit;
   }
-  select option {
-    background: var(--night-2);
-    color: var(--ink);
-  }
   ::placeholder {
-    color: var(--ink-2);
-    opacity: 0.85;
+    color: var(--mute);
+    opacity: 1;
   }
   [hidden] {
     display: none !important;
-  }
-  [lang='fa'],
-  .fa {
-    font-family: var(--font-arabic);
-    font-weight: 700;
-    letter-spacing: 0;
-    text-transform: none;
   }
 }

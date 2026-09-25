@@ -26,6 +26,9 @@ export const sellerApplications = pgTable('seller_applications', {
   displayName: text('display_name').notNull(),
   bio: text('bio').notNull(),
   telegramContact: text('telegram_contact'),
+  // The artist's photo, uploaded in the cabinet or the admin; without it the
+  // public pages show the Telegram photo, then the first letter of the name.
+  avatarUrl: text('avatar_url'),
   status: applicationStatusEnum('status').notNull().default('pending'),
   rejectionReason: text('rejection_reason'),
   reviewedByAdminId: uuid('reviewed_by_admin_id').references(() => users.id),
@@ -69,6 +72,11 @@ export const artworks = pgTable('artworks', {
     .notNull()
     .references(() => techniques.id),
   imageUrl: text('image_url').notNull(),
+  // Optional: the year it was painted, and the stored photo's pixel size
+  // (saved on upload so the page can reserve the right space).
+  year: integer('year'),
+  widthPx: integer('width_px'),
+  heightPx: integer('height_px'),
   status: artworkStatusEnum('status').notNull().default('pending'),
   rejectionReason: text('rejection_reason'),
   submittedAt: timestamp('submitted_at').notNull().defaultNow(),
@@ -115,4 +123,26 @@ export const homeCollage = pgTable('home_collage', {
     .unique()
     .references(() => artworks.id, { onDelete: 'cascade' }),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Home page banner slides, managed by the admin. The public reads only active
+// ones inside their show window, ordered by sort_order.
+export const banners = pgTable('banners', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  imageUrl: text('image_url').notNull(),
+  imageMobileUrl: text('image_mobile_url'),
+  eyebrow: text('eyebrow'),
+  title: text('title').notNull(),
+  subtitle: text('subtitle'),
+  buttonLabel: text('button_label'),
+  buttonUrl: text('button_url'),
+  button2Label: text('button2_label'),
+  button2Url: text('button2_url'),
+  artworkId: uuid('artwork_id').references(() => artworks.id, { onDelete: 'set null' }),
+  overlay: integer('overlay').notNull().default(45),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isActive: boolean('is_active').notNull().default(true),
+  startsAt: timestamp('starts_at', { withTimezone: true }),
+  endsAt: timestamp('ends_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });

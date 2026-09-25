@@ -15,7 +15,8 @@ export const DB_TABLES = {
   techniques: { table: schema.techniques, label: 'Техники' },
   artwork_likes: { table: schema.artworkLikes, label: 'Лайки' },
   login_requests: { table: schema.loginRequests, label: 'Запросы входа через бота' },
-  home_collage: { table: schema.homeCollage, label: 'Коллаж на главной' },
+  home_collage: { table: schema.homeCollage, label: 'Коллаж на главной (не используется)' },
+  banners: { table: schema.banners, label: 'Баннеры' },
 } satisfies Record<string, { table: PgTable; label: string }>;
 
 export type TableName = keyof typeof DB_TABLES;

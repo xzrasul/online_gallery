@@ -14,16 +14,25 @@ export class UnreadableImageError extends Error {
 // sharp is a native module, loaded only when a photo is processed: if it
 // can't load on the server, the pages that hold the upload form still open,
 // and the upload fails with a message instead of the whole page failing.
-export async function normalizeArtworkImage(input: ArrayBuffer | Buffer): Promise<Buffer> {
+// Also returns the stored size in pixels. `maxSide` is the long side's limit.
+export async function normalizeImage(
+  input: ArrayBuffer | Buffer,
+  maxSide = MAX_IMAGE_SIDE,
+): Promise<{ data: Buffer; width: number; height: number }> {
   const buffer = Buffer.isBuffer(input) ? input : Buffer.from(input);
   const { default: sharp } = await import('sharp');
   try {
-    return await sharp(buffer, { failOn: 'error' })
+    const { data, info } = await sharp(buffer, { failOn: 'error' })
       .rotate()
-      .resize({ width: MAX_IMAGE_SIDE, height: MAX_IMAGE_SIDE, fit: 'inside', withoutEnlargement: true })
+      .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: WEBP_QUALITY })
-      .toBuffer();
+      .toBuffer({ resolveWithObject: true });
+    return { data, width: info.width, height: info.height };
   } catch {
     throw new UnreadableImageError();
   }
+}
+
+export async function normalizeArtworkImage(input: ArrayBuffer | Buffer): Promise<Buffer> {
+  return (await normalizeImage(input)).data;
 }

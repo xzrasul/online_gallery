@@ -8,7 +8,9 @@ import { getDb } from '@/src/db';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { getSellerProfile } from '@/src/lib/sellers/applications';
 import { MAX_BIO_LENGTH, MAX_DISPLAY_NAME_LENGTH } from '@/src/lib/sellers/profile-form';
-import { submitSellerProfile } from './actions';
+import { AVATAR_MESSAGES, type AvatarResult } from '@/src/lib/sellers/avatar';
+import { AvatarForm } from '@/src/components/sanat/avatar-form';
+import { submitSellerAvatar, submitSellerProfile } from './actions';
 
 export const metadata = {
   title: 'Мой профиль',
@@ -17,7 +19,7 @@ export const metadata = {
 export default async function SellerProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{ error?: string; saved?: string; photo?: string }>;
 }) {
   const user = await getCurrentUser();
   if (!user) redirect('/sign-in');
@@ -26,7 +28,7 @@ export default async function SellerProfilePage({
   const profile = await getSellerProfile(getDb(), user.id);
   if (!profile) redirect('/become-seller/status');
 
-  const { error, saved } = await searchParams;
+  const { error, saved, photo } = await searchParams;
 
   return (
     <main className="mx-auto max-w-lg">
@@ -54,7 +56,21 @@ export default async function SellerProfilePage({
             Пожалуйста, заполните все поля корректно.
           </p>
         )}
-        <form action={submitSellerProfile} className="mt-6 grid gap-5">
+        <section aria-labelledby="photo-title" className="mt-6 grid gap-3">
+          <h2 id="photo-title" className="text-xl">
+            Фото
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Показывается на странице художника и в списке художников. Без фото там будет первая буква имени.
+          </p>
+          {photo && photo in AVATAR_MESSAGES && (
+            <p role={photo === 'saved' || photo === 'removed' ? 'status' : 'alert'} className="notice">
+              {AVATAR_MESSAGES[photo as AvatarResult]}
+            </p>
+          )}
+          <AvatarForm action={submitSellerAvatar} name={profile.displayName} url={profile.avatarUrl ?? user.photoUrl} />
+        </section>
+        <form action={submitSellerProfile} className="mt-8 grid gap-5">
           <Field label="Имя художника/студии">
             <Input
               type="text"

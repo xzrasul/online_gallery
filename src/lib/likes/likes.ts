@@ -1,6 +1,7 @@
 import { and, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { Db } from '../../db';
-import { artworkLikes, artworks, sellerApplications } from '../../db/schema';
+import { artworkLikes, artworks, sellerApplications, techniques } from '../../db/schema';
+import { CARD_COLUMNS } from '../artworks/public-queries';
 
 // Only works the public can see can be liked (and keep their likes once sold).
 const VISIBLE = ['published', 'sold'] as const;
@@ -83,18 +84,11 @@ export async function countFavorites(db: Db, userId: string): Promise<number> {
 // The user's favourites: works they liked that are still public, most recently liked first.
 export async function listFavorites(db: Db, userId: string) {
   return db
-    .select({
-      id: artworks.id,
-      title: artworks.title,
-      price: artworks.price,
-      imageUrl: artworks.imageUrl,
-      status: artworks.status,
-      sellerId: artworks.sellerId,
-      sellerDisplayName: sellerApplications.displayName,
-    })
+    .select(CARD_COLUMNS)
     .from(artworkLikes)
     .innerJoin(artworks, eq(artworkLikes.artworkId, artworks.id))
     .innerJoin(sellerApplications, eq(artworks.sellerId, sellerApplications.userId))
+    .innerJoin(techniques, eq(artworks.techniqueId, techniques.id))
     .where(and(eq(artworkLikes.userId, userId), inArray(artworks.status, [...VISIBLE])))
     .orderBy(desc(artworkLikes.createdAt));
 }

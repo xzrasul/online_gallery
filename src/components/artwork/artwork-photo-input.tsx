@@ -11,7 +11,15 @@ const mb = (bytes: number) => (bytes / 1024 / 1024).toLocaleString('ru-RU', { ma
 // The artwork photo field. A chosen photo is shrunk in the browser before the
 // form is sent (the form can't be submitted while that runs), and the field
 // says what will be uploaded.
-export function ArtworkPhotoInput({ required }: { required: boolean }) {
+export function ArtworkPhotoInput({
+  required,
+  name = 'image',
+  maxSide,
+}: {
+  required: boolean;
+  name?: string;
+  maxSide?: number;
+}) {
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
   const onChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -22,7 +30,7 @@ export function ArtworkPhotoInput({ required }: { required: boolean }) {
 
     input.setCustomValidity('Подождите, фото готовится');
     setStatus({ kind: 'working' });
-    const shrunk = await shrinkPhoto(file).catch(() => null);
+    const shrunk = await shrinkPhoto(file, maxSide).catch(() => null);
     input.setCustomValidity('');
 
     const chosen = shrunk?.file ?? file;
@@ -48,7 +56,7 @@ export function ArtworkPhotoInput({ required }: { required: boolean }) {
 
   return (
     <>
-      <Input type="file" name="image" accept="image/*" required={required} onChange={onChange} />
+      <Input type="file" name={name} accept="image/*" required={required} onChange={onChange} />
       {status.kind === 'working' && (
         <span role="status" className="text-sm text-muted-foreground">
           Готовим фото…
