@@ -43,7 +43,7 @@ export function WishlistGrid({ saved, likes }: { saved: CardArtwork[]; likes: Re
           </Link>
         </div>
       ) : (
-        <ul className="grid cards">
+        <ul className="art-grid cards">
           {items.map((w) => (
             <li key={w.id}>
               <ArtworkCard artwork={w} like={likes[w.id]} />

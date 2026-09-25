@@ -9,7 +9,8 @@ export default async function CabinetPage() {
   const user = await getCurrentUser();
   if (!user) redirect('/sign-in');
 
-  if (user.role === 'admin') redirect('/admin/sellers');
+  // the admin area has its own sign-in now (login and password)
+  if (user.role === 'admin') redirect('/sanatadmin');
   if (user.role === 'seller') redirect('/dashboard/seller');
 
   const [application] = await getDb()

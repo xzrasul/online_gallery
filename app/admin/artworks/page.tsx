@@ -1,5 +1,4 @@
-import { getCurrentUser } from '@/src/lib/auth/session';
-import { redirect } from 'next/navigation';
+import { requireStaff } from '@/src/lib/auth/staff';
 import { getDb } from '@/src/db';
 import { listPendingArtworks } from '@/src/lib/artworks/admin-operations';
 import { AdminNav } from '@/src/components/admin/admin-nav';
@@ -9,15 +8,13 @@ import { Input } from '@/src/components/ui/input';
 import { approveArtwork, rejectArtwork } from './actions';
 
 export default async function AdminArtworksPage() {
-  const admin = await getCurrentUser();
-  if (!admin) redirect('/sign-in');
-  if (admin.role !== 'admin') redirect('/');
+  const role = await requireStaff();
 
   const pending = await listPendingArtworks(getDb());
 
   return (
     <main>
-      <AdminNav />
+      <AdminNav role={role} />
       <h1>Картины на модерации</h1>
       {pending.length === 0 && <p className="mt-4 text-muted-foreground">Нет картин на модерации.</p>}
       <div className="mt-6 grid gap-4">

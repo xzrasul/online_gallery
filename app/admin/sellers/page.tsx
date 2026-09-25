@@ -1,5 +1,4 @@
-import { getCurrentUser } from '@/src/lib/auth/session';
-import { redirect } from 'next/navigation';
+import { requireStaff } from '@/src/lib/auth/staff';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { sellerApplications } from '@/src/db/schema';
@@ -9,9 +8,7 @@ import { Input } from '@/src/components/ui/input';
 import { approveApplication, rejectApplication } from './actions';
 
 export default async function AdminSellersPage() {
-  const admin = await getCurrentUser();
-  if (!admin) redirect('/sign-in');
-  if (admin.role !== 'admin') redirect('/');
+  const role = await requireStaff();
 
   const pending = await getDb()
     .select()
@@ -20,7 +17,7 @@ export default async function AdminSellersPage() {
 
   return (
     <main>
-      <AdminNav />
+      <AdminNav role={role} />
       <h1>Заявки продавцов на рассмотрении</h1>
       {pending.length === 0 && <p className="mt-4 text-muted-foreground">Нет заявок на рассмотрении.</p>}
       <div className="mt-6 grid max-w-2xl gap-4">

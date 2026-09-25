@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { signInAsNewUser } from './helpers/auth';
+import { signInAsNewUser, signInAsStaff } from './helpers/auth';
 import { eq } from 'drizzle-orm';
 import { getDb } from '../../src/db';
 import { users, categories, techniques } from '../../src/db/schema';
 
 test('admin creates and renames a category and a technique', async ({ page }) => {
   const adminUser = await signInAsNewUser(page, 'catalog_admin');
-  await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, adminUser.id));
+  await signInAsStaff(page, 'moderator');
 
   const categoryName = `E2E категория ${Date.now()}`;
   const renamedCategoryName = `${categoryName} (переименовано)`;

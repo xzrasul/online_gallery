@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '@/src/db';
 import { users } from '@/src/db/schema';
 import { SESSION_COOKIE, getSessionSecret, readSessionToken } from '@/src/lib/auth/session-token';
+import { STAFF_COOKIE, readStaffToken } from '@/src/lib/auth/staff-token';
 
 const isSellerRoute = (path: string) => path.startsWith('/dashboard/seller');
 const isAdminRoute = (path: string) => path.startsWith('/admin');
@@ -13,7 +14,19 @@ const isAuthenticatedRoute = (path: string) =>
 // everywhere else in this project; the session cookie only carries the user id.
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  if (!isAuthenticatedRoute(path) && !isSellerRoute(path) && !isAdminRoute(path)) {
+
+  // The admin area is for staff signed in at /sanatadmin (login and password),
+  // not for Telegram accounts. The database editor is for the admin only.
+  if (isAdminRoute(path)) {
+    const role = await readStaffToken(req.cookies.get(STAFF_COOKIE)?.value, getSessionSecret());
+    if (!role) return NextResponse.redirect(new URL('/sanatadmin', req.url));
+    if (path.startsWith('/admin/database') && role !== 'admin') {
+      return NextResponse.redirect(new URL('/admin/sellers', req.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (!isAuthenticatedRoute(path) && !isSellerRoute(path)) {
     return NextResponse.next();
   }
 
@@ -28,9 +41,6 @@ export default async function middleware(req: NextRequest) {
 
   if (isSellerRoute(path) && user.role !== 'seller') {
     return NextResponse.redirect(new URL('/become-seller/status', req.url));
-  }
-  if (isAdminRoute(path) && user.role !== 'admin') {
-    return NextResponse.redirect(new URL('/', req.url));
   }
   return NextResponse.next();
 }

@@ -7,7 +7,8 @@ export async function approveOrRejectArtwork(
   db: Db,
   input: {
     artworkId: string;
-    adminUserId: string;
+    /** the reviewer's users row; null for staff signed in at /sanatadmin */
+    adminUserId: string | null;
     decision: 'approve' | 'reject';
     reason?: string;
   },

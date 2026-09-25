@@ -1,5 +1,9 @@
 import Link from 'next/link';
+import { staffSignOut } from '@/app/sanatadmin/actions';
+import type { StaffRole } from '@/src/lib/auth/staff';
 
+// Moderators: applications, artworks, categories, techniques. The admin also
+// gets the database editor.
 const LINKS = [
   { href: '/admin/sellers', label: 'Заявки продавцов' },
   { href: '/admin/artworks', label: 'Картины на модерации' },
@@ -7,18 +11,30 @@ const LINKS = [
   { href: '/admin/techniques', label: 'Техники' },
 ];
 
-export function AdminNav() {
+const pill =
+  'inline-flex min-h-11 shrink-0 items-center rounded-full border border-border bg-card px-4 text-sm hover:border-brand hover:text-brand';
+
+export function AdminNav({ role }: { role: StaffRole }) {
+  const links = role === 'admin' ? [{ href: '/admin/database', label: 'База данных' }, ...LINKS] : LINKS;
   return (
-    <nav aria-label="Разделы админки" className="-m-1 mb-7 p-1 flex flex-nowrap gap-2 overflow-x-auto sm:flex-wrap">
-      {LINKS.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className="shrink-0 rounded-full border border-border bg-card px-4 py-1.5 text-sm hover:border-brand hover:text-brand"
-        >
-          {link.label}
-        </Link>
-      ))}
-    </nav>
+    <div className="mb-7 flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm tracking-widest text-ink-2 uppercase">
+          {role === 'admin' ? 'Администратор' : 'Модератор'}
+        </p>
+        <form action={staffSignOut}>
+          <button type="submit" className={pill}>
+            Выйти
+          </button>
+        </form>
+      </div>
+      <nav aria-label="Разделы админки" className="-m-1 flex flex-nowrap gap-2 overflow-x-auto p-1 sm:flex-wrap">
+        {links.map((link) => (
+          <Link key={link.href} href={link.href} className={pill}>
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
   );
 }

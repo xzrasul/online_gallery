@@ -32,10 +32,10 @@ test('/cabinet sends each user to the cabinet of their role', async ({ page }) =
     await page.goto('/cabinet');
     await expect(page).toHaveURL(/\/dashboard\/seller/);
 
-    // admin → admin area
+    // a Telegram account with the old admin role → the staff sign-in page
     await getDb().update(users).set({ role: 'admin' }).where(eq(users.id, user.id));
     await page.goto('/cabinet');
-    await expect(page).toHaveURL(/\/admin\/sellers/);
+    await expect(page).toHaveURL(/\/sanatadmin/);
   } finally {
     await getDb().delete(sellerApplications).where(eq(sellerApplications.userId, user.id));
     await getDb().delete(users).where(eq(users.id, user.id));

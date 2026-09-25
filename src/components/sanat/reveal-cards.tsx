@@ -9,7 +9,7 @@ export function RevealCards({ base = 60, children }: { base?: number; children: 
   const ref = useRef<HTMLUListElement>(null);
   useLayoutEffect(() => arm(Array.from(ref.current!.querySelectorAll(CARD_SELECTOR)), base), [base]);
   return (
-    <ul className="grid cards" ref={ref}>
+    <ul className="art-grid cards" ref={ref}>
       {children}
     </ul>
   );

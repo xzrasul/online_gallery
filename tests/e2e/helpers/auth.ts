@@ -3,6 +3,8 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../../../src/db';
 import { users } from '../../../src/db/schema';
 import { testTelegramId } from '../../helpers/test-telegram-id';
+import { getSessionSecret } from '../../../src/lib/auth/session-token';
+import { STAFF_COOKIE, createStaffToken, type StaffRole } from '../../../src/lib/auth/staff-token';
 
 // Signs a brand-new user in through the development-only /auth/dev-login
 // route (the real Telegram widget cannot run on localhost). New accounts are
@@ -17,4 +19,11 @@ export async function signInAsNewUser(page: Page, label = 'e2e_user') {
 
 export async function signOut(page: Page) {
   await page.context().clearCookies();
+}
+
+// Signs the browser in as staff (what /sanatadmin does after checking the
+// login and password), so tests need no staff passwords.
+export async function signInAsStaff(page: Page, role: StaffRole, baseURL = 'http://localhost:3000') {
+  const token = await createStaffToken(role, getSessionSecret());
+  await page.context().addCookies([{ name: STAFF_COOKIE, value: token, url: baseURL, httpOnly: true, sameSite: 'Strict' }]);
 }
