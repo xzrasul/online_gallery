@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/src/lib/auth/session';
 import { BotLogin } from '@/src/components/auth/bot-login';
@@ -36,7 +37,12 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             ) : (
               <p className="notice">Вход через Telegram не настроен: задайте TELEGRAM_BOT_USERNAME.</p>
             )}
-            <small>Бот получит только ваше имя и username в Telegram. Номер телефона не передаётся.</small>
+            <small className="legal">
+              Нажимая «Войти через Telegram», вы принимаете <Link href="/terms">Пользовательское соглашение</Link> и
+              соглашаетесь на обработку персональных данных по{' '}
+              <Link href="/privacy">Политике конфиденциальности</Link>, включая их хранение на серверах за пределами
+              Таджикистана. Сайт получит ваш Telegram ID, имя и username; номер телефона не передаётся.
+            </small>
           </div>
         </div>
 

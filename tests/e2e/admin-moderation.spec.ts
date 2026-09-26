@@ -11,6 +11,7 @@ test('admin approves a pending seller application', async ({ page }) => {
 
   await page.getByLabel('Имя художника/студии').fill(displayName);
   await page.getByLabel('О себе').fill('Тест.');
+  await page.getByRole('checkbox', { name: /Правила для продавцов/ }).check();
   await page.getByRole('button', { name: 'Отправить на рассмотрение' }).click();
   await expect(page).toHaveURL(/\/become-seller\/status/, { timeout: 15000 });
 
