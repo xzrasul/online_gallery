@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { createArtwork } from '@/src/lib/artworks/seller-operations';
-import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { dropArtworkImages, tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
 import { parseYear } from '@/src/lib/artworks/year';
 
 const MAX_TITLE_LENGTH = 200;
@@ -46,20 +46,26 @@ export async function submitNewArtwork(formData: FormData) {
   const upload = await tryUploadArtworkImage(image as File);
   if (upload.error !== undefined) redirect(`/dashboard/seller/new?error=${upload.error}`);
 
-  await createArtwork(getDb(), {
-    sellerId: user.id,
-    title,
-    description,
-    price,
-    heightCm,
-    widthCm,
-    categoryId,
-    techniqueId,
-    imageUrl: upload.url,
-    widthPx: upload.width,
-    heightPx: upload.height,
-    year,
-  });
+  try {
+    await createArtwork(getDb(), {
+      sellerId: user.id,
+      title,
+      description,
+      price,
+      heightCm,
+      widthCm,
+      categoryId,
+      techniqueId,
+      imageUrl: upload.url,
+      widthPx: upload.width,
+      heightPx: upload.height,
+      year,
+    });
+  } catch (error) {
+    // no row points at the uploaded photo
+    await dropArtworkImages([upload.url]);
+    throw error;
+  }
 
   redirect('/dashboard/seller');
 }
