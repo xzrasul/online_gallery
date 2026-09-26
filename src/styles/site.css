@@ -1547,6 +1547,116 @@
     font-size: 0.92rem;
   }
 
+  /* ---------- legal documents ---------- */
+  .doc {
+    max-width: 860px;
+    color: #3d453f;
+    line-height: 1.6;
+  }
+  .doc h1 {
+    margin: 0;
+    font: 500 clamp(1.7rem, 6.5vw, 2.6rem) / 1.1 var(--serif);
+    color: var(--ink);
+    overflow-wrap: break-word;
+  }
+  .doc-date {
+    margin: 8px 0 28px;
+    color: var(--mute);
+    font-size: 0.92rem;
+  }
+  .doc h2 {
+    margin: 32px 0 10px;
+    font-size: 1.6rem;
+    color: var(--ink);
+  }
+  .doc p,
+  .doc ul,
+  .doc ol {
+    margin: 0 0 12px;
+  }
+  .doc ul,
+  .doc ol {
+    padding-left: 1.4em;
+  }
+  .doc ul {
+    list-style: disc;
+  }
+  .doc ol {
+    list-style: decimal;
+  }
+  .doc li + li {
+    margin-top: 4px;
+  }
+  .doc a {
+    color: var(--sage-d);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .doc-table {
+    width: 100%;
+    margin: 0 0 12px;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .doc-table th,
+  .doc-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  /* phones: one small card per row, cells labelled with their column */
+  @media (max-width: 640px) {
+    .doc-table thead {
+      display: none;
+    }
+    .doc-table tr,
+    .doc-table td {
+      display: block;
+    }
+    .doc-table tr {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .doc-table td {
+      padding: 2px 0;
+      border: 0;
+    }
+    .doc-table td:first-child {
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .doc-table td[data-label]::before {
+      content: attr(data-label) ': ';
+      color: var(--mute);
+    }
+  }
+  .doc-others {
+    margin-top: 40px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  .consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .consent input {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--sage-d);
+  }
+  .consent a,
+  .login .legal a {
+    color: var(--sage-d);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   /* ---------- footer ---------- */
   .site-footer {
     background: var(--sage-l);
@@ -1554,7 +1664,7 @@
   }
   .foot {
     display: grid;
-    grid-template-columns: 1.6fr repeat(2, 1fr);
+    grid-template-columns: 1.6fr repeat(3, 1fr);
     gap: 36px 28px;
     padding-block: 56px 34px;
   }

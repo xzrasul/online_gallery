@@ -51,7 +51,11 @@ async function handleMessage(message: NonNullable<TelegramUpdate['message']>, si
     chat_id: chatId,
     text:
       `Вход на сайт «${SITE_NAME}».\n\n` +
-      'Нажмите кнопку ниже, чтобы подтвердить вход. Если вы не пытались войти, просто проигнорируйте это сообщение.',
+      'Нажмите кнопку ниже, чтобы подтвердить вход. Если вы не пытались войти, просто проигнорируйте это сообщение.\n\n' +
+      'Подтверждая вход, вы принимаете Пользовательское соглашение и соглашаетесь на обработку ваших Telegram ID, ' +
+      'имени и username по Политике конфиденциальности:\n' +
+      `${new URL('/terms', signInUrl)}\n${new URL('/privacy', signInUrl)}`,
+    link_preview_options: { is_disabled: true },
     reply_markup: { inline_keyboard: [[{ text: '✅ Подтвердить вход', callback_data: confirmCallbackData(request.id) }]] },
   });
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Logo } from '@/src/components/sanat/logo';
 import { BRAND_NAME } from '@/src/lib/brand';
+import { LEGAL_DOCS } from '@/src/lib/legal';
 
 export function SiteFooter() {
   return (
@@ -20,6 +21,15 @@ export function SiteFooter() {
             <h4>Продавцам</h4>
             <Link href="/sell">Стать продавцом</Link>
             <Link href="/sign-in">Войти через Telegram</Link>
+            <Link href="/rules/sellers">Правила для продавцов</Link>
+          </nav>
+          <nav aria-label="Документы">
+            <h4>Документы</h4>
+            {LEGAL_DOCS.filter((d) => d.href !== '/rules/sellers').map((d) => (
+              <Link key={d.href} href={d.href}>
+                {d.title}
+              </Link>
+            ))}
           </nav>
         </div>
         <div className="copy">
