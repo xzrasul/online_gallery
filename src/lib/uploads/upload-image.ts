@@ -21,6 +21,15 @@ export async function deleteImages(bucket: string, publicUrls: string[]): Promis
 
 export const deleteArtworkImages = (publicUrls: string[]) => deleteImages(ARTWORK_IMAGES_BUCKET, publicUrls);
 
+// Best effort, for cleanup after a save: a failed delete only leaves an
+// unused file behind (scripts/prune-orphan-images.ts removes those later).
+export async function dropImages(bucket: string, publicUrls: string[]): Promise<void> {
+  if (publicUrls.length === 0) return;
+  await deleteImages(bucket, publicUrls).catch((e) => console.error(`image delete from "${bucket}" failed`, e));
+}
+
+export const dropArtworkImages = (publicUrls: string[]) => dropImages(ARTWORK_IMAGES_BUCKET, publicUrls);
+
 export type UploadedImage = { url: string; width: number; height: number };
 export type UploadResult = (UploadedImage & { error?: undefined }) | { url?: undefined; error: 'image' | 'upload' };
 

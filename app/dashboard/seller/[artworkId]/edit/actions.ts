@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/src/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getDb } from '@/src/db';
 import { getArtworkForOwner, updateArtwork } from '@/src/lib/artworks/seller-operations';
-import { tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
+import { dropArtworkImages, tryUploadArtworkImage } from '@/src/lib/uploads/upload-image';
 import { parseYear } from '@/src/lib/artworks/year';
 
 const MAX_TITLE_LENGTH = 200;
@@ -51,19 +51,28 @@ export async function submitEditArtwork(artworkId: string, formData: FormData) {
     photo = { imageUrl: upload.url, widthPx: upload.width, heightPx: upload.height };
   }
 
-  await updateArtwork(getDb(), {
-    artworkId,
-    sellerId: user.id,
-    title,
-    description,
-    price,
-    heightCm,
-    widthCm,
-    categoryId,
-    techniqueId,
-    ...photo,
-    year,
-  });
+  const replaced = photo.imageUrl !== existing.imageUrl;
+  try {
+    await updateArtwork(getDb(), {
+      artworkId,
+      sellerId: user.id,
+      title,
+      description,
+      price,
+      heightCm,
+      widthCm,
+      categoryId,
+      techniqueId,
+      ...photo,
+      year,
+    });
+  } catch (error) {
+    // the row still points at the old photo, so the new file is unused
+    if (replaced) await dropArtworkImages([photo.imageUrl]);
+    throw error;
+  }
+  // Only once the row points at the new photo is the old file removed.
+  if (replaced) await dropArtworkImages([existing.imageUrl]);
 
   redirect('/dashboard/seller');
 }

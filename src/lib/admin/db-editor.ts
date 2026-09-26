@@ -218,10 +218,12 @@ export async function updateRow(db: Db, name: TableName, key: string, form: Form
   }
 }
 
-export async function deleteRow(db: Db, name: TableName, key: string) {
+// Returns the deleted row, so the caller can remove the files it pointed at.
+export async function deleteRow(db: Db, name: TableName, key: string): Promise<Record<string, unknown>> {
   try {
-    const deleted = await db.delete(DB_TABLES[name].table).where(whereKey(name, key)).returning();
+    const deleted = (await db.delete(DB_TABLES[name].table).where(whereKey(name, key)).returning()) as Record<string, unknown>[];
     if (deleted.length === 0) throw new DbEditError('Запись не найдена.');
+    return deleted[0];
   } catch (error) {
     explain(error);
   }
