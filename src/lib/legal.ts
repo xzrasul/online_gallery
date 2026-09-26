@@ -2,12 +2,12 @@
 // the operator's details from here, so they are filled in once.
 // TODO(operator): replace the bracketed placeholders before going live.
 export const OPERATOR = {
-  name: '[ФИО или наименование оператора]',
+  name: '[Rasuljon Muminov]',
   // Taxpayer id (ИНН) or registration number; leave empty if not applicable.
-  registration: '[ИНН / регистрационный номер]',
-  address: '[город, адрес для корреспонденции]',
-  telegram: '[@support_username]',
-  email: '[email для обращений]',
+  registration: '[]',
+  address: '[Dushanbe]',
+  telegram: '[@xzrasul]',
+  email: '[xzrasul13@gmail.com]',
 };
 
 // When the documents last changed; shown on every document page.
