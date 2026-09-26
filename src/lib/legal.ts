@@ -1,13 +1,13 @@
 // The site's legal documents and who runs the site. Every document page reads
 // the operator's details from here, so they are filled in once.
-// TODO(operator): replace the bracketed placeholders before going live.
+// Plain values, no brackets; an empty `registration` is left out of the pages.
 export const OPERATOR = {
-  name: '[Rasuljon Muminov]',
+  name: 'Rasuljon Muminov',
   // Taxpayer id (ИНН) or registration number; leave empty if not applicable.
-  registration: '[]',
-  address: '[Dushanbe]',
-  telegram: '[@xzrasul]',
-  email: '[xzrasul13@gmail.com]',
+  registration: '',
+  address: 'Dushanbe',
+  telegram: '@xzrasul',
+  email: 'xzrasul13@gmail.com',
 };
 
 // When the documents last changed; shown on every document page.
